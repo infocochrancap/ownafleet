@@ -144,8 +144,8 @@ function confirmationEmailHtml(lead) {
       <p>Thanks for your interest in equipment ownership through OwnaFleet. Quick rundown of what happens next:</p>
       <ol style="line-height: 1.8;">
         <li>I'll review your info within 24 hours and confirm fit.</li>
-        <li>Bevel Financial will email you a secure portal to start the credit application.</li>
-        <li>You'll upload tax returns and supporting documents through Bevel's portal.</li>
+        <li>Our lending partner will email you a secure portal to start the credit application.</li>
+        <li>You'll upload tax returns and supporting documents through the lender's portal.</li>
         <li>We'll schedule a call to walk through the deal in detail.</li>
       </ol>
       <p>If you'd rather talk first, grab 20 minutes on my calendar: <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership">calendly.com/drjoshcochran/connect-about-fleet-ownership</a></p>
