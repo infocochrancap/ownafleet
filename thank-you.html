@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanks — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724; --ink-soft: #2A3647; --muted: #6B7280;
+    --line: #D9DDE3; --line-soft: #EEF0F3; --paper: #F8F7F4; --paper-warm: #F2F0EA;
+    --accent: #8B6F3F; --accent-deep: #6B5430; --success: #2F5D3D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); font-family: 'Inter', sans-serif; color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
+  nav { padding: 18px 32px; border-bottom: 1px solid var(--line-soft); }
+  .nav-brand { font-family: 'Fraunces', serif; font-weight: 400; font-size: 14px; letter-spacing: 0.4em; color: var(--ink); text-decoration: none; }
+  main { flex: 1; padding: 80px 32px; max-width: 980px; margin: 0 auto; width: 100%; }
+  .eyebrow { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; font-weight: 500; }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; letter-spacing: -0.02em; line-height: 0.95; font-size: clamp(48px, 7vw, 88px); margin-bottom: 32px; }
+  h1 em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .lede { font-family: 'Fraunces', serif; font-size: clamp(20px, 2.2vw, 26px); font-weight: 300; color: var(--ink-soft); line-height: 1.4; max-width: 760px; margin-bottom: 56px; }
+  .ty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 56px; }
+  @media (max-width: 800px) { .ty-grid { grid-template-columns: 1fr; gap: 40px; } }
+  h3 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 24px; margin-bottom: 24px; letter-spacing: -0.01em; }
+  .next-steps { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: 24px; }
+  .next-steps li { counter-increment: steps; padding-left: 56px; position: relative; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .next-steps li::before { content: counter(steps, decimal-leading-zero); position: absolute; left: 0; top: -2px; font-family: 'Fraunces', serif; font-size: 22px; color: var(--accent); }
+  .next-steps li strong { display: block; color: var(--ink); margin-bottom: 4px; font-weight: 500; font-size: 15px; }
+  .calendly-section { background: white; border-top: 3px solid var(--accent); padding: 32px; }
+  .cta-label { font-size: 10px; letter-spacing: 0.3em; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
+  .cta-link { font-family: 'Fraunces', serif; font-size: 22px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--accent); display: inline-block; margin-bottom: 16px; transition: color 0.2s; }
+  .cta-link:hover { color: var(--accent); }
+  .phone-fallback { font-size: 14px; color: var(--muted); margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .phone-fallback strong { color: var(--ink); font-weight: 500; }
+  footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 32px; text-align: center; font-size: 11px; line-height: 1.7; font-style: italic; margin-top: 80px; }
+  footer .disc-text { max-width: 880px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<nav><a href="/" class="nav-brand">OWNAFLEET</a></nav>
+
+<main>
+  <div class="eyebrow">Submission received</div>
+  <h1>Thanks. <em>Here's what's next.</em></h1>
+  <p class="lede">Your information is on its way to me and to Bevel Financial. You'll hear back within 24 hours with the next step.</p>
+
+  <div class="ty-grid">
+    <div>
+      <h3>What happens next</h3>
+      <ol class="next-steps">
+        <li><strong>I review your info</strong> within 24 hours and confirm fit. If anything's borderline, I'll reach out before involving Bevel.</li>
+        <li><strong>Bevel Financial emails you a secure portal</strong> for the credit application — typically the next business day.</li>
+        <li><strong>You upload tax returns + supporting docs</strong> through Bevel's portal at your own pace.</li>
+        <li><strong>We schedule a call</strong> to walk through the deal economics in detail before you commit to anything.</li>
+      </ol>
+    </div>
+
+    <div>
+      <div class="calendly-section">
+        <h3 style="margin-bottom: 16px;">Want to talk first?</h3>
+        <p style="font-size: 14px; color: var(--ink-soft); margin-bottom: 20px;">Book 20 minutes on my calendar — no obligation, just questions.</p>
+        <div class="cta-label">Direct link</div>
+        <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener" class="cta-link">Book 20 min with Josh →</a>
+
+        <div class="phone-fallback">
+          <div class="cta-label" style="margin-bottom: 8px;">Or reach me directly</div>
+          <p>Text or call <strong>(206) 755-6436</strong> &nbsp;·&nbsp; <strong>josh@ownafleet.com</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="disc-text">
+    OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. Cochran Management LLC receives a referral fee from Armada Fleet Management for participants who complete the program. The information on this site does not constitute financial, tax, legal, investment, or accounting advice. © 2026 Cochran Management LLC.
+  </div>
+</footer>
+
+</body>
+</html>

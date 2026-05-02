@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner Dashboard — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724; --ink-soft: #2A3647; --muted: #6B7280;
+    --line: #D9DDE3; --line-soft: #EEF0F3; --paper: #F8F7F4; --paper-warm: #F2F0EA;
+    --accent: #8B6F3F; --accent-deep: #6B5430; --success: #2F5D3D; --warn: #B85C3A;
+    --hot: #B85C3A; --warm: #8B6F3F; --review: #6B7280; --unq: #B0B0B0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); font-family: 'Inter', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  nav { background: var(--ink); color: white; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-family: 'Fraunces', serif; font-weight: 400; font-size: 14px; letter-spacing: 0.4em; color: white; text-decoration: none; }
+  .nav-right { display: flex; align-items: center; gap: 24px; font-size: 12px; }
+  .nav-user { color: rgba(255,255,255,0.6); }
+  .signout-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); padding: 6px 14px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+  .signout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 40px 32px; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 48px; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .subhead { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+  /* Referral link callout */
+  .ref-card { background: white; border-top: 3px solid var(--accent); padding: 28px 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .ref-info { flex: 1; min-width: 280px; }
+  .ref-label { font-size: 10px; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .ref-link-display { font-family: 'Fraunces', serif; font-size: 22px; color: var(--ink); letter-spacing: -0.01em; word-break: break-all; }
+  .ref-link-display strong { color: var(--accent); }
+  .copy-btn { background: var(--ink); color: white; border: none; padding: 12px 22px; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: background 0.2s; white-space: nowrap; }
+  .copy-btn:hover { background: var(--accent); }
+  .copy-btn.copied { background: var(--success); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 32px; }
+  @media (max-width: 720px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+  .stat { background: white; padding: 20px 22px; }
+  .stat-label { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; color: var(--ink); letter-spacing: -0.02em; }
+  .stat-value.accent { color: var(--accent); }
+
+  table { width: 100%; background: white; border-collapse: collapse; }
+  th { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); font-weight: 500; }
+  td { padding: 16px; border-bottom: 1px solid var(--line-soft); font-size: 14px; vertical-align: top; }
+  .lead-name { font-weight: 500; color: var(--ink); }
+  .lead-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .status-badge { display: inline-block; padding: 4px 10px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+  .status-new { background: var(--paper-warm); color: var(--ink-soft); }
+  .status-contacted { background: rgba(107,114,128,0.12); color: var(--ink-soft); }
+  .status-application_started, .status-documents_uploaded { background: rgba(139,111,63,0.15); color: var(--accent-deep); }
+  .status-approved { background: rgba(139,111,63,0.25); color: var(--accent-deep); }
+  .status-funded, .status-closed_won { background: rgba(47,93,61,0.15); color: var(--success); }
+  .status-dead { background: rgba(176,176,176,0.18); color: var(--unq); }
+
+  .empty { background: white; padding: 80px 32px; text-align: center; color: var(--muted); }
+  .empty h3 { font-family: 'Fraunces', serif; font-size: 22px; color: var(--ink); margin-bottom: 12px; font-weight: 400; }
+  .loading { padding: 80px; text-align: center; color: var(--muted); font-size: 14px; }
+
+  .commission { font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink); }
+  .commission-est { color: var(--muted); font-size: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">OWNAFLEET · PARTNER</a>
+  <div class="nav-right">
+    <span class="nav-user" id="userEmail">—</span>
+    <button class="signout-btn" id="signoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<main>
+  <h1 id="pageTitle">Welcome back.</h1>
+  <p class="subhead" id="pageSubtitle">Track your referrals and pipeline below.</p>
+
+  <div class="ref-card">
+    <div class="ref-info">
+      <div class="ref-label">Your referral link</div>
+      <div class="ref-link-display" id="refLink">—</div>
+    </div>
+    <button class="copy-btn" id="copyBtn">Copy link</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-label">Total referrals</div><div class="stat-value" id="statTotal">—</div></div>
+    <div class="stat"><div class="stat-label">In pipeline</div><div class="stat-value" id="statPipe">—</div></div>
+    <div class="stat"><div class="stat-label">Funded</div><div class="stat-value accent" id="statFunded">—</div></div>
+    <div class="stat"><div class="stat-label">Earned commission</div><div class="stat-value accent" id="statEarned">—</div></div>
+  </div>
+
+  <div id="content"><div class="loading">Loading your referrals…</div></div>
+</main>
+
+<script type="module">
+  import { supabase, getUserRole } from '/shared/supabase.js';
+
+  const STATUS_LABEL = {
+    new: 'New',
+    contacted: 'Contacted',
+    application_started: 'Application Started',
+    documents_uploaded: 'Documents Uploaded',
+    approved: 'Approved',
+    funded: 'Funded',
+    closed_won: 'Closed Won',
+    dead: 'Dead'
+  };
+
+  // Auth gate
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '/login'; throw new Error('redirect'); }
+
+  // Load partner profile
+  const { data: partner, error: pErr } = await supabase
+    .from('referral_partners')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if (!partner || pErr) {
+    document.querySelector('main').innerHTML = `
+      <div class="empty">
+        <h3>No partner profile found</h3>
+        <p>Your account exists but isn't linked to a referral partner record. Email <a href="mailto:josh@ownafleet.com" style="color:var(--accent);">josh@ownafleet.com</a> for help.</p>
+      </div>
+    `;
+    throw new Error('no profile');
+  }
+
+  if (partner.status !== 'active') {
+    const labels = {
+      pending: 'Your application is being reviewed. We typically respond within 1–2 business days.',
+      paused: 'Your account is currently paused. Contact josh@ownafleet.com to reactivate.',
+      rejected: 'Your application was not approved at this time. Contact josh@ownafleet.com with questions.'
+    };
+    document.querySelector('main').innerHTML = `
+      <div class="empty">
+        <h3>Account ${partner.status}</h3>
+        <p>${labels[partner.status] || ''}</p>
+      </div>
+    `;
+    throw new Error('inactive');
+  }
+
+  document.getElementById('userEmail').textContent = partner.email;
+  document.getElementById('pageTitle').textContent = `Welcome back, ${partner.first_name}.`;
+
+  const refUrl = `${window.location.origin}?ref=${partner.referral_code}`;
+  document.getElementById('refLink').innerHTML = refUrl.replace(`?ref=${partner.referral_code}`, `?ref=<strong>${partner.referral_code}</strong>`);
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(refUrl);
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+  });
+
+  // Sign out
+  document.getElementById('signoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  });
+
+  // Load this partner's leads (RLS enforces filtering — they only see their own)
+  const { data: leads, error: lErr } = await supabase
+    .from('leads')
+    .select('id, created_at, first_name, last_name, equipment_range, status, qualification, estimated_total_commission')
+    .order('created_at', { ascending: false });
+
+  if (lErr) {
+    document.getElementById('content').innerHTML = `<div class="empty">Error loading: ${lErr.message}</div>`;
+    throw lErr;
+  }
+
+  // Stats
+  const earnedSplit = (partner.commission_split_pct || 40) / 100;
+  document.getElementById('statTotal').textContent = leads.length;
+  document.getElementById('statPipe').textContent = leads.filter(l => ['contacted','application_started','documents_uploaded','approved'].includes(l.status)).length;
+  document.getElementById('statFunded').textContent = leads.filter(l => ['funded','closed_won'].includes(l.status)).length;
+  const earned = leads
+    .filter(l => l.status === 'closed_won')
+    .reduce((sum, l) => sum + (Number(l.estimated_total_commission || 0) * earnedSplit), 0);
+  document.getElementById('statEarned').textContent = '$' + Math.round(earned).toLocaleString();
+
+  if (leads.length === 0) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <h3>No referrals yet</h3>
+        <p>Share your referral link above with your network. When someone submits the form, they'll appear here.</p>
+      </div>
+    `;
+  } else {
+    const rows = leads.map(lead => {
+      const totalCommission = Number(lead.estimated_total_commission || 0);
+      const partnerCut = totalCommission * earnedSplit;
+      const isPaidStatus = lead.status === 'closed_won';
+      return `
+        <tr>
+          <td>
+            <div class="lead-name">${escapeHtml(lead.first_name)} ${escapeHtml(lead.last_name)}</div>
+            <div class="lead-meta">Submitted ${formatDate(lead.created_at)}</div>
+          </td>
+          <td>${escapeHtml(lead.equipment_range)}</td>
+          <td><span class="status-badge status-${lead.status}">${STATUS_LABEL[lead.status]}</span></td>
+          <td>
+            ${partnerCut > 0
+              ? `<div class="commission">$${Math.round(partnerCut).toLocaleString()}</div>
+                 <div class="commission-est">${isPaidStatus ? 'Paid' : 'Estimated'}</div>`
+              : '<span style="color:var(--muted);font-size:12px;">TBD</span>'}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    document.getElementById('content').innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Lead</th><th>Equipment Target</th><th>Status</th><th>Your Commission</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724; --ink-soft: #2A3647; --muted: #6B7280;
+    --line: #D9DDE3; --line-soft: #EEF0F3; --paper: #F8F7F4; --paper-warm: #F2F0EA;
+    --accent: #8B6F3F; --accent-deep: #6B5430; --success: #2F5D3D; --warn: #B85C3A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); font-family: 'Inter', sans-serif; color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+  nav { padding: 18px 32px; border-bottom: 1px solid var(--line-soft); }
+  .nav-brand { font-family: 'Fraunces', serif; font-weight: 400; font-size: 14px; letter-spacing: 0.4em; color: var(--ink); text-decoration: none; }
+  main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 64px 32px; }
+  .card { background: white; border-top: 3px solid var(--accent); padding: 48px 40px; max-width: 440px; width: 100%; }
+  .eyebrow { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 20px; font-weight: 500; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 36px; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
+  .lede { font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 28px; }
+  label { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: 500; }
+  input { width: 100%; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink); padding: 14px 16px; border: 1px solid var(--line); background: var(--paper); border-radius: 0; transition: border-color 0.2s, background 0.2s; }
+  input:focus { outline: none; border-color: var(--accent); background: white; }
+  .btn { margin-top: 20px; width: 100%; background: var(--ink); color: white; border: none; padding: 16px 32px; font-family: 'Inter', sans-serif; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; font-weight: 500; }
+  .btn:hover:not(:disabled) { background: var(--accent); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg { margin-top: 20px; padding: 14px 18px; font-size: 13px; line-height: 1.5; display: none; }
+  .msg.success { background: rgba(47,93,61,0.08); border-left: 2px solid var(--success); color: var(--success); }
+  .msg.error { background: rgba(184,92,58,0.08); border-left: 2px solid var(--warn); color: var(--warn); }
+  .footer-link { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); text-align: center; }
+  .footer-link a { color: var(--accent); text-decoration: none; }
+  .footer-link a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav><a href="/" class="nav-brand">OWNAFLEET</a></nav>
+
+<main>
+  <div class="card" id="loginCard">
+    <div class="eyebrow">Sign in</div>
+    <h1>Welcome back.</h1>
+    <p class="lede">Enter your email and we'll send you a one-time sign-in link. No password required.</p>
+
+    <form id="loginForm">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" required autofocus autocomplete="email">
+      <button type="submit" class="btn" id="submitBtn">Send sign-in link</button>
+    </form>
+
+    <div class="msg success" id="successMsg"></div>
+    <div class="msg error" id="errorMsg"></div>
+
+    <div class="footer-link">
+      Want to become a referral partner? <a href="/partners">Apply here →</a>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { supabase, routeByRole, getUserRole } from '/shared/supabase.js';
+
+  // If we land here with an active session (e.g., from magic link callback), route them.
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const role = await getUserRole(session.user.id);
+      if (role === 'admin') return window.location.href = '/admin';
+      if (role === 'partner') return window.location.href = '/dashboard';
+      // No role — sign them out and show a message
+      const card = document.getElementById('loginCard');
+      card.innerHTML = `
+        <div class="eyebrow" style="color: var(--warn);">Account pending</div>
+        <h1>Almost there.</h1>
+        <p class="lede">Your account exists but hasn't been approved yet. We'll email you when access is granted. Questions? Email <a href="mailto:josh@ownafleet.com" style="color: var(--accent);">josh@ownafleet.com</a>.</p>
+      `;
+    }
+  })();
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const btn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    successMsg.style.display = 'none';
+    errorMsg.style.display = 'none';
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin + '/login' }
+    });
+
+    if (error) {
+      errorMsg.textContent = error.message;
+      errorMsg.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send sign-in link';
+    } else {
+      successMsg.textContent = `Check ${email} for your sign-in link. It expires in 1 hour.`;
+      successMsg.style.display = 'block';
+      btn.textContent = 'Link sent ✓';
+    }
+  });
+</script>
+
+</body>
+</html>
