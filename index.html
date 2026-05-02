@@ -239,6 +239,67 @@
     flex-wrap: wrap;
   }
 
+  /* ---------- PHOTO BANNER ---------- */
+  .photo-banner {
+    width: 100%;
+    height: clamp(280px, 38vw, 540px);
+    overflow: hidden;
+    position: relative;
+    background: var(--ink);
+  }
+  .photo-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+    filter: contrast(1.05) saturate(0.95);
+  }
+  .photo-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11,23,36,0.15) 0%, transparent 30%, transparent 70%, rgba(11,23,36,0.25) 100%);
+    pointer-events: none;
+  }
+  .photo-caption {
+    position: absolute;
+    bottom: 32px;
+    left: 32px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  .photo-caption::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+    vertical-align: middle;
+    margin-right: 16px;
+  }
+
+  /* ---------- WHY ARMADA PHOTO PANEL ---------- */
+  .why-photo-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 56px;
+    align-items: stretch;
+    margin-top: 56px;
+  }
+  @media (max-width: 900px) {
+    .why-photo-row { grid-template-columns: 1fr; gap: 32px; }
+  }
+  .why-photo {
+    overflow: hidden;
+    position: relative;
+    min-height: 320px;
+  }
+  .why-photo img { width: 100%; height: 100%; object-fit: cover; }
+
   /* ---------- OPPORTUNITY (3 PILLARS) ---------- */
   .opportunity {
     background: var(--paper);
@@ -547,6 +608,163 @@
     line-height: 1.6;
     font-style: italic;
   }
+
+  /* Tooltip on calculator metric labels */
+  .tip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.7);
+    font-size: 9px;
+    font-weight: 600;
+    margin-left: 6px;
+    cursor: help;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    line-height: 1;
+    vertical-align: middle;
+  }
+  .tip:hover { border-color: var(--accent); color: var(--accent); }
+  .tip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--paper);
+    color: var(--ink);
+    padding: 12px 14px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    width: 240px;
+    text-align: left;
+    text-transform: none;
+    letter-spacing: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 10;
+    border-left: 2px solid var(--accent);
+  }
+  .tip:hover .tip-content { opacity: 1; }
+  .tip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--paper);
+  }
+
+  /* Walkthrough toggle */
+  .walkthrough-toggle {
+    margin-top: 28px;
+    width: 100%;
+    background: rgba(139,111,63,0.12);
+    border: 1px solid rgba(139,111,63,0.4);
+    color: var(--accent);
+    padding: 16px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .walkthrough-toggle:hover { background: rgba(139,111,63,0.2); }
+  .walkthrough-toggle::after { content: ' ↓'; transition: transform 0.2s; display: inline-block; }
+  .walkthrough-toggle.open::after { transform: rotate(180deg); }
+  .walkthrough-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    margin-top: 0;
+  }
+  .walkthrough-body.open {
+    max-height: 1200px;
+    margin-top: 20px;
+  }
+  .walkthrough-step {
+    background: rgba(255,255,255,0.04);
+    border-left: 2px solid var(--accent);
+    padding: 18px 22px;
+    margin-bottom: 12px;
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .walkthrough-step strong { color: var(--accent); font-weight: 500; }
+  .walkthrough-step .num {
+    display: inline-block;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: var(--accent);
+    margin-right: 8px;
+    letter-spacing: 0.15em;
+  }
+
+  /* Year-by-year timeline */
+  .timeline {
+    margin-top: 28px;
+    padding: 24px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .timeline-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 140px;
+  }
+  .timeline-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+  }
+  .timeline-bar {
+    width: 100%;
+    min-height: 4px;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: height 0.3s;
+    position: relative;
+  }
+  .timeline-bar.negative { background: #B85C3A; }
+  .timeline-bar.large { background: var(--accent); box-shadow: 0 0 12px rgba(139,111,63,0.4); }
+  .timeline-year {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 6px;
+    letter-spacing: 0.1em;
+  }
+  .timeline-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    white-space: nowrap;
+  }
+  .timeline-bar.negative + .timeline-year { color: rgba(184,92,58,0.8); }
 
   /* ---------- WHO IT'S FOR ---------- */
   .qualifier { background: var(--paper); border-top: 1px solid var(--line); }
@@ -1030,7 +1248,7 @@
     <div class="hero-inner">
       <div class="eyebrow">Equipment ownership, simplified</div>
       <h1>Heavy equipment that <em>pays you.</em></h1>
-      <p class="hero-sub">Buy a fleet that EquipmentShare rents out across 385 locations nationwide. Receive monthly rental income, claim accelerated depreciation, and own a real asset — fully managed by the 4th-largest equipment rental company in the U.S.</p>
+      <p class="hero-sub">Buy a fleet that our operating partner rents out across 385 locations nationwide. Receive monthly rental income, claim accelerated depreciation, and own a real asset — fully managed by the 4th-largest equipment rental company in the U.S.</p>
       <div class="hero-ctas">
         <a href="#contact" class="btn btn-primary">See if you qualify</a>
         <a href="#math" class="btn btn-secondary">Run the numbers</a>
@@ -1038,24 +1256,30 @@
     </div>
 
     <div class="hero-trust">
-      <div class="hero-trust-label">In partnership with</div>
+      <div class="hero-trust-label">Powered by</div>
       <div class="hero-trust-logos">
-        <span>EquipmentShare</span>
-        <span>·</span>
         <span>Armada Fleet Management</span>
         <span>·</span>
         <span>Bevel Financial</span>
+        <span>·</span>
+        <span>Cochran Management</span>
       </div>
     </div>
   </div>
 </section>
+
+<!-- ============ PHOTO BANNER ============ -->
+<div class="photo-banner">
+  <img src="/assets/armada/photo-lifts.png" alt="Heavy construction equipment fleet">
+  <div class="photo-caption">Real assets · Real cash flow · Real depreciation</div>
+</div>
 
 <!-- ============ OPPORTUNITY ============ -->
 <section class="opportunity">
   <div class="container">
     <div class="eyebrow">The Opportunity</div>
     <h2>Three returns from <em>one asset.</em></h2>
-    <p class="lede">Heavy construction equipment generates rental income, qualifies for accelerated depreciation, and holds residual value as hard collateral. EquipmentShare's equipment ownership program lets you participate without operating a rental business yourself.</p>
+    <p class="lede">Heavy construction equipment generates rental income, qualifies for accelerated depreciation, and holds residual value as hard collateral. Our managed ownership program lets you participate without operating a rental business yourself.</p>
 
     <div class="pillars">
       <div class="pillar">
@@ -1071,7 +1295,7 @@
       <div class="pillar">
         <div class="pillar-num">03</div>
         <div class="pillar-title">Real, mobile collateral</div>
-        <div class="pillar-desc">Mobile, durable, dollar-priced industrial assets serving infrastructure spend. EquipmentShare's limited-loss guarantee covers up to 9.99% of original purchase price at exit.</div>
+        <div class="pillar-desc">Mobile, durable, dollar-priced industrial assets serving infrastructure spend. The operating partner's limited-loss guarantee covers up to 9.99% of original purchase price at exit.</div>
       </div>
     </div>
   </div>
@@ -1117,36 +1341,44 @@
       <div>
         <div class="calc-output">
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Initial Cash Outlay</div>
+            <div class="calc-metric-label">Initial Cash Outlay <span class="tip">?<span class="tip-content">10% down payment plus a 3% fleet aggregation fee. The remaining 90% is financed by Bevel over 72 months with a balloon at exit.</span></span></div>
             <div class="calc-metric-value" id="calcOutlay">$130,000</div>
             <div class="calc-metric-sub">10% down + 3% fleet aggregation fee</div>
           </div>
           <div class="calc-metric">
-            <div class="calc-metric-label">Annual Cash Flow (Yr 1–5)</div>
+            <div class="calc-metric-label">Annual Cash Flow (Yr 1–5) <span class="tip">?<span class="tip-content">Your share of monthly rental revenue, minus operating costs (maintenance, insurance, telematics) and debt service. The number is small because most of the rental income services the loan in years 1–5.</span></span></div>
             <div class="calc-metric-value" id="calcAnnual">$9,118</div>
             <div class="calc-metric-sub">After debt service & operating costs</div>
           </div>
           <div class="calc-metric">
-            <div class="calc-metric-label">Year 6 Exit</div>
+            <div class="calc-metric-label">Year 6 Exit <span class="tip">?<span class="tip-content">Equipment is sold at fair market value at the end of year 6. After the loan balloon is paid off, the remaining proceeds plus the year-6 cash flow come back to you. This is where most of the cash return shows up.</span></span></div>
             <div class="calc-metric-value" id="calcExit">$109,118</div>
             <div class="calc-metric-sub">Final cash flow + balloon recovery at fair market value</div>
           </div>
           <div class="calc-metric">
-            <div class="calc-metric-label">Total Cash Returned (6 yr)</div>
+            <div class="calc-metric-label">Total Cash Returned (6 yr) <span class="tip">?<span class="tip-content">Sum of years 1–5 cash flow plus the year-6 exit. This is the actual money that comes back to you, before any tax effects.</span></span></div>
             <div class="calc-metric-value" id="calcTotal">$154,706</div>
             <div class="calc-metric-sub">Pre-tax cash-on-cash</div>
           </div>
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Est. Year-1 Tax Shelter</div>
+            <div class="calc-metric-label">Est. Year-1 Tax Shelter <span class="tip">?<span class="tip-content">If you qualify for bonus depreciation and have active income to absorb the deduction, you can claim ~100% of the equipment value as a year-1 tax write-off. At your marginal rate, this is the value of those tax savings.</span></span></div>
             <div class="calc-metric-value" id="calcTax">$400,000</div>
             <div class="calc-metric-sub">Bonus depreciation × marginal tax rate</div>
           </div>
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Total Economics (Cash + Tax)</div>
+            <div class="calc-metric-label">Total Economics (Cash + Tax) <span class="tip">?<span class="tip-content">Cash returned plus estimated year-1 tax shelter. For most participants, the tax shelter is the largest single component — that's why this program is built around active-income offset, not yield.</span></span></div>
             <div class="calc-metric-value" id="calcGrand">$554,706</div>
             <div class="calc-metric-sub">On initial outlay above</div>
           </div>
         </div>
+
+        <div class="timeline">
+          <div class="timeline-label">Cash flow timeline (per dollar invested)</div>
+          <div class="timeline-grid" id="timelineGrid"></div>
+        </div>
+
+        <button type="button" class="walkthrough-toggle" id="walkthroughToggle">Walk me through this scenario</button>
+        <div class="walkthrough-body" id="walkthroughBody"></div>
 
         <div class="calc-footnote">
           <strong>Important assumptions for the tax line:</strong> you have sufficient active income to absorb the deduction, you materially participate (or qualify under another active rule), and your at-risk basis covers the equipment value (the personally-guaranteed loan typically counts). Depreciation recapture at year-6 exit is not modeled and will reduce total economics. <em>Your CPA must verify all of this for your specific situation — we don't give tax advice.</em>
@@ -1169,7 +1401,7 @@
       <div class="step">
         <div class="step-num">01</div>
         <div class="step-title">You buy</div>
-        <div class="step-desc">Through your LLC. Armada arranges the equipment purchase from EquipmentShare; Bevel Financial arranges 90% financing. Typical first deal: $500K–$1M, $65K–$130K initial outlay.</div>
+        <div class="step-desc">Through your LLC. Armada arranges the equipment purchase from the operating partner; Bevel Financial arranges 90% financing. Typical first deal: $500K–$1M, $65K–$130K initial outlay.</div>
       </div>
       <div class="step">
         <div class="step-num">02</div>
@@ -1178,7 +1410,7 @@
       </div>
       <div class="step">
         <div class="step-num">03</div>
-        <div class="step-title">EquipmentShare rents</div>
+        <div class="step-title">The fleet rents it</div>
         <div class="step-desc">Your equipment joins the nationwide rental fleet across 385 locations in 45 states. Branch operators are agnostic to ownership.</div>
       </div>
       <div class="step">
@@ -1189,7 +1421,7 @@
       <div class="step">
         <div class="step-num">05</div>
         <div class="step-title">Exit at year 6</div>
-        <div class="step-desc">EquipmentShare offers to buy at fair market value. Limited-loss guarantee protects up to 9.99% of original cost. Or remarket to third parties.</div>
+        <div class="step-desc">The operating partner offers to buy at fair market value. Limited-loss guarantee protects up to 9.99% of original cost. Or remarket to third parties.</div>
       </div>
     </div>
   </div>
@@ -1227,17 +1459,44 @@
   </div>
 </section>
 
+<!-- ============ WHY COME THROUGH OWNAFLEET ============ -->
+<section class="through" style="background: var(--paper-warm); border-top: 1px solid var(--line);">
+  <div class="container">
+    <div class="eyebrow">Working with Josh</div>
+    <h2>Same deal. <em>Better journey.</em></h2>
+    <p class="lede">The program economics are what they are — your numbers don't change based on how you arrive. What changes is the experience of getting there, and what flexibility is available to you.</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">Flexibility on minimums</div>
+        <div class="pillar-desc">Direct application typically requires $1M+ of equipment. Through Josh, the minimum can flex to $500K — and to $250K depending on timing and your profile. Going direct, you get one number: theirs.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">One person, the whole way</div>
+        <div class="pillar-desc">Josh coordinates Armada, Bevel, and the operating partner so you don't juggle three companies and three timelines. He's your single point of contact from intro call through closing.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">Aligned, not commissioned</div>
+        <div class="pillar-desc">Josh earns a referral fee from Armada when a deal funds — paid by them, not added to your costs. Same terms either way; he's incentivized to find the right fit, not the biggest deal.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ WHY ARMADA ============ -->
 <section class="why">
   <div class="container">
-    <div class="eyebrow">Why Armada · EquipmentShare · Bevel</div>
-    <h2>Built on the operator, not the <em>operator's promise.</em></h2>
-    <p class="lede">EquipmentShare is the fastest-growing equipment rental company in the U.S. and the operating partner behind every dollar of equipment you'll own. Armada Fleet Management aggregates participants and handles the relationship. Bevel Financial provides the debt.</p>
+    <div class="eyebrow">Built on real scale</div>
+    <h2>Backed by the <em>operator behind</em> every asset.</h2>
+    <p class="lede">Our operating partner is the 4th-largest equipment rental company in the U.S. and runs every dollar of equipment you'll own. Armada Fleet Management aggregates participants and handles the relationship. Bevel Financial arranges the debt. Together they make the program turnkey.</p>
 
     <div class="stats-grid">
       <div class="stat">
         <div class="stat-value">$<span>4.4</span><span class="small">B</span></div>
-        <div class="stat-label">EquipmentShare 2025 revenue</div>
+        <div class="stat-label">Operating partner 2025 revenue</div>
       </div>
       <div class="stat">
         <div class="stat-value">385</div>
@@ -1261,9 +1520,20 @@
       </div>
     </div>
 
-    <div class="why-callout">
-      <div class="why-callout-label">Limited-Loss Guarantee</div>
-      <div class="why-callout-text">EquipmentShare backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real downside floor on residual risk.</div>
+    <div class="why-photo-row">
+      <div class="why-photo">
+        <img src="/assets/armada/photo-jobsite-2.png" alt="Construction site with heavy equipment">
+      </div>
+      <div class="why-callout" style="margin-top: 0; grid-template-columns: 1fr; gap: 20px;">
+        <div>
+          <div class="why-callout-label">Limited-Loss Guarantee</div>
+          <div class="why-callout-text" style="margin-top: 12px;">The operating partner backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real downside floor on residual risk.</div>
+        </div>
+        <div style="padding-top: 20px; border-top: 1px solid var(--line);">
+          <div class="why-callout-label">Mega-project tailwinds</div>
+          <div class="why-callout-text" style="margin-top: 12px; font-size: 16px;">$5T+ in active and planned U.S. industrial, infrastructure, and utility mega-projects sit inside the operating partner's serviceable footprint. Demand is structural, not cyclical.</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1276,7 +1546,7 @@
       <div class="eyebrow">About Josh</div>
       <h2 class="about-name">Josh Cochran</h2>
       <div class="about-role">Founder · Cochran Capital · Spokane, WA</div>
-      <p class="about-bio">Josh Cochran is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He partners directly with Brian Duncan at Armada Fleet Management to bring qualified participants into EquipmentShare's equipment ownership program.</p>
+      <p class="about-bio">Josh Cochran is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He partners directly with Brian Duncan at Armada Fleet Management to bring qualified participants into the managed equipment ownership program.</p>
       <p class="about-bio">Working with Josh means a single point of contact through closing, flexibility on minimums based on his Armada relationship, and an advocate for your interests through the lifecycle of the deal.</p>
       <p class="about-disclosure">Disclosure: Josh is not a financial, tax, or legal advisor. He is a participant in the program himself and earns a referral fee from Armada Fleet Management on completed deals. This relationship does not affect your terms.</p>
     </div>
@@ -1304,23 +1574,23 @@
       </div>
       <div class="faq-item">
         <button class="faq-q">What if my equipment doesn't get rented enough? <span class="icon">+</span></button>
-        <div class="faq-a"><p>EquipmentShare runs the rental side and is incentivized by their 15–25% revenue share to maximize utilization. The fleet is moved between regions to chase demand. Participant-owned equipment is treated identically to EquipmentShare's own balance-sheet equipment. Utilization risk is real, but it's the operator's risk first.</p></div>
+        <div class="faq-a"><p>The operating partner runs the rental side and is incentivized by their 15–25% revenue share to maximize utilization. The fleet is moved between regions to chase demand. Participant-owned equipment is treated identically to the operator's own balance-sheet equipment. Utilization risk is real, but it's the operator's risk first.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Can I exit before year 6? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Yes, but with friction. You can market equipment to third parties at any time, with EquipmentShare having a 15-day right of first refusal. Early exit means you forfeit the full depreciation schedule and may sell into a soft market. The program is designed for the full term.</p></div>
+        <div class="faq-a"><p>Yes, but with friction. You can market equipment to third parties at any time, with the operating partner having a 15-day right of first refusal. Early exit means you forfeit the full depreciation schedule and may sell into a soft market. The program is designed for the full term.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Who actually owns the equipment? <span class="icon">+</span></button>
-        <div class="faq-a"><p>You do — through your LLC. You hold sole title. Armada manages the relationship and EquipmentShare operates the rentals. This is a true sale, not a fund interest, and the equipment is not on EquipmentShare's balance sheet.</p></div>
+        <div class="faq-a"><p>You do — through your LLC. You hold sole title. Armada manages the relationship and the operating partner runs the rentals. This is a true sale, not a fund interest, and the equipment is not on the operator's balance sheet.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">What's the personal guarantee about? <span class="icon">+</span></button>
         <div class="faq-a"><p>Bevel Financial requires unlimited personal guarantees from the LLC's owners on the financed portion (typically 90% of purchase price) — standard for equipment finance, and lenders qualify based on net worth (3× purchase) and liquidity (30% of purchase) accordingly.</p><p style="margin-top: 12px;">The personal guarantee also matters for tax treatment: under IRS at-risk rules, depreciation can generally only be deducted against active income up to your "at-risk" amount, which typically includes personally-guaranteed (recourse) debt but excludes nonrecourse debt. The personal guarantee, required by the lender, is also what enables the full depreciation benefit to flow against active income. Your CPA needs to walk through the at-risk and material participation rules for your specific situation — we don't give tax advice.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">How do I verify EquipmentShare is what they claim? <span class="icon">+</span></button>
-        <div class="faq-a"><p>EquipmentShare is a <strong>publicly-traded company</strong>, so audited financials, 10-K / 10-Q filings, and investor disclosures are available through SEC EDGAR and their investor relations site. They are the 4th-largest U.S. equipment rental company by revenue ($4.4B in 2025), with their equipment ownership program holding $3.9B of equipment under management across 1,000+ existing participants. Independent accountant reports specific to the program are also available on request.</p><p style="margin-top: 12px;">We strongly encourage diligence — this is a major capital decision and deserves the same scrutiny you'd apply to any private investment.</p></div>
+        <button class="faq-q">How do I verify the operating partner? <span class="icon">+</span></button>
+        <div class="faq-a"><p>Our operating partner is the 4th-largest U.S. equipment rental company by revenue ($4.4B in 2025), with $3.9B of equipment under management across 1,000+ existing participants. They are a <strong>publicly-traded company</strong>, so audited financials, 10-K / 10-Q filings, and investor disclosures are available — Josh will share the company name, ticker, and SEC EDGAR links during your intro call so you can verify independently. Independent accountant reports specific to the program are also available on request.</p><p style="margin-top: 12px;">We strongly encourage diligence — this is a major capital decision and deserves the same scrutiny you'd apply to any private investment.</p></div>
       </div>
     </div>
   </div>
@@ -1439,7 +1709,7 @@
     <div class="footer-grid">
       <div>
         <div class="footer-brand">OWNAFLEET</div>
-        <p class="footer-tagline">Equipment ownership, simplified. A referral service connecting qualified participants with EquipmentShare's equipment ownership program through Armada Fleet Management.</p>
+        <p class="footer-tagline">Equipment ownership, simplified. A referral service connecting qualified participants with the managed equipment ownership program through Armada Fleet Management.</p>
       </div>
       <div class="footer-col">
         <div class="footer-col-title">Contact</div>
@@ -1449,9 +1719,9 @@
       </div>
       <div class="footer-col">
         <div class="footer-col-title">Partners</div>
-        <p>EquipmentShare</p>
         <p>Armada Fleet Management</p>
         <p>Bevel Financial</p>
+        <p>Cochran Management LLC</p>
       </div>
     </div>
 
@@ -1505,7 +1775,57 @@
     totalEl.textContent = fmt(total);
     taxEl.textContent = fmt(taxShelter);
     grandEl.textContent = fmt(grandTotal);
+
+    renderTimeline(outlay, annual, exit);
+    renderWalkthrough(e, outlay, annual, exit, total, taxRate, taxShelter, grandTotal);
   }
+
+  function renderTimeline(outlay, annual, exitVal) {
+    const grid = document.getElementById('timelineGrid');
+    if (!grid) return;
+    // Years: 0 (outlay), 1-5 (annual), 6 (exit)
+    const values = [-outlay, annual, annual, annual, annual, annual, exitVal];
+    const labels = ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'];
+    const max = Math.max(...values.map(Math.abs));
+    grid.innerHTML = values.map((v, i) => {
+      const pctHeight = max > 0 ? Math.max(4, (Math.abs(v) / max) * 100) : 4;
+      const cls = v < 0 ? 'negative' : (i === 6 ? 'large' : '');
+      const sign = v < 0 ? '−' : '+';
+      const display = '$' + Math.round(Math.abs(v) / 1000) + 'K';
+      return `
+        <div class="timeline-bar-wrap">
+          <div class="timeline-bar ${cls}" style="height: ${pctHeight}%;">
+            <div class="timeline-amount">${sign}${display}</div>
+          </div>
+          <div class="timeline-year">${labels[i]}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderWalkthrough(e, outlay, annual, exitVal, total, taxRate, taxShelter, grandTotal) {
+    const body = document.getElementById('walkthroughBody');
+    if (!body) return;
+    const debtAmt = Math.round(e * 0.90);
+    const ratePct = Math.round(taxRate * 100);
+    body.innerHTML = `
+      <div class="walkthrough-step"><span class="num">01</span><strong>You commit ${fmt(e)} of equipment.</strong> Your LLC signs the purchase agreement coordinated by Armada and the operating partner.</div>
+      <div class="walkthrough-step"><span class="num">02</span><strong>Bevel finances ${fmt(debtAmt)} (90%)</strong> at ~7.25% over 72 months. You put ${fmt(e * 0.10)} cash down. Add a 3% fleet aggregation fee (${fmt(e * 0.03)}) and your <strong>total out-of-pocket is ${fmt(outlay)}.</strong></div>
+      <div class="walkthrough-step"><span class="num">03</span><strong>Year 1: claim ~100% bonus depreciation on ${fmt(e)}.</strong> At your ${ratePct}% combined marginal rate, that's roughly <strong>${fmt(taxShelter)} in tax savings</strong> (assuming you have active income to absorb it — your CPA will verify).</div>
+      <div class="walkthrough-step"><span class="num">04</span><strong>Years 1–5: equipment generates rental revenue</strong> across 385 locations. After your share of operating costs and the loan payment, you receive ~${fmt(annual)}/yr in cash distributions to your LLC. Modest by design — most of the rental income is paying down the loan.</div>
+      <div class="walkthrough-step"><span class="num">05</span><strong>Year 6: exit at fair market value.</strong> Equipment is sold (typically back to the operating partner). After paying off the loan balloon, you receive <strong>~${fmt(exitVal)}</strong> in your final year — including the year-6 cash flow and the cash recovery from the sale.</div>
+      <div class="walkthrough-step"><span class="num">06</span><strong>Total cash returned: ${fmt(total)}</strong> on a ${fmt(outlay)} outlay (years 1–5 distributions + year 6 exit). Add the year-1 tax shelter and total economics work out to <strong>${fmt(grandTotal)}.</strong></div>
+      <div class="walkthrough-step" style="border-left-color: #B85C3A; background: rgba(184,92,58,0.08);"><span class="num" style="color:#B85C3A;">⚠</span><strong>Watch-outs:</strong> the tax shelter assumes active income, material participation, and sufficient at-risk basis (the personal guarantee). Depreciation recapture at exit reduces total economics. These projections use Armada's published assumptions; actuals vary with utilization and market conditions. Talk to your CPA before deciding.</div>
+    `;
+  }
+
+  document.getElementById('walkthroughToggle').addEventListener('click', () => {
+    const btn = document.getElementById('walkthroughToggle');
+    const body = document.getElementById('walkthroughBody');
+    btn.classList.toggle('open');
+    body.classList.toggle('open');
+    btn.textContent = btn.classList.contains('open') ? 'Hide walkthrough' : 'Walk me through this scenario';
+  });
 
   slider.addEventListener('input', update);
   taxRateEl.addEventListener('change', update);

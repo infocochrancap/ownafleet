@@ -140,6 +140,27 @@
   if (role !== 'admin') { window.location.href = '/login'; throw new Error('redirect'); }
   document.getElementById('userEmail').textContent = session.user.email;
 
+  // Get specific role (owner vs operator) — controls UI visibility.
+  // If the role column doesn't exist yet (migration not run), default to owner
+  // so the dashboard remains fully functional.
+  let isOwner = true;
+  try {
+    const { data: adminRow, error } = await supabase
+      .from('admins')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    if (!error && adminRow && adminRow.role) {
+      isOwner = adminRow.role === 'owner';
+    }
+  } catch (e) {
+    // Role column missing — leave isOwner=true (backward-compatible)
+  }
+
+  if (!isOwner) {
+    document.getElementById('partnersTab').style.display = 'none';
+  }
+
   // Sign out
   document.getElementById('signoutBtn').addEventListener('click', async () => {
     await supabase.auth.signOut();
@@ -151,6 +172,11 @@
   const view = params.get('view') || 'leads';
 
   if (view === 'partners') {
+    if (!isOwner) {
+      // Operators can't access partners view — bounce them back to leads
+      window.location.href = '/admin';
+      throw new Error('redirect');
+    }
     document.getElementById('pageTitle').textContent = 'Referral Partners';
     document.querySelector('.nav-tab.active').classList.remove('active');
     document.getElementById('partnersTab').classList.add('active');
@@ -310,10 +336,27 @@
       </div>
 
       <div class="modal-section">
-        <h3>Internal notes (not visible to partners)</h3>
+        <h3>Deal economics</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Equipment value (actual)</label>
+            <input type="number" id="equipmentValue" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_equipment_value || ''}" placeholder="e.g. 1200000">
+          </div>
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Total commission (2.1%)</label>
+            <input type="number" id="totalCommission" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_total_commission || ''}" placeholder="auto-calculates from value">
+          </div>
+        </div>
+        <button class="save-btn" id="saveEconomics">Save economics</button>
+      </div>
+
+      ${isOwner ? `
+      <div class="modal-section">
+        <h3>Internal notes (owner only)</h3>
         <textarea class="notes-input" id="internalNotes">${escapeHtml(lead.internal_notes || '')}</textarea>
         <button class="save-btn" id="saveNotes">Save notes</button>
       </div>
+      ` : ''}
 
       <div class="modal-section">
         <h3>Status history</h3>
@@ -328,16 +371,43 @@
       </div>
     `;
 
-    document.getElementById('saveNotes').addEventListener('click', async () => {
-      const notes = document.getElementById('internalNotes').value;
-      const { error } = await supabase.from('leads').update({ internal_notes: notes }).eq('id', leadId);
-      if (error) alert('Save failed: ' + error.message);
-      else {
-        lead.internal_notes = notes;
-        document.getElementById('saveNotes').textContent = 'Saved ✓';
-        setTimeout(() => { document.getElementById('saveNotes').textContent = 'Save notes'; }, 1500);
+    // Auto-calculate commission when equipment value changes
+    const valueInput = document.getElementById('equipmentValue');
+    const commissionInput = document.getElementById('totalCommission');
+    valueInput.addEventListener('input', () => {
+      const v = parseFloat(valueInput.value);
+      if (!isNaN(v) && v > 0) commissionInput.value = Math.round(v * 0.021);
+    });
+
+    document.getElementById('saveEconomics').addEventListener('click', async () => {
+      const value = parseFloat(valueInput.value) || null;
+      const commission = parseFloat(commissionInput.value) || null;
+      const { error } = await supabase
+        .from('leads')
+        .update({ estimated_equipment_value: value, estimated_total_commission: commission })
+        .eq('id', leadId);
+      if (error) {
+        alert('Save failed: ' + error.message);
+      } else {
+        lead.estimated_equipment_value = value;
+        lead.estimated_total_commission = commission;
+        document.getElementById('saveEconomics').textContent = 'Saved ✓';
+        setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save economics'; }, 1500);
       }
     });
+
+    if (isOwner) {
+      document.getElementById('saveNotes').addEventListener('click', async () => {
+        const notes = document.getElementById('internalNotes').value;
+        const { error } = await supabase.from('leads').update({ internal_notes: notes }).eq('id', leadId);
+        if (error) alert('Save failed: ' + error.message);
+        else {
+          lead.internal_notes = notes;
+          document.getElementById('saveNotes').textContent = 'Saved ✓';
+          setTimeout(() => { document.getElementById('saveNotes').textContent = 'Save notes'; }, 1500);
+        }
+      });
+    }
 
     document.getElementById('modalBg').classList.add('open');
   }
