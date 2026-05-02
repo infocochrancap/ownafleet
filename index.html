@@ -239,67 +239,6 @@
     flex-wrap: wrap;
   }
 
-  /* ---------- PHOTO BANNER ---------- */
-  .photo-banner {
-    width: 100%;
-    height: clamp(280px, 38vw, 540px);
-    overflow: hidden;
-    position: relative;
-    background: var(--ink);
-  }
-  .photo-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 35%;
-    filter: contrast(1.05) saturate(0.95);
-  }
-  .photo-banner::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(11,23,36,0.15) 0%, transparent 30%, transparent 70%, rgba(11,23,36,0.25) 100%);
-    pointer-events: none;
-  }
-  .photo-caption {
-    position: absolute;
-    bottom: 32px;
-    left: 32px;
-    color: rgba(255,255,255,0.85);
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    z-index: 2;
-  }
-  .photo-caption::before {
-    content: '';
-    display: inline-block;
-    width: 32px;
-    height: 1px;
-    background: var(--accent);
-    vertical-align: middle;
-    margin-right: 16px;
-  }
-
-  /* ---------- WHY ARMADA PHOTO PANEL ---------- */
-  .why-photo-row {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 56px;
-    align-items: stretch;
-    margin-top: 56px;
-  }
-  @media (max-width: 900px) {
-    .why-photo-row { grid-template-columns: 1fr; gap: 32px; }
-  }
-  .why-photo {
-    overflow: hidden;
-    position: relative;
-    min-height: 320px;
-  }
-  .why-photo img { width: 100%; height: 100%; object-fit: cover; }
-
   /* ---------- OPPORTUNITY (3 PILLARS) ---------- */
   .opportunity {
     background: var(--paper);
@@ -1268,12 +1207,6 @@
   </div>
 </section>
 
-<!-- ============ PHOTO BANNER ============ -->
-<div class="photo-banner">
-  <img src="/assets/armada/photo-lifts.png" alt="Heavy construction equipment fleet">
-  <div class="photo-caption">Real assets · Real cash flow · Real depreciation</div>
-</div>
-
 <!-- ============ OPPORTUNITY ============ -->
 <section class="opportunity">
   <div class="container">
@@ -1520,20 +1453,9 @@
       </div>
     </div>
 
-    <div class="why-photo-row">
-      <div class="why-photo">
-        <img src="/assets/armada/photo-jobsite-2.png" alt="Construction site with heavy equipment">
-      </div>
-      <div class="why-callout" style="margin-top: 0; grid-template-columns: 1fr; gap: 20px;">
-        <div>
-          <div class="why-callout-label">Limited-Loss Guarantee</div>
-          <div class="why-callout-text" style="margin-top: 12px;">The operating partner backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real downside floor on residual risk.</div>
-        </div>
-        <div style="padding-top: 20px; border-top: 1px solid var(--line);">
-          <div class="why-callout-label">Mega-project tailwinds</div>
-          <div class="why-callout-text" style="margin-top: 12px; font-size: 16px;">$5T+ in active and planned U.S. industrial, infrastructure, and utility mega-projects sit inside the operating partner's serviceable footprint. Demand is structural, not cyclical.</div>
-        </div>
-      </div>
+    <div class="why-callout">
+      <div class="why-callout-label">Limited-Loss Guarantee</div>
+      <div class="why-callout-text">The operating partner backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real downside floor on residual risk.</div>
     </div>
   </div>
 </section>
