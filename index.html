@@ -3,7 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OwnaFleet — Heavy equipment that pays you</title>
+<title>OwnaFleet — Heavy equipment that shelters income.</title>
+<meta name="description" content="Own heavy equipment rented out across 385 locations by the 4th-largest equipment rental company in the U.S. Year-1 accelerated depreciation, monthly distributions, fully managed.">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ownafleet.com/">
+<meta property="og:title" content="OwnaFleet — Heavy equipment that shelters income.">
+<meta property="og:description" content="Own heavy equipment rented out across 385 locations by the 4th-largest equipment rental company in the U.S. Year-1 accelerated depreciation, monthly distributions, fully managed.">
+<meta property="og:image" content="https://ownafleet.com/assets/og-image.jpg?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OwnaFleet — managed equipment ownership">
+<meta property="og:site_name" content="OwnaFleet">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OwnaFleet — Heavy equipment that shelters income.">
+<meta name="twitter:description" content="Own heavy equipment rented out across 385 locations by the 4th-largest equipment rental company in the U.S. Year-1 accelerated depreciation, monthly distributions, fully managed.">
+<meta name="twitter:image" content="https://ownafleet.com/assets/og-image.jpg?v=2">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -209,34 +226,6 @@
     inset: 0;
     background: linear-gradient(135deg, rgba(11,23,36,0.05), rgba(139,111,63,0.08));
     pointer-events: none;
-  }
-
-  .hero-trust {
-    margin-top: 80px;
-    padding-top: 32px;
-    border-top: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    gap: 48px;
-    flex-wrap: wrap;
-  }
-  .hero-trust-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .hero-trust-logos {
-    display: flex;
-    gap: 40px;
-    align-items: center;
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    color: var(--ink-soft);
-    letter-spacing: 0.1em;
-    font-size: 14px;
-    flex-wrap: wrap;
   }
 
   /* ---------- OPPORTUNITY (3 PILLARS) ---------- */
@@ -817,6 +806,302 @@
     color: var(--ink-soft);
   }
 
+  /* ---------- FLOW DIAGRAM ---------- */
+  .flow {
+    background: var(--paper-warm);
+    border-top: 1px solid var(--line);
+    padding: 96px 0;
+  }
+  .flow-pipeline {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 48px;
+  }
+  .flow-step {
+    flex: 1 1 0;
+    min-width: 0;
+    background: white;
+    border: 1px solid var(--line);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    position: relative;
+  }
+  .flow-step-hub {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+  .flow-step-hub .flow-num,
+  .flow-step-hub .flow-step-title,
+  .flow-step-hub .flow-step-desc {
+    color: white;
+  }
+  .flow-step-hub .flow-step-desc {
+    color: rgba(255,255,255,0.7);
+  }
+  .flow-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+  .flow-step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .flow-step-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .flow-arrow {
+    flex: 0 0 auto;
+    align-self: center;
+    color: var(--accent);
+    font-size: 22px;
+    line-height: 1;
+    padding: 0 14px;
+    user-select: none;
+  }
+  .flow-outcomes-label {
+    margin-top: 56px;
+    text-align: center;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    position: relative;
+  }
+  .flow-outcomes-label::before,
+  .flow-outcomes-label::after {
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    width: 60px;
+    height: 1px;
+    background: var(--line);
+    margin: 0 16px;
+  }
+  .flow-outcomes {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .flow-outcome {
+    background: white;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    padding: 28px 24px;
+    text-align: left;
+  }
+  .flow-outcome-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .flow-outcome-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .flow-outcome-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  @media (max-width: 880px) {
+    .flow { padding: 64px 0; }
+    .flow-pipeline {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .flow-arrow {
+      transform: rotate(90deg);
+      align-self: center;
+      padding: 8px 0;
+    }
+    .flow-outcomes {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .flow-outcomes-label::before,
+    .flow-outcomes-label::after {
+      width: 32px;
+      margin: 0 8px;
+    }
+  }
+
+  /* ---------- EXIT SCENARIOS ---------- */
+  .exit {
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 96px 0;
+  }
+  .exit-grid {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .exit-table-wrap {
+    background: white;
+    border: 1px solid var(--line);
+    overflow-x: auto;
+  }
+  .exit-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  .exit-table thead th {
+    background: var(--paper-warm);
+    text-align: right;
+    padding: 14px 14px;
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .exit-table thead th:first-child { text-align: left; }
+  .exit-table tbody th {
+    text-align: left;
+    padding: 18px 14px;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .exit-table tbody td {
+    text-align: right;
+    padding: 18px 14px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .exit-table tbody tr.row-good {
+    background: rgba(120, 145, 95, 0.10);
+    border-left: 3px solid rgba(120, 145, 95, 0.7);
+  }
+  .exit-table tbody tr.row-soft {
+    background: rgba(189, 152, 70, 0.12);
+    border-left: 3px solid var(--accent);
+  }
+  .exit-table tbody tr.row-severe {
+    background: rgba(165, 90, 75, 0.10);
+    border-left: 3px solid rgba(165, 90, 75, 0.7);
+  }
+  .exit-table tbody tr + tr td,
+  .exit-table tbody tr + tr th {
+    border-top: 1px solid var(--line-soft);
+  }
+  .exit-explainer h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .exit-explainer p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .exit-explainer .floor-cap {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .exit-explainer .exit-fineprint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.55;
+  }
+  @media (max-width: 880px) {
+    .exit { padding: 64px 0; }
+    .exit-grid { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  /* ---------- TESTIMONIAL ---------- */
+  .testimonial {
+    background: var(--paper-warm);
+    border-top: 1px solid var(--line);
+    padding: 96px 0;
+  }
+  .testimonial-inner {
+    max-width: 820px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 24px;
+  }
+  .testimonial-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 80px;
+    line-height: 0.6;
+    color: var(--accent);
+    opacity: 0.5;
+    margin-bottom: 16px;
+    user-select: none;
+  }
+  .testimonial-quote {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+  }
+  .testimonial-quote em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .testimonial-attr {
+    font-size: 14px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .testimonial-attr strong {
+    display: block;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-bottom: 4px;
+  }
+  @media (max-width: 720px) {
+    .testimonial { padding: 64px 0; }
+    .testimonial-quote { font-size: 24px; }
+    .testimonial-mark { font-size: 60px; }
+  }
+
   /* ---------- ABOUT JOSH (DARK SPLIT) ---------- */
   .about {
     background: var(--ink);
@@ -832,46 +1117,25 @@
     background: radial-gradient(circle at 80% 20%, rgba(139,111,63,0.18) 0%, transparent 55%);
     pointer-events: none;
   }
-  .about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    min-height: 640px;
+  .about-inner {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 120px 72px;
     position: relative;
     z-index: 1;
   }
-  @media (max-width: 900px) {
-    .about-grid { grid-template-columns: 1fr; }
-  }
-  .about-photo {
-    background-size: cover;
-    background-position: center top;
-    min-height: 480px;
-  }
-  .about-content {
-    padding: 96px 72px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
   @media (max-width: 720px) {
-    .about-content { padding: 56px 28px; }
+    .about-inner { padding: 72px 28px; }
   }
   .about-name {
     font-family: 'Fraunces', serif;
     font-weight: 300;
-    font-size: clamp(48px, 5vw, 72px);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-    margin-bottom: 16px;
-    color: white;
-  }
-  .about-role {
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.25em;
-    color: rgba(255,255,255,0.55);
-    text-transform: uppercase;
+    font-size: clamp(32px, 3.6vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
     margin-bottom: 36px;
+    margin-top: 16px;
+    color: white;
   }
   .about-bio {
     font-family: 'Fraunces', serif;
@@ -882,6 +1146,54 @@
     margin-bottom: 28px;
   }
   .about-bio + .about-bio { margin-top: 0; }
+  .founder-block {
+    margin-top: 40px;
+    padding-top: 36px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .founder-photo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center top;
+  }
+  .founder-meta { padding-top: 4px; }
+  .founder-name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: white;
+    line-height: 1.1;
+  }
+  .founder-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-top: 6px;
+    margin-bottom: 16px;
+  }
+  .founder-bio {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.78);
+  }
+  @media (max-width: 600px) {
+    .founder-block {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      justify-items: start;
+    }
+    .founder-photo { width: 120px; height: 120px; }
+  }
   .about-disclosure {
     margin-top: 32px;
     padding-top: 24px;
@@ -1172,9 +1484,9 @@
   <div class="nav-inner">
     <a href="#top" class="nav-brand">OWNAFLEET</a>
     <div class="nav-links">
-      <a href="#how">How It Works</a>
       <a href="#math">The Math</a>
-      <a href="#about">About Josh</a>
+      <a href="#how">How It Works</a>
+      <a href="#about">About</a>
       <a href="#faq">FAQ</a>
       <a href="#contact" class="nav-cta">Get Started</a>
     </div>
@@ -1186,8 +1498,8 @@
   <div class="container-wide">
     <div class="hero-inner">
       <div class="eyebrow">Equipment ownership, simplified</div>
-      <h1>Heavy equipment that <em>pays you.</em></h1>
-      <p class="hero-sub">Buy a fleet that our operating partner rents out across 385 locations nationwide. Receive monthly rental income, claim accelerated depreciation, and own a real asset — fully managed by the 4th-largest equipment rental company in the U.S.</p>
+      <h1>Heavy equipment that <em>shelters income.</em></h1>
+      <p class="hero-sub">OwnaFleet structures and coordinates qualified participation in a managed equipment ownership program operated by the 4th-largest publicly-traded equipment rental company in the U.S. — $7B under management, $3.9B already owned by participants, 385 locations in 45 states. Year-1 accelerated depreciation. Monthly distributions through year 6. Fully managed.</p>
       <div class="hero-ctas">
         <a href="#contact" class="btn btn-primary">See if you qualify</a>
         <a href="#math" class="btn btn-secondary">Run the numbers</a>
@@ -1197,28 +1509,55 @@
   </div>
 </section>
 
-<!-- ============ OPPORTUNITY ============ -->
-<section class="opportunity">
+<!-- ============ FLOW DIAGRAM ============ -->
+<section class="flow">
   <div class="container">
-    <div class="eyebrow">The Opportunity</div>
-    <h2>Three returns from <em>one asset.</em></h2>
-    <p class="lede">Heavy construction equipment generates rental income, qualifies for accelerated depreciation, and holds residual value as hard collateral. Our managed ownership program lets you participate without operating a rental business yourself.</p>
+    <div class="eyebrow">How the dollars move</div>
+    <h2>One purchase. <em>Three returns.</em></h2>
+    <p class="lede">Your capital flows through your own LLC into a fully-managed equipment fleet. Three distinct return streams come back: monthly rental income, year-one tax shelter, and capital recovery at exit.</p>
 
-    <div class="pillars">
-      <div class="pillar">
-        <div class="pillar-num">01</div>
-        <div class="pillar-title">Monthly rental income</div>
-        <div class="pillar-desc">Equipment generates revenue from day one. Owners receive 75–85% of net rental revenue, distributed monthly to your LLC's operating account.</div>
+    <div class="flow-pipeline">
+      <div class="flow-step">
+        <div class="flow-num">01</div>
+        <div class="flow-step-title">You</div>
+        <div class="flow-step-desc">Minimum initial capital of 13% plus a personal guarantee on the financed portion — both required for program participation and to establish IRC §465 at-risk basis.</div>
       </div>
-      <div class="pillar">
-        <div class="pillar-num">02</div>
-        <div class="pillar-title">Accelerated depreciation</div>
-        <div class="pillar-desc">Heavy equipment qualifies for bonus depreciation under current tax law, often offsetting other ordinary income in year one. For most participants, the after-tax economics are the headline number — consult your CPA.</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">
+        <div class="flow-num">02</div>
+        <div class="flow-step-title">Your LLC</div>
+        <div class="flow-step-desc">Holds title and signs the purchase, asset-management, and remarketing agreements.</div>
       </div>
-      <div class="pillar">
-        <div class="pillar-num">03</div>
-        <div class="pillar-title">Real, mobile collateral</div>
-        <div class="pillar-desc">Mobile, durable, dollar-priced industrial assets serving infrastructure spend. The operating partner's limited-loss guarantee covers up to 9.99% of original purchase price at exit.</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">
+        <div class="flow-num">03</div>
+        <div class="flow-step-title">Equipment</div>
+        <div class="flow-step-desc">Heavy construction assets — aerial, earthmoving, material handling. ~90% financed.</div>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step flow-step-hub">
+        <div class="flow-num">04</div>
+        <div class="flow-step-title">Rental fleet</div>
+        <div class="flow-step-desc">Managed by the rental operator across 385 locations in 45 states. Branch teams agnostic to ownership.</div>
+      </div>
+    </div>
+
+    <div class="flow-outcomes-label">Three returns flow back to you</div>
+    <div class="flow-outcomes">
+      <div class="flow-outcome">
+        <div class="flow-outcome-mark">$</div>
+        <div class="flow-outcome-title">Monthly distributions</div>
+        <div class="flow-outcome-desc">75–85% of net rental revenue, deposited to your LLC's operating account each month for the full 6-year term.</div>
+      </div>
+      <div class="flow-outcome">
+        <div class="flow-outcome-mark">%</div>
+        <div class="flow-outcome-title">Year-1 tax shelter</div>
+        <div class="flow-outcome-desc">100% bonus depreciation deduction against active income, subject to at-risk and material participation rules. CPA-modeled to your situation.</div>
+      </div>
+      <div class="flow-outcome">
+        <div class="flow-outcome-mark">&#8599;</div>
+        <div class="flow-outcome-title">Year-6 sale</div>
+        <div class="flow-outcome-desc">Equipment sold at fair market value (typically back to the operator). Limited-loss guarantee pays up to 9.99% if you sell below floor.</div>
       </div>
     </div>
   </div>
@@ -1235,9 +1574,9 @@
       <div class="calc-input">
         <div class="calc-input-label">Equipment Purchase</div>
         <div class="calc-amount" id="calcAmount">$1,000,000</div>
-        <input type="range" min="250000" max="50000000" value="1000000" step="250000" class="calc-slider" id="calcSlider">
+        <input type="range" min="500000" max="50000000" value="1000000" step="250000" class="calc-slider" id="calcSlider">
         <div class="calc-range-labels">
-          <span>$250K min</span>
+          <span>$500K min</span>
           <span>$50M</span>
         </div>
         <p style="margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6;"><span style="color: var(--accent); font-weight: 500;">Average fleet purchase is $1.2M.</span> Minimum is $500K.</p>
@@ -1264,7 +1603,7 @@
       <div>
         <div class="calc-output">
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Initial Cash Outlay <span class="tip">?<span class="tip-content">10% down payment plus a 3% fleet aggregation fee. The remaining 90% is financed by the lending partner over 72 months with a balloon at exit.</span></span></div>
+            <div class="calc-metric-label">Initial Cash Outlay <span class="tip">?<span class="tip-content">10% down payment plus a 3% fleet aggregation fee. The remaining 90% is financed by our partner team over 72 months with a balloon at exit.</span></span></div>
             <div class="calc-metric-value" id="calcOutlay">$130,000</div>
             <div class="calc-metric-sub">10% down + 3% fleet aggregation fee</div>
           </div>
@@ -1291,7 +1630,7 @@
           <div class="calc-metric highlight">
             <div class="calc-metric-label">Total Economics (Cash + Tax) <span class="tip">?<span class="tip-content">Cash returned plus estimated year-1 tax shelter. For most participants, the tax shelter is the largest single component — that's why this program is built around active-income offset, not yield.</span></span></div>
             <div class="calc-metric-value" id="calcGrand">$554,706</div>
-            <div class="calc-metric-sub">On initial outlay above</div>
+            <div class="calc-metric-sub">On initial outlay above · subject to your CPA's modeling for your situation</div>
           </div>
         </div>
 
@@ -1304,7 +1643,7 @@
         <div class="walkthrough-body" id="walkthroughBody"></div>
 
         <div class="calc-footnote">
-          <strong>Important assumptions for the tax line:</strong> you have sufficient active income to absorb the deduction, you materially participate (or qualify under another active rule), and your at-risk basis covers the equipment value (the personally-guaranteed loan typically counts). Depreciation recapture at year-6 exit is not modeled and will reduce total economics. <em>Your CPA must verify all of this for your specific situation — we don't give tax advice.</em>
+          <strong>Important assumptions for the tax line:</strong> sufficient active income to absorb the deduction, material participation under IRC §469 (or qualification under another active rule), and at-risk basis under IRC §465 covering the equipment value (the personally-guaranteed loan typically counts). Depreciation recapture at year-6 exit is not modeled and will reduce total economics. <em>Your CPA must verify all of this for your specific situation — OwnaFleet does not give tax advice.</em>
         </div>
 
         <p class="calc-disclaimer">Projections only, not guaranteed. Cash flow figures based on the program's published Q2 2026 pro forma: 80% average rev share to monthly target, 72-month term, 90% financing at 7.25% with 120-month amortization, equipment sold at Net Orderly Liquidation Value (the fair sale price under normal market conditions over a reasonable period) in year 6. Tax figures are estimates only and depend entirely on your individual tax situation, which we are not qualified to assess. Actual cash flow varies due to utilization, market conditions, and equipment performance.</p>
@@ -1324,7 +1663,7 @@
       <div class="step">
         <div class="step-num">01</div>
         <div class="step-title">You buy</div>
-        <div class="step-desc">Through your LLC. Our partner team arranges the equipment purchase and 90% financing. Typical first deal: $500K–$1M, $65K–$130K initial outlay.</div>
+        <div class="step-desc">Through your LLC. Our partner team arranges the equipment purchase and 90% financing.</div>
       </div>
       <div class="step">
         <div class="step-num">02</div>
@@ -1344,7 +1683,70 @@
       <div class="step">
         <div class="step-num">05</div>
         <div class="step-title">Exit at year 6</div>
-        <div class="step-desc">The operating partner offers to buy at fair market value. Limited-loss guarantee protects up to 9.99% of original cost. Or remarket to third parties.</div>
+        <div class="step-desc">The rental operator offers to buy at fair market value. The limited-loss guarantee pays up to 9.99% of original cost if you sell below floor. Or remarket to third parties.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXIT SCENARIOS ============ -->
+<section class="exit">
+  <div class="container">
+    <div class="eyebrow">End-of-term exit</div>
+    <h2>How exit risk <em>actually</em> plays out.</h2>
+    <p class="lede">At the end of the six-year term, equipment is sold and proceeds (minus the loan balloon) flow back to participants. A limited-loss guarantee from the rental operator caps the downside if equipment sells below its stated floor price. Three scenarios at a $1M purchase, with a 54% floor price.</p>
+
+    <div class="exit-grid">
+      <div class="exit-table-wrap">
+        <table class="exit-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Purchase</th>
+              <th>Floor (54%)</th>
+              <th>Sale Price</th>
+              <th>Shortfall</th>
+              <th>Operator Pays</th>
+              <th>Owner Net Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-good">
+              <th>Projected Exit</th>
+              <td>$1,000,000</td>
+              <td>$540,000</td>
+              <td>$552,000</td>
+              <td>$0</td>
+              <td>$0</td>
+              <td>$0</td>
+            </tr>
+            <tr class="row-soft">
+              <th>Soft Market</th>
+              <td>$1,000,000</td>
+              <td>$540,000</td>
+              <td>$480,000</td>
+              <td>$60,000</td>
+              <td>$60,000</td>
+              <td>$0</td>
+            </tr>
+            <tr class="row-severe">
+              <th>Severe Downturn</th>
+              <td>$1,000,000</td>
+              <td>$540,000</td>
+              <td>$400,000</td>
+              <td>$140,000</td>
+              <td>$99,999</td>
+              <td>$40,010</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="exit-explainer">
+        <h3>How the guarantee works</h3>
+        <p>180+ days before the contract ends, the rental operator makes an all-or-none offer to buy the equipment, typically at fair market value. Owners may accept that offer or remarket the equipment to third parties (the operator retains a 15-day right of first refusal).</p>
+        <p>If sale price falls below the floor stated in the limited-loss agreement, the operator pays the shortfall — capped at <span class="floor-cap">9.99%</span> of original purchase price. The cap is the maximum payout per asset, not a guaranteed minimum return; in deep downturns, owners can absorb residual loss beyond the cap.</p>
+        <p class="exit-fineprint">In severe-downturn scenarios, owners may also elect to continue renting the equipment through the program for up to one (1) additional year under the existing terms.</p>
       </div>
     </div>
   </div>
@@ -1387,12 +1789,12 @@
   <div class="container">
     <div class="eyebrow">Built on real scale</div>
     <h2>Backed by the <em>operator behind</em> every asset.</h2>
-    <p class="lede">Our operating partner is the 4th-largest equipment rental company in the U.S. and runs every dollar of equipment you'll own. Our fleet management partner aggregates participants and handles the relationship. Our lending partner arranges the debt. Together they make the program turnkey.</p>
+    <p class="lede">Every dollar of equipment you own is rented out by the 4th-largest equipment rental company in the U.S., running 385 locations in 45 states. Our partner team handles fleet aggregation, financing, insurance, and reporting end-to-end. You sign once and collect.</p>
 
     <div class="stats-grid">
       <div class="stat">
         <div class="stat-value">$<span>4.4</span><span class="small">B</span></div>
-        <div class="stat-label">Operating partner 2025 revenue</div>
+        <div class="stat-label">Rental operator 2025 revenue</div>
       </div>
       <div class="stat">
         <div class="stat-value">385</div>
@@ -1417,24 +1819,42 @@
     </div>
 
     <div class="why-callout">
-      <div class="why-callout-label">Limited-Loss Guarantee</div>
-      <div class="why-callout-text">The operating partner backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real downside floor on residual risk.</div>
+      <div class="why-callout-label">Publicly traded · SEC-audited</div>
+      <div class="why-callout-text">The rental operator is a publicly-traded U.S. company. Audited financials, 10-K and 10-Q filings, and investor disclosures are publicly available — independently verifiable through SEC EDGAR. Company name, ticker, and direct EDGAR links provided to participants on request.</div>
     </div>
   </div>
 </section>
 
-<!-- ============ ABOUT JOSH ============ -->
-<section class="about" id="about">
-  <div class="about-grid">
-    <div class="about-photo" style="background-image: url('/assets/josh-about.jpg');"></div>
-    <div class="about-content">
-      <div class="eyebrow">About Josh</div>
-      <h2 class="about-name">Josh Cochran</h2>
-      <div class="about-role">Founder · Cochran Capital · Spokane, WA</div>
-      <p class="about-bio">Josh Cochran is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He works directly with the program's partner team to bring qualified participants into the managed equipment ownership program.</p>
-      <p class="about-bio">Working with Josh means a single point of contact through closing, flexibility on minimums based on his partner relationships, and an advocate for your interests through the lifecycle of the deal.</p>
-      <p class="about-disclosure">Disclosure: Josh is not a financial, tax, or legal advisor. He is a participant in the program himself and earns a referral fee from the program's operating partners on completed deals. This relationship does not affect your terms.</p>
+<!-- ============ TESTIMONIAL ============ -->
+<section class="testimonial">
+  <div class="testimonial-inner">
+    <div class="testimonial-mark">&ldquo;</div>
+    <p class="testimonial-quote">OwnaFleet helped me keep roughly <em>$350,000</em> that otherwise would have gone to taxes.</p>
+    <div class="testimonial-attr">
+      <strong>Dr. Jeremiah Sturgill</strong>
+      Tennessee
     </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT THE FIRM ============ -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="eyebrow">About Cochran Capital</div>
+    <h2 class="about-name">A platform of tax-advantaged investment solutions.</h2>
+    <p class="about-bio">OwnaFleet is a Cochran Capital solution. Cochran Capital structures tax-advantaged investment opportunities for high-net-worth individuals, families, and professionals — across managed equipment ownership, opportunity zone real estate, and other asset-backed yield programs.</p>
+    <p class="about-bio">The firm selects solutions on three criteria: durable underlying assets, meaningful tax efficiency, and operational leverage that does not require participants to operate. Current programs span value-add real estate (<strong>Cochran Capital Fund</strong>), qualified opportunity zone real estate (<strong>INW Opportunity Zone Fund I</strong>, with <strong>Fund II</strong> launching January 2027), select SPVs and joint ventures, and active-income strategy (<strong>OwnaFleet</strong> — this site). Four prior investments have been fully cycled to exit.</p>
+
+    <div class="founder-block">
+      <div class="founder-photo" style="background-image: url('/assets/josh-about.jpg');"></div>
+      <div class="founder-meta">
+        <div class="founder-name">Josh Cochran</div>
+        <div class="founder-title">Founder &amp; Principal</div>
+        <p class="founder-bio">Josh founded Cochran Capital in 2022 to bring tax-advantaged investment programs to high-net-worth individuals, families, and professionals seeking durable, asset-backed yield. He is a participant in OwnaFleet's managed equipment ownership program himself.</p>
+      </div>
+    </div>
+
+    <p class="about-disclosure">Cochran Capital and OwnaFleet are not financial, tax, legal, investment, or accounting advisors. Information on this site is general in nature; participants should consult licensed advisors before making capital decisions.</p>
   </div>
 </section>
 
@@ -1447,7 +1867,7 @@
     <div class="faq-list">
       <div class="faq-item">
         <button class="faq-q">What's the minimum equipment purchase? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Officially $1M. In practice, Josh's partner relationships make $500K typical and $250K possible depending on timing. Q4 sees the most demand and the highest minimums — Q1–Q3 has the most flexibility.</p></div>
+        <div class="faq-a"><p>$500K is the official minimum through OwnaFleet. Q4 demand typically pushes minimums to $1M with no guarantee of allocation; Q1–Q3 has the most flexibility. Exceptions down to $250K are made occasionally for the right participant.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">How is this different from owning rental real estate? <span class="icon">+</span></button>
@@ -1459,23 +1879,23 @@
       </div>
       <div class="faq-item">
         <button class="faq-q">What if my equipment doesn't get rented enough? <span class="icon">+</span></button>
-        <div class="faq-a"><p>The operating partner runs the rental side and is incentivized by their 15–25% revenue share to maximize utilization. The fleet is moved between regions to chase demand. Participant-owned equipment is treated identically to the operator's own balance-sheet equipment. Utilization risk is real, but it's the operator's risk first.</p></div>
+        <div class="faq-a"><p>The rental operator runs the rental side and is incentivized by their 15–25% revenue share to maximize utilization. The fleet is moved between regions to chase demand. Participant-owned equipment is treated identically to the operator's own balance-sheet equipment. Utilization risk is real, but it's the operator's risk first.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Can I exit before year 6? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Yes, but with friction. You can market equipment to third parties at any time, with the operating partner having a 15-day right of first refusal. Early exit means you forfeit the full depreciation schedule and may sell into a soft market. The program is designed for the full term.</p></div>
+        <div class="faq-a"><p>Yes, but with friction. You can market equipment to third parties at any time, with the rental operator having a 15-day right of first refusal. Early exit means you forfeit the full depreciation schedule and may sell into a soft market. The program is designed for the full term.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Who actually owns the equipment? <span class="icon">+</span></button>
-        <div class="faq-a"><p>You do — through your LLC. You hold sole title. The partner team manages the relationship and the operating partner runs the rentals. This is a true sale, not a fund interest, and the equipment is not on the operator's balance sheet.</p></div>
+        <div class="faq-a"><p>You do — through your LLC. You hold sole title. Our partner team manages the relationship and the rental operator runs the equipment in their fleet. This is a true sale, not a fund interest.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">What's the personal guarantee about? <span class="icon">+</span></button>
-        <div class="faq-a"><p>The lending partner requires unlimited personal guarantees from the LLC's owners on the financed portion (typically 90% of purchase price) — standard for equipment finance, and lenders qualify based on net worth (3× purchase) and liquidity (30% of purchase) accordingly.</p><p style="margin-top: 12px;">The personal guarantee also matters for tax treatment: under IRS at-risk rules, depreciation can generally only be deducted against active income up to your "at-risk" amount, which typically includes personally-guaranteed (recourse) debt but excludes nonrecourse debt. The personal guarantee, required by the lender, is also what enables the full depreciation benefit to flow against active income. Your CPA needs to walk through the at-risk and material participation rules for your specific situation — we don't give tax advice.</p></div>
+        <div class="faq-a"><p>The lender requires unlimited personal guarantees from the LLC's owners on the financed portion (typically 90% of purchase price) — standard for equipment finance, and lenders qualify based on net worth (3× purchase) and liquidity (30% of purchase) accordingly.</p><p style="margin-top: 12px;">The personal guarantee also matters for tax treatment: under the IRS <strong>at-risk rules (IRC §465)</strong>, depreciation can generally only be deducted against active income up to a participant's "at-risk" amount, which typically includes personally-guaranteed (recourse) debt but excludes nonrecourse debt. The personal guarantee — required by the lender for credit reasons — is also what enables the full depreciation benefit to flow against active income. A participant's CPA must walk through the at-risk (§465) and <strong>material participation (IRC §469)</strong> rules for the specific situation. OwnaFleet does not provide tax advice.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">How do I verify the operating partner? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Our operating partner is the 4th-largest U.S. equipment rental company by revenue ($4.4B in 2025), with $3.9B of equipment under management across 1,000+ existing participants. They are a <strong>publicly-traded company</strong>, so audited financials, 10-K / 10-Q filings, and investor disclosures are available — Josh will share the company name, ticker, and SEC EDGAR links during your intro call so you can verify independently. Independent accountant reports specific to the program are also available on request.</p><p style="margin-top: 12px;">We strongly encourage diligence — this is a major capital decision and deserves the same scrutiny you'd apply to any private investment.</p></div>
+        <button class="faq-q">How do I verify the rental operator? <span class="icon">+</span></button>
+        <div class="faq-a"><p>The rental operator is the 4th-largest U.S. equipment rental company by revenue ($4.4B in 2025), with $3.9B of equipment under management across 1,000+ existing participants. The operator is a <strong>publicly-traded company</strong>, so audited financials, 10-K / 10-Q filings, and investor disclosures are available — OwnaFleet provides the company name, ticker, and SEC EDGAR links during the intro call for independent verification. Independent accountant reports specific to the program are also available on request.</p><p style="margin-top: 12px;">Diligence is strongly encouraged — this is a major capital decision and deserves the same scrutiny applied to any private investment.</p></div>
       </div>
     </div>
   </div>
@@ -1486,7 +1906,7 @@
   <div class="container">
     <div class="eyebrow">Get Started</div>
     <h2>Tell us <em>about you.</em></h2>
-    <p class="lede">Takes 60 seconds. We'll review your fit and, if it's a match, hand you off to the lending partner to start the application. No obligation, no hard pitch.</p>
+    <p class="lede">Takes 60 seconds. We'll review your fit and, if it's a match, hand you off to our partner team to start the application. No obligation, no hard pitch.</p>
 
     <div class="form-grid">
       <form class="form-card" id="leadForm">
@@ -1520,7 +1940,6 @@
             <label for="equipment">Equipment target *</label>
             <select id="equipment" name="equipment_range" required>
               <option value="">Select range</option>
-              <option>$250K – $500K</option>
               <option>$500K – $1M</option>
               <option>$1M – $2M</option>
               <option>$2M – $5M</option>
@@ -1567,21 +1986,21 @@
         </div>
         <button type="submit" class="form-submit" id="submitBtn">Submit & Get Started</button>
         <p id="formError" style="display:none; margin-top: 14px; padding: 12px 16px; background: rgba(184,92,58,0.08); border-left: 2px solid var(--warn); color: var(--warn); font-size: 13px;"></p>
-        <p class="form-fineprint">By submitting, you consent to be contacted by Josh Cochran and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
+        <p class="form-fineprint">By submitting, you consent to be contacted by OwnaFleet and the program's partner team. Your information is shared only with the program's partner team for the purpose of evaluating your participation. OwnaFleet does not sell or share your data.</p>
       </form>
 
       <div class="form-side">
         <h3>What happens next</h3>
         <ol class="next-steps">
-          <li><strong>We review your info</strong> within 24 hours and confirm fit.</li>
-          <li><strong>Our lending partner emails you a secure portal</strong> to start the credit application.</li>
-          <li><strong>You upload tax returns + supporting docs</strong> through the lender's portal.</li>
-          <li><strong>Schedule a call with Josh</strong> to walk through the deal in detail.</li>
+          <li><strong>OwnaFleet reviews your information</strong> within 24 hours and confirms fit.</li>
+          <li><strong>The partner team emails you a secure portal</strong> to start the credit application.</li>
+          <li><strong>You upload tax returns and supporting documentation</strong> through the partner team's portal.</li>
+          <li><strong>A consultation is scheduled</strong> to walk through the deal in detail.</li>
         </ol>
         <div class="form-side-cta">
           <div class="form-side-cta-label">Prefer to talk first?</div>
-          <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">Book 20 min with Josh →</a>
-          <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">Or text/call <strong style="color: var(--ink);">(206) 755-6436</strong></p>
+          <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">Book a 20-min consultation →</a>
+          <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">Or call <strong style="color: var(--ink);">(206) 755-6436</strong></p>
         </div>
       </div>
     </div>
@@ -1594,28 +2013,27 @@
     <div class="footer-grid">
       <div>
         <div class="footer-brand">OWNAFLEET</div>
-        <p class="footer-tagline">Equipment ownership, simplified. A referral service connecting qualified participants with the managed equipment ownership program through our vetted partner network.</p>
+        <p class="footer-tagline">Equipment ownership, simplified. A referral service connecting qualified participants with the managed equipment ownership program through our partner team.</p>
       </div>
       <div class="footer-col">
         <div class="footer-col-title">Contact</div>
-        <a href="mailto:josh@ownafleet.com">josh@ownafleet.com</a>
+        <a href="mailto:info@ownafleet.com">info@ownafleet.com</a>
         <a href="tel:+12067556436">(206) 755-6436</a>
         <a href="#contact">Submit interest →</a>
       </div>
       <div class="footer-col">
         <div class="footer-col-title">Operator</div>
         <p>Cochran Management LLC</p>
-        <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 8px;">Wyoming LLC</p>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 8px; line-height: 1.5;">172 Center Street, Ste. 202<br>PO Box 2869<br>Jackson, WY 83001</p>
       </div>
     </div>
 
     <div class="footer-disclaimer">
-      OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. Cochran Management LLC receives a referral fee from the program's operating partners for participants who complete the program. This compensation does not affect the terms offered to participants. The information on this site does not constitute financial, tax, legal, investment, or accounting advice. Projected returns are estimates only and not guaranteed. Actual cash flow may vary due to market conditions, equipment performance, utilization, and operational factors. Past performance is not indicative of future results. Participants are strongly encouraged to conduct independent due diligence and consult licensed tax, legal, and financial advisors before participating. The program involves a personal guarantee on financed equipment and is not suitable for all investors.
+      OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. Cochran Management LLC receives a referral fee from the program's partner team for participants who complete the program. This compensation does not affect the terms offered to participants. The information on this site does not constitute financial, tax, legal, investment, or accounting advice. Projected returns are estimates only and not guaranteed. Actual cash flow may vary due to market conditions, equipment performance, utilization, and operational factors. Past performance is not indicative of future results. Participants are strongly encouraged to conduct independent due diligence and consult licensed tax, legal, and financial advisors before participating. The program involves a personal guarantee on financed equipment and is not suitable for all investors.
     </div>
 
     <div class="footer-bottom">
       <span>© 2026 Cochran Management LLC</span>
-      <span>v1.0 — Mockup</span>
     </div>
   </div>
 </footer>
@@ -1694,10 +2112,10 @@
     const ratePct = Math.round(taxRate * 100);
     body.innerHTML = `
       <div class="walkthrough-step"><span class="num">01</span><strong>You commit ${fmt(e)} of equipment.</strong> Your LLC signs the purchase agreement coordinated by the partner team.</div>
-      <div class="walkthrough-step"><span class="num">02</span><strong>The lending partner finances ${fmt(debtAmt)} (90%)</strong> at ~7.25% over 72 months. You put ${fmt(e * 0.10)} cash down. Add a 3% fleet aggregation fee (${fmt(e * 0.03)}) and your <strong>total out-of-pocket is ${fmt(outlay)}.</strong></div>
+      <div class="walkthrough-step"><span class="num">02</span><strong>The lender finances ${fmt(debtAmt)} (90%)</strong> at ~7.25% over 72 months. You put ${fmt(e * 0.10)} cash down. Add a 3% fleet aggregation fee (${fmt(e * 0.03)}) and your <strong>total out-of-pocket is ${fmt(outlay)}.</strong></div>
       <div class="walkthrough-step"><span class="num">03</span><strong>Year 1: claim ~100% bonus depreciation on ${fmt(e)}.</strong> At your ${ratePct}% combined marginal rate, that's roughly <strong>${fmt(taxShelter)} in tax savings</strong> (assuming you have active income to absorb it — your CPA will verify).</div>
       <div class="walkthrough-step"><span class="num">04</span><strong>Years 1–5: equipment generates rental revenue</strong> across 385 locations. After your share of operating costs and the loan payment, you receive ~${fmt(annual)}/yr in cash distributions to your LLC. Modest by design — most of the rental income is paying down the loan.</div>
-      <div class="walkthrough-step"><span class="num">05</span><strong>Year 6: exit at fair market value.</strong> Equipment is sold (typically back to the operating partner). After paying off the loan balloon, you receive <strong>~${fmt(exitVal)}</strong> in your final year — including the year-6 cash flow and the cash recovery from the sale.</div>
+      <div class="walkthrough-step"><span class="num">05</span><strong>Year 6: exit at fair market value.</strong> Equipment is sold (typically back to the rental operator). After paying off the loan balloon, you receive <strong>~${fmt(exitVal)}</strong> in your final year — including the year-6 cash flow and the cash recovery from the sale.</div>
       <div class="walkthrough-step"><span class="num">06</span><strong>Total cash returned: ${fmt(total)}</strong> on a ${fmt(outlay)} outlay (years 1–5 distributions + year 6 exit). Add the year-1 tax shelter and total economics work out to <strong>${fmt(grandTotal)}.</strong></div>
       <div class="walkthrough-step" style="border-left-color: #B85C3A; background: rgba(184,92,58,0.08);"><span class="num" style="color:#B85C3A;">⚠</span><strong>Watch-outs:</strong> the tax shelter assumes active income, material participation, and sufficient at-risk basis (the personal guarantee). Depreciation recapture at exit reduces total economics. These projections use the program's published assumptions; actuals vary with utilization and market conditions. Talk to your CPA before deciding.</div>
     `;
@@ -1724,6 +2142,26 @@
 
   // Open first FAQ by default
   document.querySelector('.faq-item').classList.add('open');
+
+  // ============ JUMP-LINK AUTO-FOCUS ============
+  // After smooth-scroll lands, focus the relevant input so the user
+  // sees their action did something concrete.
+  document.querySelectorAll('a[href="#math"]').forEach(a => {
+    a.addEventListener('click', () => {
+      setTimeout(() => {
+        const el = document.getElementById('calcSlider');
+        if (el) el.focus({ preventScroll: true });
+      }, 600);
+    });
+  });
+  document.querySelectorAll('a[href="#contact"]').forEach(a => {
+    a.addEventListener('click', () => {
+      setTimeout(() => {
+        const el = document.getElementById('fname');
+        if (el) el.focus({ preventScroll: true });
+      }, 600);
+    });
+  });
 
   // ============ REFERRAL CODE FROM URL ============
   // Reads ?ref=xxx and stores it in the hidden field + sessionStorage
