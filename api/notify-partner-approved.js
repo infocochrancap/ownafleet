@@ -48,11 +48,14 @@ export default async function handler(req, res) {
 
   if (partnerErr || !partner) return res.status(404).json({ error: 'Partner not found' });
 
-  // Compute partner's effective commission percentage on equipment purchase
+  // Compute partner's typical-deal payout in dollars (no underlying % exposed
+  // to the partner — per Josh's positioning to avoid split-negotiation anchoring).
   // partner.commission_split_pct is the partner's % of Josh's 2.1% affiliate fee.
   // e.g., 40 -> 0.84% of equipment purchase. Default for new partners is 40.
   const splitPct = parseFloat(partner.commission_split_pct ?? 40);
-  const partnerEffectivePct = (JOSH_BASE_PCT * splitPct / 100).toFixed(2);
+  const partnerEffectivePct = (JOSH_BASE_PCT * splitPct / 100); // for internal use only
+  // Typical deal in the program = $1.2M of equipment.
+  const typicalPayout = Math.round(1200000 * partnerEffectivePct / 100);
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -60,7 +63,7 @@ export default async function handler(req, res) {
       from: FROM,
       to: [partner.email],
       subject: 'You\'re approved — your OwnaFleet referral link',
-      html: approvalEmailHtml(partner, partnerEffectivePct)
+      html: approvalEmailHtml(partner, typicalPayout)
     });
   } catch (emailErr) {
     console.error('Email send error:', emailErr);
@@ -70,7 +73,7 @@ export default async function handler(req, res) {
   return res.status(200).json({ ok: true });
 }
 
-function approvalEmailHtml(partner, partnerEffectivePct) {
+function approvalEmailHtml(partner, typicalPayout) {
   const referralUrl = `https://ownafleet.com?ref=${encodeURIComponent(partner.referral_code)}`;
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
@@ -87,11 +90,11 @@ function approvalEmailHtml(partner, partnerEffectivePct) {
 
       <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">The qualified-lead profile</h3>
       <p>Individuals with a meaningful windfall — capital gain, business sale, strong income year, or other liquidity event.</p>
-      <p><strong>Lender thresholds:</strong> net worth ≥ $1M, liquid assets ≥ $300K. Anything below those usually can't be financed, so pre-filtering saves everyone time.</p>
+      <p><strong>Lender thresholds:</strong> net worth ≥ $1M, liquid assets ≥ $200K. Anything below those usually can't be financed, so pre-filtering saves everyone time.</p>
 
-      <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">Commission</h3>
-      <p><strong>${partnerEffectivePct}% of the equipment purchase price</strong>, paid on funding.</p>
-      <p style="font-size: 13px; color: #6B7280;">(On a $1M deal that's approximately $${Math.round(10000 * parseFloat(partnerEffectivePct)).toLocaleString()}.)</p>
+      <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">Your referral fee</h3>
+      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> per closed deal at the program's average size ($1.2M of equipment), paid on funding.</p>
+      <p style="font-size: 13px; color: #6B7280;">Larger or smaller deals scale proportionally. Your dashboard shows estimated payout per lead from day one.</p>
 
       <p>Any questions, reply here.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>

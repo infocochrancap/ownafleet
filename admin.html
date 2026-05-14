@@ -169,6 +169,10 @@
     window.location.href = '/login';
   });
 
+  // Module-level state — declare BEFORE any async call that touches them
+  let allLeads = [];
+  let currentFilter = 'all';
+
   // View switcher (leads vs partners)
   const params = new URLSearchParams(window.location.search);
   const view = params.get('view') || 'leads';
@@ -189,9 +193,6 @@
   } else {
     await loadLeads();
   }
-
-  let allLeads = [];
-  let currentFilter = 'all';
 
   async function loadLeads() {
     const { data, error } = await supabase
