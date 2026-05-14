@@ -97,24 +97,23 @@ export default async function handler(req, res) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // 1. Internal notification (to Brian, Alondra, Josh — or just Josh for below-threshold)
-    const allNotifyEmails = (process.env.LEAD_NOTIFY_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
-    const notifyTo = isBelowThreshold
-      ? allNotifyEmails.filter(e => /josh@ownafleet\.com/i.test(e)) // silent for non-qualifying
-      : allNotifyEmails;
+    // 1. Internal notification — Josh only.
+    // Workflow design: website form submissions stay with Josh. Brian and Alondra
+    // see qualified leads later, once the lead has booked a call AND submitted the
+    // credit application on the Armada Fleet Management site — which is the trigger
+    // for them to engage. Notifying them at form-submission time would be noise.
+    const notifyTo = ['josh@ownafleet.com'];
 
     const subject = isBelowThreshold
       ? `New OwnaFleet lead [BELOW THRESHOLD]: ${lead.first_name} ${lead.last_name}`
       : `New OwnaFleet lead: ${lead.first_name} ${lead.last_name} [${lead.qualification}]`;
 
-    if (notifyTo.length > 0) {
-      await resend.emails.send({
-        from: FROM,
-        to: notifyTo,
-        subject,
-        html: internalNotifyHtml(lead, isBelowThreshold)
-      });
-    }
+    await resend.emails.send({
+      from: FROM,
+      to: notifyTo,
+      subject,
+      html: internalNotifyHtml(lead, isBelowThreshold)
+    });
 
     // 2. Lead-facing email — branch on qualification
     if (isBelowThreshold) {
