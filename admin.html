@@ -101,11 +101,13 @@
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="new">New</button>
     <button class="filter-btn" data-filter="contacted">Contacted</button>
-    <button class="filter-btn" data-filter="application_sent">Application Sent</button>
-    <button class="filter-btn" data-filter="application_started">Application Started</button>
+    <button class="filter-btn" data-filter="application_sent">App Sent</button>
+    <button class="filter-btn" data-filter="mini_app_submitted">Mini App</button>
+    <button class="filter-btn" data-filter="full_app_submitted">Full App</button>
     <button class="filter-btn" data-filter="approved">Approved</button>
+    <button class="filter-btn" data-filter="terms_accepted">Terms</button>
     <button class="filter-btn" data-filter="funded">Funded</button>
-    <button class="filter-btn" data-filter="closed_won">Closed Won</button>
+    <button class="filter-btn" data-filter="operating">Operating</button>
     <button class="filter-btn" data-filter="dead">Dead</button>
   </div>
 
@@ -122,17 +124,23 @@
 <script type="module">
   import { supabase, getUserRole } from '/shared/supabase.js';
 
-  const STATUSES = ['new','contacted','application_sent','application_started','documents_uploaded','approved','funded','closed_won','dead'];
+  const STATUSES = ['new','contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating','dead'];
   const STATUS_LABEL = {
     new: 'New',
     contacted: 'Contacted',
     application_sent: 'Application Sent',
-    application_started: 'Application Started',
-    documents_uploaded: 'Documents Uploaded',
+    mini_app_submitted: 'Mini App Submitted',
+    full_app_submitted: 'Full App Submitted',
     approved: 'Approved',
+    terms_accepted: 'Terms Accepted',
     funded: 'Funded',
-    closed_won: 'Closed Won',
-    dead: 'Dead'
+    operating: 'Operating',
+    dead: 'Dead',
+    // Legacy values from before migration_006 — only shown if a historical lead
+    // is still on one of these. Should not appear in fresh data.
+    application_started: 'Application Started (legacy)',
+    documents_uploaded: 'Documents Uploaded (legacy)',
+    closed_won: 'Closed Won (legacy)'
   };
 
   // Auth gate
@@ -213,8 +221,8 @@
     const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
     document.getElementById('statTotal').textContent = allLeads.length;
     document.getElementById('statHot').textContent = allLeads.filter(l => l.qualification === 'hot').length;
-    document.getElementById('statPipe').textContent = allLeads.filter(l => ['contacted','application_started','documents_uploaded','approved'].includes(l.status)).length;
-    document.getElementById('statFunded').textContent = allLeads.filter(l => ['funded','closed_won'].includes(l.status)).length;
+    document.getElementById('statPipe').textContent = allLeads.filter(l => ['contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted'].includes(l.status)).length;
+    document.getElementById('statFunded').textContent = allLeads.filter(l => ['funded','operating'].includes(l.status)).length;
     document.getElementById('statRecent').textContent = allLeads.filter(l => new Date(l.created_at) >= sevenDaysAgo).length;
   }
 
@@ -348,7 +356,7 @@
             ${lead.status === 'contacted' ? 'Re-send nudge' : 'Send 24-hour nudge'}
           </button>
           <button class="save-btn" id="sendApplicationBtn" ${lead.status === 'dead' ? 'disabled' : ''}>
-            ${lead.status === 'application_sent' || lead.status === 'application_started' || lead.status === 'documents_uploaded' || lead.status === 'approved' || lead.status === 'funded' || lead.status === 'closed_won'
+            ${['application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating'].includes(lead.status)
               ? 'Re-send application link'
               : 'Send Armada application →'}
           </button>
