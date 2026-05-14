@@ -62,7 +62,7 @@ export default async function handler(req, res) {
         ok: false,
         requires_confirmation: true,
         event: calendlyCheck.event,
-        message: `${lead.first_name} ${lead.last_name} appears to have already booked a Calendly call — "${calendlyCheck.event.name}" on ${calendlyCheck.event.start_time_human} (${calendlyCheck.event.status}). Send the nudge anyway?`
+        lead_name: `${lead.first_name} ${lead.last_name}`
       });
     }
   }
@@ -172,20 +172,14 @@ async function checkCalendlyBooking(leadEmail) {
       .sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
     const relevant = future[0] || past[0];
 
+    // Return raw ISO timestamp — frontend formats with browser timezone for
+    // local-time display in the confirmation prompt.
     return {
       booked: true,
       event: {
         name: relevant.name || 'Calendly meeting',
         status: relevant.status || 'active',  // 'active' or 'canceled'
-        start_time: relevant.start_time,
-        start_time_human: new Date(relevant.start_time).toLocaleString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZoneName: 'short'
-        })
+        start_time: relevant.start_time
       }
     };
   } catch (err) {

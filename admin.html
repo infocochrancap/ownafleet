@@ -462,10 +462,21 @@
       try {
         let result = await sendRequest(false);
 
-        // If Calendly says they've already booked, prompt for override
+        // If Calendly says they've already booked, prompt for override.
+        // Format the booking time using the browser's local timezone for readability.
         if (result.requires_confirmation) {
           btn.textContent = 'Awaiting confirmation…';
-          const proceed = confirm(`⚠ ${result.message}`);
+          const ev = result.event;
+          const localTime = new Date(ev.start_time).toLocaleString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          });
+          const msg = `⚠ ${result.lead_name} appears to have already booked a Calendly call — "${ev.name}" on ${localTime} (${ev.status}). Send the nudge anyway?`;
+          const proceed = confirm(msg);
           if (!proceed) {
             btn.disabled = false;
             btn.textContent = originalText;
