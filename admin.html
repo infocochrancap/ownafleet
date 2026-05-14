@@ -101,6 +101,7 @@
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="new">New</button>
     <button class="filter-btn" data-filter="contacted">Contacted</button>
+    <button class="filter-btn" data-filter="application_sent">Application Sent</button>
     <button class="filter-btn" data-filter="application_started">Application Started</button>
     <button class="filter-btn" data-filter="approved">Approved</button>
     <button class="filter-btn" data-filter="funded">Funded</button>
@@ -121,10 +122,11 @@
 <script type="module">
   import { supabase, getUserRole } from '/shared/supabase.js';
 
-  const STATUSES = ['new','contacted','application_started','documents_uploaded','approved','funded','closed_won','dead'];
+  const STATUSES = ['new','contacted','application_sent','application_started','documents_uploaded','approved','funded','closed_won','dead'];
   const STATUS_LABEL = {
     new: 'New',
     contacted: 'Contacted',
+    application_sent: 'Application Sent',
     application_started: 'Application Started',
     documents_uploaded: 'Documents Uploaded',
     approved: 'Approved',
@@ -336,6 +338,18 @@
       </div>
 
       <div class="modal-section">
+        <h3>Next-step actions</h3>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
+          After the intro call, send the credit application link. This emails the lead with the Armada application link and bumps their status to <strong>Application Sent</strong>.
+        </p>
+        <button class="save-btn" id="sendApplicationBtn" ${lead.status === 'dead' ? 'disabled' : ''}>
+          ${lead.status === 'application_sent' || lead.status === 'application_started' || lead.status === 'documents_uploaded' || lead.status === 'approved' || lead.status === 'funded' || lead.status === 'closed_won'
+            ? 'Re-send application link'
+            : 'Send Armada application →'}
+        </button>
+      </div>
+
+      <div class="modal-section">
         <h3>Deal economics</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div>
@@ -393,6 +407,43 @@
         lead.estimated_total_commission = commission;
         document.getElementById('saveEconomics').textContent = 'Saved ✓';
         setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save economics'; }, 1500);
+      }
+    });
+
+    // Send Armada application button
+    document.getElementById('sendApplicationBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('sendApplicationBtn');
+      const originalText = btn.textContent;
+      if (!confirm(`Send the credit application link to ${lead.first_name} ${lead.last_name} (${lead.email})?`)) return;
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/send-application', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.access_token
+          },
+          body: JSON.stringify({ lead_id: leadId })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to send');
+        }
+        btn.textContent = 'Sent ✓ — status bumped to Application Sent';
+        // Refresh local state + status select on the table
+        lead.status = 'application_sent';
+        renderStats();
+        const tableSelect = document.querySelector(`select.status-select[data-id="${leadId}"]`);
+        if (tableSelect) tableSelect.value = 'application_sent';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Re-send application link';
+        }, 2500);
+      } catch (e) {
+        alert('Failed: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
     });
 
@@ -462,14 +513,47 @@
     `;
 
     document.querySelectorAll('.status-select[data-type="partner"]').forEach(sel => {
+      // Capture previous status so we know whether to fire the approval email
+      const previousStatus = sel.value;
+      sel.dataset.previousStatus = previousStatus;
       sel.addEventListener('change', async () => {
+        const partnerId = sel.dataset.id;
+        const prev = sel.dataset.previousStatus;
         const updates = { status: sel.value };
         if (sel.value === 'active') {
           updates.approved_at = new Date().toISOString();
           updates.approved_by = session.user.id;
         }
-        const { error } = await supabase.from('referral_partners').update(updates).eq('id', sel.dataset.id);
-        if (error) alert('Update failed: ' + error.message);
+        const { error } = await supabase.from('referral_partners').update(updates).eq('id', partnerId);
+        if (error) {
+          alert('Update failed: ' + error.message);
+          sel.value = prev;
+          return;
+        }
+        sel.dataset.previousStatus = sel.value;
+
+        // Fire approval email if status moved INTO active from something else
+        if (sel.value === 'active' && prev !== 'active') {
+          if (!confirm('Send approval email with referral link to this partner?')) return;
+          try {
+            const res = await fetch('/api/notify-partner-approved', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session.access_token
+              },
+              body: JSON.stringify({ partner_id: partnerId })
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              alert('Partner approved but email failed: ' + (data.error || 'unknown error'));
+            } else {
+              alert('Approval email sent ✓');
+            }
+          } catch (e) {
+            alert('Partner approved but email failed: ' + e.message);
+          }
+        }
       });
     });
   }

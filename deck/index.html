@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Request the overview — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724; --ink-soft: #2A3647; --muted: #6B7280;
+    --line: #D9DDE3; --line-soft: #EEF0F3; --paper: #F8F7F4; --paper-warm: #F2F0EA;
+    --accent: #8B6F3F; --accent-deep: #6B5430; --warn: #B85C3A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  nav {
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  main {
+    flex: 1;
+    padding: 80px 32px;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @media (max-width: 600px) {
+    main { padding: 48px 20px; }
+  }
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 500;
+  }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    font-size: clamp(40px, 6vw, 64px);
+    margin-bottom: 28px;
+  }
+  h1 em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin-bottom: 48px;
+    max-width: 600px;
+  }
+  form {
+    background: white;
+    padding: 40px;
+    border-top: 3px solid var(--accent);
+  }
+  @media (max-width: 600px) {
+    form { padding: 28px 24px; }
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 24px;
+    border-radius: 0;
+  }
+  input[type="text"]:focus, input[type="email"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: white;
+  }
+  .checkbox-row {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 28px;
+    padding: 16px;
+    background: var(--paper);
+    border-left: 2px solid var(--accent);
+  }
+  .checkbox-row input[type="checkbox"] {
+    margin-top: 4px;
+    cursor: pointer;
+  }
+  .checkbox-row label {
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    cursor: pointer;
+    font-weight: 400;
+  }
+  button[type="submit"] {
+    width: 100%;
+    background: var(--ink);
+    color: white;
+    border: none;
+    padding: 18px 24px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button[type="submit"]:hover { background: var(--accent); }
+  button[type="submit"]:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+  }
+  .error {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: rgba(184,92,58,0.08);
+    border-left: 2px solid var(--warn);
+    color: var(--warn);
+    font-size: 13px;
+  }
+  .success {
+    background: white;
+    border-top: 3px solid var(--accent);
+    padding: 48px 40px;
+    text-align: center;
+    display: none;
+  }
+  .success h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+  .success p {
+    color: var(--ink-soft);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+  .success a {
+    display: inline-block;
+    background: var(--ink);
+    color: white;
+    text-decoration: none;
+    padding: 14px 28px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+  .success a:hover { background: var(--accent); }
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.5);
+    padding: 28px 32px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.7;
+    font-style: italic;
+    margin-top: 48px;
+  }
+  footer .disc-text { max-width: 880px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<nav><a href="/" class="nav-brand">OWNAFLEET</a></nav>
+
+<main>
+  <div class="eyebrow">Program Overview</div>
+  <h1>Request the <em>21-slide overview.</em></h1>
+  <p class="lede">It walks through structure, year-by-year economics on a representative $1M deal, the Year-1 tax overlay, and the questions most participants ask before a first call.</p>
+
+  <form id="deckForm">
+    <label for="firstName">First name *</label>
+    <input type="text" id="firstName" name="first_name" required autocomplete="given-name">
+
+    <label for="email">Email *</label>
+    <input type="email" id="email" name="email" required autocomplete="email">
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="disclaimer" name="disclaimer" required>
+      <label for="disclaimer">
+        I understand this overview is provided for <strong>informational purposes only</strong> and is <strong>not an offer to sell or solicit any security</strong>. Participants in the program take direct title to specific equipment through their own LLC. I am requesting this material to evaluate whether the program may be a fit for my situation.
+      </label>
+    </div>
+
+    <button type="submit" id="submitBtn">Send me the overview →</button>
+    <p class="error" id="errorMsg"></p>
+  </form>
+
+  <div class="success" id="successPanel">
+    <h2>Check your email.</h2>
+    <p>We just sent the overview link to your inbox. It should arrive within 60 seconds.</p>
+    <a href="/deck/view" id="viewNowLink">View it now →</a>
+  </div>
+</main>
+
+<footer>
+  <div class="disc-text">
+    OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. This material is informational only and does not constitute an offer to sell or solicit any security, nor does it constitute financial, tax, legal, investment, or accounting advice. © 2026 Cochran Management LLC.
+  </div>
+</footer>
+
+<script>
+  document.getElementById('deckForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById('submitBtn');
+    const errorEl = document.getElementById('errorMsg');
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const payload = {
+      first_name: document.getElementById('firstName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      disclaimer_accepted: document.getElementById('disclaimer').checked
+    };
+
+    try {
+      const res = await fetch('/api/request-deck', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+      // Set cookie so we don't re-gate on return visits (30 days)
+      document.cookie = 'deck_unlocked=1; path=/; max-age=' + (60*60*24*30) + '; SameSite=Lax';
+
+      // Swap to success state
+      form.style.display = 'none';
+      document.getElementById('successPanel').style.display = 'block';
+    } catch (err) {
+      errorEl.textContent = err.message + '. Please try again or email josh@ownafleet.com.';
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send me the overview →';
+    }
+  });
+
+  // If they already unlocked, skip the gate
+  if (document.cookie.split(';').some(c => c.trim().startsWith('deck_unlocked=1'))) {
+    window.location.replace('/deck/view');
+  }
+</script>
+
+</body>
+</html>

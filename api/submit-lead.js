@@ -1,5 +1,7 @@
 // POST /api/submit-lead
-// Validates form input, writes to Supabase, emails Brian + Alondra + Josh.
+// Validates form input, writes to Supabase, sends internal notification + lead-facing email.
+// Branching: leads with net_worth >= $1M AND liquidity >= $300K get the deck link.
+// Below-threshold leads get a respectful decline email instead.
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
@@ -7,12 +9,14 @@ import { Resend } from 'resend';
 const REQUIRED = ['first_name', 'last_name', 'email', 'phone', 'state', 'equipment_range', 'net_worth', 'liquidity'];
 
 const ALLOWED = {
-  equipment_range: ['$250K – $500K','$500K – $1M','$1M – $2M','$2M – $5M','$5M – $10M','$10M – $25M','$25M – $50M','$50M+','Not sure yet'],
+  equipment_range: ['$250K – $500K','$500K – $1M','$1M – $2M','$2M – $5M','Over $5M — consultation','Not sure yet'],
   net_worth: ['Under $1M','$1M – $3M','$3M – $10M','$10M – $30M','$30M – $75M','$75M – $150M','$150M+'],
   liquidity: ['Under $300K','$300K – $1M','$1M – $3M','$3M – $10M','$10M – $25M','$25M+']
 };
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
+const DECK_URL = 'https://ownafleet.com/deck/view';
+const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-ownership';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -85,43 +89,66 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to save lead' });
   }
 
-  // Send notification emails — don't fail the request if email fails
+  // Hard-fail criteria per Josh's rule: net worth < $1M OR liquidity < $300K -> doesn't qualify
+  const isBelowThreshold =
+    lead.net_worth === 'Under $1M' || lead.liquidity === 'Under $300K';
+
+  // Send notification + lead-facing email — don't fail the request if email fails
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const to = (process.env.LEAD_NOTIFY_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
 
-    const tierEmoji = { hot: '🔥', warm: '⚡', needs_review: '👀', unqualified: '⚪' };
-    const subject = `New OwnaFleet lead: ${lead.first_name} ${lead.last_name} [${lead.qualification}]`;
+    // 1. Internal notification (to Brian, Alondra, Josh — or just Josh for below-threshold)
+    const allNotifyEmails = (process.env.LEAD_NOTIFY_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
+    const notifyTo = isBelowThreshold
+      ? allNotifyEmails.filter(e => /josh@ownafleet\.com/i.test(e)) // silent for non-qualifying
+      : allNotifyEmails;
 
-    if (to.length > 0) {
+    const subject = isBelowThreshold
+      ? `New OwnaFleet lead [BELOW THRESHOLD]: ${lead.first_name} ${lead.last_name}`
+      : `New OwnaFleet lead: ${lead.first_name} ${lead.last_name} [${lead.qualification}]`;
+
+    if (notifyTo.length > 0) {
       await resend.emails.send({
         from: FROM,
-        to,
+        to: notifyTo,
         subject,
-        html: leadEmailHtml(lead)
+        html: internalNotifyHtml(lead, isBelowThreshold)
       });
     }
 
-    // Confirmation email to the lead themselves
-    await resend.emails.send({
-      from: FROM,
-      to: [lead.email],
-      subject: 'Thanks for your interest — next steps',
-      html: confirmationEmailHtml(lead)
-    });
+    // 2. Lead-facing email — branch on qualification
+    if (isBelowThreshold) {
+      await resend.emails.send({
+        from: FROM,
+        to: [lead.email],
+        subject: 'A note on fit — equipment ownership program',
+        html: declineEmailHtml(lead)
+      });
+    } else {
+      await resend.emails.send({
+        from: FROM,
+        to: [lead.email],
+        subject: 'Thanks for your interest — your equipment overview inside',
+        html: deckDeliveryEmailHtml(lead)
+      });
+    }
   } catch (emailErr) {
     console.error('Email send error:', emailErr);
-    // Don't fail the response — lead is saved, that's what matters
+    // Don't fail — lead is saved
   }
 
   return res.status(200).json({ ok: true, lead_id: lead.id });
 }
 
-function leadEmailHtml(lead) {
+// ============== Internal notification (Brian/Alondra/Josh) ==============
+function internalNotifyHtml(lead, isBelowThreshold) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.5; color: #0B1724;">
       <h2 style="color: #0B1724; margin-bottom: 8px;">New lead — ${escape(lead.first_name)} ${escape(lead.last_name)}</h2>
-      <p style="color: #6B7280; font-size: 13px; margin-top: 0;">Qualification: <strong style="color: #8B6F3F;">${lead.qualification.toUpperCase()}</strong></p>
+      <p style="color: #6B7280; font-size: 13px; margin-top: 0;">
+        Qualification tier: <strong style="color: #8B6F3F;">${lead.qualification.toUpperCase()}</strong>
+        ${isBelowThreshold ? ' &nbsp;·&nbsp; <strong style="color: #B85C3A;">BELOW THRESHOLD — auto-decline sent</strong>' : ''}
+      </p>
       <table style="border-collapse: collapse; width: 100%; margin-top: 16px;">
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280; width: 40%;">EMAIL</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.email)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">PHONE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.phone)}</td></tr>
@@ -137,24 +164,50 @@ function leadEmailHtml(lead) {
   `;
 }
 
-function confirmationEmailHtml(lead) {
+// ============== Deck delivery (qualifying lead) ==============
+function deckDeliveryEmailHtml(lead) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
-      <p>${escape(lead.first_name)},</p>
-      <p>Thanks for your interest in equipment ownership through OwnaFleet. Quick rundown of what happens next:</p>
-      <ol style="line-height: 1.8;">
-        <li>I'll review your info within 24 hours and confirm fit.</li>
-        <li>Our lending partner will email you a secure portal to start the credit application.</li>
-        <li>You'll upload tax returns and supporting documents through the lender's portal.</li>
-        <li>We'll schedule a call to walk through the deal in detail.</li>
-      </ol>
-      <p>If you'd rather talk first, grab 20 minutes on my calendar: <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership">calendly.com/drjoshcochran/connect-about-fleet-ownership</a></p>
-      <p>Or text/call me directly: <strong>(206) 755-6436</strong></p>
+      <p>Hi ${escape(lead.first_name)},</p>
+      <p>Thanks for submitting your interest. Based on what you shared, this program looks like a potential fit — and I want to make sure you have everything to evaluate it carefully.</p>
+      <p>The 21-slide overview is here:</p>
+      <p style="margin: 24px 0;">
+        <a href="${DECK_URL}" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">View the overview →</a>
+      </p>
+      <p>It walks through structure, year-by-year economics on a representative $1M deal, what the Year-1 tax overlay can look like, and the questions I get most often before a first call.</p>
+      <p>It's designed to handle the standard questions in advance, so our intro call can focus on your situation: income picture, tax position, what you're trying to accomplish.</p>
+      <p>When you've had a chance to read through, grab a 20-minute window here:</p>
+      <p style="margin: 20px 0;">
+        <a href="${CALENDLY_URL}" style="color: #8B6F3F; border-bottom: 1px solid #8B6F3F; text-decoration: none;">${CALENDLY_URL}</a>
+      </p>
+      <p>No obligation, no hard pitch. If you'd rather pick a time over text, I'm at <strong>(206) 755-6436</strong> — or just reply to this email with a few windows.</p>
+      <p>Looking forward to it.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>
+      <hr style="border: none; border-top: 1px solid #D9DDE3; margin: 32px 0 16px;">
+      <p style="font-size: 11px; color: #6B7280; font-style: italic; line-height: 1.5;">
+        This material is provided for informational purposes only and does not constitute an offer to sell or a solicitation of an offer to buy any security. OwnaFleet does not offer or sell securities. Participants in the program take direct title to specific equipment through their own LLC. This communication does not constitute financial, tax, legal, investment, or accounting advice. Consult your CPA and legal advisor before participating.
+      </p>
+    </div>
+  `;
+}
+
+// ============== Respectful decline (below threshold) ==============
+function declineEmailHtml(lead) {
+  return `
+    <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
+      <p>Hi ${escape(lead.first_name)},</p>
+      <p>Thanks for the interest in the equipment ownership program.</p>
+      <p>Based on what you shared, this specific program may not be the right fit right now. The lending partner typically requires net worth above $1M and at least $300K in liquid assets to underwrite the program's leverage — and without those, the Year-1 tax economics that make it worthwhile don't pencil out.</p>
+      <p>If your picture shifts — a strong income year, a liquidity event, a business sale — you're welcome to circle back. Just reply to this email.</p>
+      <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>
+      <hr style="border: none; border-top: 1px solid #D9DDE3; margin: 32px 0 16px;">
+      <p style="font-size: 11px; color: #6B7280; font-style: italic; line-height: 1.5;">
+        This communication is informational only and does not constitute financial, tax, legal, investment, or accounting advice.
+      </p>
     </div>
   `;
 }
 
 function escape(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }

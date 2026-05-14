@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OwnaFleet — Heavy equipment that pays you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,300;9..144,1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724;
+    --ink-soft: #2A3647;
+    --muted: #6B7280;
+    --line: #D9DDE3;
+    --line-soft: #EEF0F3;
+    --paper: #F8F7F4;
+    --paper-warm: #F2F0EA;
+    --accent: #8B6F3F;
+    --accent-deep: #6B5430;
+    --success: #2F5D3D;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #E5E3DE; font-family: 'Inter', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* ---------- DECK FRAME ---------- */
+  .deck { display: flex; flex-direction: column; align-items: center; padding: 40px 0 80px; gap: 24px; }
+  .slide {
+    width: 1280px;
+    height: 720px;
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 0 var(--line), 0 24px 60px -28px rgba(11,23,36,0.18);
+  }
+  .slide-inner {
+    position: absolute;
+    inset: 0;
+    padding: 56px 88px 52px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- PRINT BUTTON ---------- */
+  .print-btn {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 100;
+    background: var(--ink);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .print-btn:hover { background: var(--accent); }
+
+  /* ---------- TYPOGRAPHY ---------- */
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 500;
+  }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); }
+  .eyebrow.no-line::before { display: none; }
+
+  h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 300; letter-spacing: -0.02em; line-height: 1.05; color: var(--ink); }
+  h1 { font-size: 96px; line-height: 0.96; }
+  h2 { font-size: 52px; margin-bottom: 18px; }
+  h3 { font-size: 26px; font-weight: 400; }
+  em { font-style: italic; color: var(--accent); font-weight: 300; }
+
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    max-width: 880px;
+  }
+
+  /* ---------- SLIDE FOOTER ---------- */
+  .slide-footer {
+    position: absolute;
+    left: 88px;
+    right: 88px;
+    bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .slide-footer .brand { font-family: 'Fraunces', serif; letter-spacing: 0.35em; font-weight: 400; color: var(--ink-soft); font-size: 11px; }
+  .slide-footer .disclaim { color: var(--muted); font-style: italic; letter-spacing: 0.05em; text-transform: none; font-size: 10px; }
+  .slide-footer .pagenum { font-weight: 500; }
+
+  /* ---------- SLIDE 1: COVER ---------- */
+  .cover { background: var(--ink); color: white; padding: 0; }
+  .cover .cover-photo {
+    position: absolute;
+    inset: 0;
+    background-image: url('./assets/cover.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.55;
+  }
+  .cover .cover-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(11,23,36,0.55), rgba(11,23,36,0.35) 50%, rgba(139,111,63,0.2));
+  }
+  .cover .cover-inner {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding: 64px 88px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+  }
+  .cover .cover-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cover .cover-brand {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    letter-spacing: 0.45em;
+    font-weight: 400;
+  }
+  .cover .cover-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  .cover .cover-main {
+    max-width: 920px;
+  }
+  .cover .cover-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.85);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 500;
+  }
+  .cover .cover-eyebrow::before { content: ''; width: 40px; height: 1px; background: rgba(255,255,255,0.7); }
+  .cover h1 {
+    color: white;
+    font-size: 108px;
+    line-height: 0.96;
+    margin-bottom: 22px;
+  }
+  .cover h1 em { color: #D6BC8A; }
+  .cover .cover-hook {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    color: #D6BC8A;
+    letter-spacing: 0.005em;
+    margin-bottom: 26px;
+    max-width: 820px;
+    line-height: 1.35;
+  }
+  .cover .cover-sub {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.4;
+    max-width: 780px;
+  }
+  .cover .cover-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+  }
+  .cover .cover-bottom .presented {
+    font-family: 'Fraunces', serif;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-size: 15px;
+    color: rgba(255,255,255,0.92);
+    font-weight: 300;
+  }
+  .cover .cover-bottom .presented em { color: #D6BC8A; font-style: italic; }
+
+  /* ---------- COMMON: HEADERED SLIDES ---------- */
+  .slide-header { margin-bottom: 22px; }
+  .slide-header h2 { margin-bottom: 14px; }
+
+  /* ---------- SLIDE 2: OPPORTUNITY (3 PILLARS) ---------- */
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 24px;
+    border-top: 1px solid var(--line);
+    padding-top: 26px;
+    flex: 1;
+  }
+  .pillar {
+    padding: 0 32px;
+    position: relative;
+  }
+  .pillar:first-child { padding-left: 0; }
+  .pillar:last-child { padding-right: 0; }
+  .pillar:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--line);
+  }
+  .pillar-num {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 18px;
+  }
+  .pillar-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 28px;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .pillar-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
+  /* ---------- SLIDE 3 (NEW): EQUIPMENT CATEGORIES ---------- */
+  .cat-hero {
+    height: 170px;
+    background-image: url('./assets/categories.jpg');
+    background-size: cover;
+    background-position: center 62%;
+    background-color: var(--paper-warm);
+    margin: 4px 0 18px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .cats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 0;
+    flex: 1;
+    padding-top: 0;
+    padding-bottom: 28px;
+  }
+  .cat-col {
+    padding: 0 30px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .cat-col:first-child { padding-left: 0; }
+  .cat-col:last-child { padding-right: 0; }
+  .cat-col:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--line);
+  }
+  .cat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+  .cat-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 30px;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .cat-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .cat-items {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px 0;
+    min-height: 110px;
+  }
+  .cat-items li {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.25;
+    padding: 8px 0;
+    border-top: 1px solid var(--line-soft);
+  }
+  .cat-items li:first-child { border-top: none; padding-top: 0; }
+  .cat-desc {
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- REVENUE SHARING + FEES (BIG-STAT 2-COL) ---------- */
+  .rev-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    margin-top: 28px;
+    flex: 1;
+    align-content: start;
+  }
+  .rev-stat { border-top: 2px solid var(--accent); padding-top: 26px; }
+  .rev-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+    font-weight: 600;
+  }
+  .rev-stat-number {
+    font-family: 'Fraunces', serif;
+    font-size: 88px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 18px;
+  }
+  .rev-stat-h {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .rev-stat-h em { font-style: italic; color: var(--accent); }
+  .rev-stat-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
+  /* ---------- PRO FORMA ASSUMPTIONS (3-COL LISTS) ---------- */
+  .pf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+    margin-top: 24px;
+    flex: 1;
+    border-top: 1px solid var(--line);
+    padding-top: 26px;
+    align-content: start;
+  }
+  .pf-col-h {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+  .pf-col-h em { font-style: italic; color: var(--accent); }
+  .pf-list { list-style: none; padding: 0; margin: 0; }
+  .pf-list li {
+    padding: 9px 0;
+    border-bottom: 1px dotted var(--line);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .pf-list li:last-child { border-bottom: none; }
+  .pf-list li b {
+    color: var(--ink);
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+  }
+  .pf-foot {
+    margin-top: 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  /* ---------- LEVERAGE PLAY (3-STEP COMPOUNDING) ---------- */
+  .lev-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 22px;
+    flex: 1;
+    border-top: 1px solid var(--line);
+    padding-top: 26px;
+    align-items: start;
+  }
+  .lev-step {
+    padding: 0 32px;
+    position: relative;
+  }
+  .lev-step:first-child { padding-left: 0; }
+  .lev-step:last-child { padding-right: 0; }
+  .lev-step:not(:first-child)::before {
+    content: '→';
+    position: absolute;
+    left: -10px;
+    top: 38px;
+    font-size: 24px;
+    color: var(--accent);
+    font-family: 'Fraunces', serif;
+    line-height: 1;
+  }
+  .lev-num {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+  .lev-h {
+    font-family: 'Fraunces', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+  .lev-h em { font-style: italic; color: var(--accent); }
+  .lev-stat {
+    font-family: 'Fraunces', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .lev-stat-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+  .lev-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .lev-foot {
+    margin-top: 12px;
+    padding: 9px 14px;
+    background: var(--paper-warm);
+    border-left: 2px solid var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .lev-foot strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------- CASH FLOW DETAIL (YEAR-BY-YEAR TABLE) ---------- */
+  .cf-wrap {
+    margin-top: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .cf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .cf-table th {
+    text-align: right;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 9px 10px 9px 0;
+    border-bottom: 2px solid var(--accent);
+  }
+  .cf-table th:first-child {
+    text-align: left;
+    padding-left: 0;
+  }
+  .cf-table th.total { color: var(--ink); padding-right: 0; }
+  .cf-table td {
+    padding: 9px 10px 9px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+  .cf-table td:first-child {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--ink);
+    text-align: left;
+    padding-left: 0;
+    letter-spacing: -0.005em;
+  }
+  .cf-table td:last-child { padding-right: 0; }
+  .cf-table td.neg { color: #B85C3A; }
+  .cf-table td.pos { color: var(--success); }
+  .cf-table td.total { color: var(--ink); font-weight: 500; }
+  .cf-table td.muted { color: var(--muted); }
+  .cf-table tr.subtotal td { background: var(--paper-warm); font-weight: 500; color: var(--ink); }
+  .cf-table tr.subtotal td:first-child { font-weight: 500; }
+  .cf-table tr.headline td {
+    background: var(--ink);
+    color: white;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    font-weight: 500;
+  }
+  .cf-table tr.headline td:first-child { color: white; padding-left: 12px; font-weight: 500; }
+  .cf-table tr.headline td.neg { color: #E89E84; }
+  .cf-table tr.headline td.pos { color: #B8D5C0; }
+  .cf-table tr.headline td.total { color: white; }
+  .cf-table tr:last-child td { border-bottom: none; }
+  .cf-foot {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--paper-warm);
+    border-left: 2px solid var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .cf-foot strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------- LIMITED-LOSS GUARANTEE (SCENARIO TABLE) ---------- */
+  .lg-wrap {
+    margin-top: 22px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .lg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+  }
+  .lg-table th {
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 12px 14px 12px 0;
+    border-bottom: 2px solid var(--accent);
+    vertical-align: bottom;
+  }
+  .lg-table th.num { text-align: right; padding-right: 0; padding-left: 14px; }
+  .lg-table td {
+    padding: 16px 14px 16px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-family: 'Inter', sans-serif;
+  }
+  .lg-table td:first-child {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .lg-table td.num {
+    text-align: right;
+    padding-right: 0;
+    padding-left: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .lg-table td.num.pos { color: var(--success); font-weight: 500; }
+  .lg-table td.num.bad { color: #B85C3A; font-weight: 500; }
+  .lg-table tr:last-child td { border-bottom: none; }
+  .lg-explain {
+    margin-top: 18px;
+    padding: 16px 20px;
+    background: var(--paper-warm);
+    border-left: 2px solid var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+  .lg-explain strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------- THESIS SLIDE (DARK MID-DECK BREAK) ---------- */
+  .thesis { background: var(--ink); color: white; position: relative; overflow: hidden; }
+  .thesis::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(214,188,138,0.10) 0%, transparent 55%),
+      radial-gradient(circle at 88% 82%, rgba(214,188,138,0.06) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .thesis .slide-inner { color: white; position: relative; z-index: 1; }
+  .thesis .slide-footer { border-top-color: rgba(255,255,255,0.18); }
+  .thesis .slide-footer .brand { color: rgba(255,255,255,0.85); }
+  .thesis .slide-footer .disclaim, .thesis .slide-footer .pagenum { color: rgba(255,255,255,0.55); }
+  .thesis-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: #D6BC8A;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 500;
+  }
+  .thesis-eyebrow::before { content: ''; width: 40px; height: 1px; background: #D6BC8A; }
+  .thesis-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1000px;
+  }
+  .thesis-h {
+    font-family: 'Fraunces', serif;
+    font-size: 108px;
+    font-weight: 300;
+    color: white;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin-bottom: 40px;
+  }
+  .thesis-h em { color: #D6BC8A; font-style: italic; font-weight: 300; }
+  .thesis-body {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.5;
+    max-width: 800px;
+  }
+  .thesis-body em { font-style: italic; color: #D6BC8A; font-weight: 300; }
+
+  /* ---------- DISCLOSURES (2x2 GRID) ---------- */
+  .disc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 56px;
+    margin-top: 22px;
+    flex: 1;
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+    align-content: start;
+  }
+  .disc-num {
+    font-family: 'Fraunces', serif;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .disc-h {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  .disc-h em { font-style: italic; color: var(--accent); }
+  .disc-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  /* ---------- DEAL STRUCTURE (3-COL STACKED LISTS) ---------- */
+  .ds-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 24px;
+    flex: 1;
+    border-top: 1px solid var(--line);
+    padding-top: 26px;
+    align-content: start;
+  }
+  .ds-col {
+    padding: 0 30px;
+    position: relative;
+  }
+  .ds-col:first-child { padding-left: 0; }
+  .ds-col:last-child { padding-right: 0; }
+  .ds-col:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--line);
+  }
+  .ds-num {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+  .ds-h {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .ds-h em { font-style: italic; color: var(--accent); }
+  .ds-list { list-style: none; padding: 0; margin: 0; }
+  .ds-list li {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .ds-list li:last-child { border-bottom: none; }
+  .ds-list li strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------- SLIDE 4: WHO IT'S FOR (TWO-COLUMN) ---------- */
+  .who-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    margin-top: 24px;
+    flex: 1;
+  }
+  .who-col { display: flex; flex-direction: column; }
+  .who-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .who-h {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .who-h em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .who-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 22px;
+    letter-spacing: 0.05em;
+  }
+  .who-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+  }
+  .who-body p + p { margin-top: 14px; }
+
+  /* ---------- SLIDE 4: HOW IT WORKS (5 STEPS) ---------- */
+  .steps-grid {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+    flex: 1;
+  }
+  .step {
+    background: var(--paper-warm);
+    padding: 30px 24px;
+    border-top: 2px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+  }
+  .step-num {
+    font-family: 'Fraunces', serif;
+    font-size: 44px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+  }
+  .step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .step-desc {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* ---------- SLIDE 5: EXAMPLE ECONOMICS ---------- */
+  .economics {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 36px;
+    margin-top: 8px;
+    flex: 1;
+  }
+  .econ-left {
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .econ-amount-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .econ-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+  }
+  .econ-amount-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+  }
+  .econ-sizing-note {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    border-left: 2px solid var(--accent);
+    background: var(--paper-warm);
+  }
+  .econ-sizing-note strong { color: var(--ink); font-weight: 600; }
+  .econ-sizing-fine {
+    font-size: 10.5px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+  .econ-assumptions {
+    background: var(--paper-warm);
+    padding: 16px 18px 14px;
+    border-top: 2px solid var(--accent);
+  }
+  .econ-assumptions h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .econ-assumptions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .econ-assumptions li {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted var(--line);
+    padding: 2px 0;
+  }
+  .econ-assumptions li:last-child { border-bottom: none; }
+  .econ-assumptions li span:last-child { color: var(--ink); font-weight: 500; font-family: 'Inter', sans-serif; }
+
+  .econ-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    align-self: start;
+  }
+  .econ-metric {
+    background: var(--paper);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .econ-metric.highlight { background: var(--ink); color: white; }
+  .econ-metric-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9.5px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .econ-metric.highlight .econ-metric-label { color: rgba(255,255,255,0.7); }
+  .econ-metric.highlight .econ-metric-label.accent { color: #D6BC8A; }
+  .econ-metric-value {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .econ-metric.highlight .econ-metric-value { color: white; }
+  .econ-metric-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  .econ-metric.highlight .econ-metric-sub { color: rgba(255,255,255,0.65); }
+
+  /* ---------- SLIDE 6: WHY THIS WORKS ---------- */
+  .why-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 820px;
+    margin-bottom: 20px;
+  }
+  .why-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+    flex: 1;
+    align-content: start;
+  }
+  .why-tile {
+    border: 1px solid var(--line);
+    padding: 16px 18px;
+    background: var(--paper);
+  }
+  .why-tile-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .why-tile-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .why-tile-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .why-callout {
+    margin-top: 18px;
+    padding: 18px 22px;
+    background: var(--paper-warm);
+    border-left: 2px solid var(--accent);
+    font-family: 'Inter', sans-serif;
+  }
+  .why-callout strong {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .why-callout p { font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+
+  /* ---------- SLIDE 7: WHAT YOU DON'T DO ---------- */
+  .dont-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .dont-item {
+    padding: 18px 20px 18px 0;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .dont-item:not(:nth-child(3n+1)) { padding-left: 28px; }
+  .dont-item:nth-child(3n) { border-right: none; padding-right: 0; }
+  .dont-item:nth-child(n+4) { border-bottom: none; padding-bottom: 14px; }
+  .dont-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .dont-h {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .dont-h em { font-style: italic; color: var(--accent); }
+  .dont-desc {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .dont-tagline {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--ink);
+    margin-top: 12px;
+    letter-spacing: -0.01em;
+  }
+  .dont-tagline em { color: var(--accent); }
+  .dont-note {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-top: 8px;
+    max-width: 820px;
+  }
+  .dont-note em { font-style: italic; color: var(--accent); font-weight: 500; }
+
+  /* ---------- SLIDE 8: WHY OWNAFLEET ---------- */
+  .why-us-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 12px;
+    flex: 1;
+    border-top: 1px solid var(--line);
+  }
+  .why-us-item {
+    padding: 28px 36px 28px 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .why-us-item:nth-child(odd) { padding-right: 36px; }
+  .why-us-item:nth-child(even) { padding-left: 36px; }
+  .why-us-item:nth-child(even)::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 28px; bottom: 28px;
+    width: 1px;
+    background: var(--line);
+  }
+  .why-us-item:nth-last-child(-n+2) { border-bottom: none; padding-bottom: 0; }
+  .why-us-num {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+  .why-us-h {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .why-us-h em { font-style: italic; color: var(--accent); }
+  .why-us-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* ---------- SLIDE 9: TESTIMONIAL ---------- */
+  .testimonial { background: var(--paper-warm); }
+  .testimonial-inner {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 56px;
+    align-items: center;
+    height: 100%;
+    padding: 88px 0 64px;
+  }
+  .testimonial-quote {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 300;
+    line-height: 1.25;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .testimonial-quote::before {
+    content: '“';
+    position: absolute;
+    left: -22px;
+    top: -16px;
+    font-size: 72px;
+    color: var(--accent);
+    font-weight: 300;
+  }
+  .testimonial-quote em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .testimonial-attribution {
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .testimonial-name {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .testimonial-role {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .testimonial-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .testimonial-stat {
+    background: var(--paper);
+    padding: 22px 24px;
+    border-top: 2px solid var(--accent);
+  }
+  .testimonial-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .testimonial-stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .testimonial-stat-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* ---------- SLIDE 10: FROM JOSH ---------- */
+  .josh-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 56px;
+    flex: 1;
+    align-items: stretch;
+  }
+  .josh-photo {
+    background-image: url('./assets/josh.jpg');
+    background-size: cover;
+    background-position: center 25%;
+    background-color: var(--paper-warm);
+    min-height: 480px;
+  }
+  .josh-text {
+    display: flex;
+    flex-direction: column;
+  }
+  .josh-text .slide-header { margin-bottom: 16px; }
+  .josh-note {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 920px;
+  }
+  .josh-note p {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .josh-note p em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .josh-sign {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .josh-sign-name {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .josh-sign-role {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- SLIDE 11: COMMON QUESTIONS ---------- */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 44px;
+    margin-top: 14px;
+    flex: 1;
+    border-top: 1px solid var(--line);
+  }
+  .faq-item {
+    padding: 11px 0 11px;
+    border-bottom: 1px solid var(--line);
+  }
+  .faq-q {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 5px;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+  }
+  .faq-a {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+
+  /* ---------- SLIDE 12: NEXT STEPS ---------- */
+  .nextsteps { background: var(--ink); color: white; position: relative; overflow: hidden; }
+  .closing-photo {
+    position: absolute;
+    inset: 0;
+    background-image: url('./assets/closing.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.35;
+    z-index: 0;
+  }
+  .closing-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(11,23,36,0.45), rgba(11,23,36,0.25) 50%, rgba(11,23,36,0.65));
+  }
+  .nextsteps .slide-inner { color: white; position: relative; z-index: 1; }
+  .nextsteps .eyebrow { color: #D6BC8A; }
+  .nextsteps .eyebrow::before { background: #D6BC8A; }
+  .nextsteps h2 { color: white; }
+  .nextsteps h2 em { color: #D6BC8A; }
+  .nextsteps .lede { color: rgba(255,255,255,0.78); }
+  .nextsteps .slide-footer { border-top-color: rgba(255,255,255,0.18); }
+  .nextsteps .slide-footer .brand { color: rgba(255,255,255,0.85); }
+  .nextsteps .slide-footer .disclaim, .nextsteps .slide-footer .pagenum { color: rgba(255,255,255,0.55); }
+
+  .ns-flow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .ns-flow-two { grid-template-columns: 1.1fr 1fr; gap: 22px; }
+  .ns-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .ns-step-link {
+    background: rgba(214,188,138,0.12);
+    border: 1.5px solid #D6BC8A;
+    position: relative;
+    cursor: pointer;
+  }
+  .ns-step-link::before {
+    content: 'CLICK TO BOOK';
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: #D6BC8A;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    font-weight: 700;
+    padding: 4px 10px;
+    line-height: 1;
+  }
+  .ns-step-link:hover { background: rgba(214,188,138,0.22); transform: translateY(-2px); }
+  .ns-step-link .ns-step-arrow { color: #D6BC8A; font-weight: 400; margin-left: 4px; font-size: 1.1em; }
+  .ns-step-cta {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #D6BC8A;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border: 1px solid #D6BC8A;
+  }
+  .ns-step-url {
+    margin-top: 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    font-weight: 300;
+  }
+  .ns-step-url em { font-style: italic; color: #D6BC8A; }
+  .ns-cta-signoff-name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: white;
+    font-weight: 400;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .nextsteps .ns-cta { margin-bottom: 32px; }
+  .nextsteps .slide-footer { padding-top: 22px; }
+  .ns-step-num {
+    font-family: 'Fraunces', serif;
+    font-size: 12px;
+    color: #D6BC8A;
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+  .ns-step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .ns-step-desc {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.55;
+  }
+  .ns-cta {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .ns-cta-block { }
+  .ns-cta-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #D6BC8A;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .ns-cta-link {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    color: white;
+    font-weight: 300;
+    text-decoration: none;
+    line-height: 1.3;
+    display: block;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+  }
+  .ns-cta-link em { font-style: italic; color: #D6BC8A; }
+  .ns-cta-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.02em;
+  }
+  .ns-signoff {
+    margin-top: 14px;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.02em;
+    font-weight: 300;
+  }
+  .ns-signoff strong { font-weight: 500; color: white; }
+
+  /* ---------- PRINT ---------- */
+  @page { size: 1280px 720px landscape; margin: 0; }
+
+  /* Force color/background preservation across browsers — critical for PDF export.
+     Without this, Chrome/Safari strip dark backgrounds and images on print, making
+     the cover, thesis, CTA, and tan callout boxes appear white. */
+  html, body, .slide, .slide *,
+  .cover, .cover-photo, .thesis, .nextsteps,
+  .closing-photo, .cat-hero, .econ-metric.highlight,
+  .lev-foot, .lg-explain, .why-callout, .pf-foot,
+  .econ-sizing-note, .cf-table tr.headline td, .cf-table tr.subtotal td {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  @media print {
+    html, body { background: white; }
+    .deck { padding: 0; gap: 0; display: block; }
+    .slide {
+      width: 1280px;
+      height: 720px;
+      margin: 0;
+      box-shadow: none;
+      page-break-after: always;
+      page-break-inside: avoid;
+      break-after: page;
+      break-inside: avoid;
+    }
+    .slide:last-child { page-break-after: avoid; break-after: auto; }
+    .print-btn { display: none !important; }
+    .nav-hint { display: none !important; }
+  }
+
+  /* ---------- ON-SCREEN NAV HINT ---------- */
+  .nav-hint {
+    position: fixed;
+    bottom: 16px;
+    right: 24px;
+    z-index: 99;
+    background: rgba(11,23,36,0.85);
+    color: white;
+    padding: 8px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .nav-hint.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">Download PDF ↓</button>
+<div class="nav-hint" id="navHint">↑ ↓ to navigate</div>
+
+<div class="deck">
+
+  <!-- ============ SLIDE 1: COVER ============ -->
+  <section class="slide cover" data-slide="1">
+    <div class="cover-photo"></div>
+    <div class="cover-inner">
+      <div class="cover-top">
+        <div class="cover-brand">OWNAFLEET</div>
+        <div class="cover-meta">Managed equipment ownership · 2026</div>
+      </div>
+      <div class="cover-main">
+        <div class="cover-eyebrow">Equipment ownership, simplified</div>
+        <h1>Heavy equipment<br>that <em>pays you.</em></h1>
+        <p class="cover-hook">Up to 8x more year-one depreciation than oil &amp; gas, per dollar invested.</p>
+        <p class="cover-sub">A turnkey solution for high-income earners and windfall recipients to own a real, cash-flowing fleet — fully managed by a major publicly-traded U.S. rental operator.</p>
+      </div>
+      <div class="cover-bottom">
+        <div class="presented">Presented by <em>Cochran Capital</em></div>
+        <div>01 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4: WHO THIS IS FOR ============ -->
+  <section class="slide" data-slide="2">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Who This Is For</div>
+        <h2>Two kinds of buyers, <em>one program.</em></h2>
+        <p class="lede">Most participants come through one of two doors — diversifying a windfall into a tax-advantaged real asset, or offsetting a strong income year. The program is structured for both.</p>
+      </div>
+
+      <div class="who-grid">
+        <div class="who-col">
+          <div class="who-h">Diversifying a <em>windfall.</em></div>
+          <div class="who-sub">Capital gain · business sale · inheritance · strong investment year</div>
+          <div class="who-body">
+            <p>You've had a liquidity event and you're looking for something real — a fleet that pays you, isn't correlated to public markets, and doesn't require you to run a business to own it.</p>
+            <p>The full equipment purchase also typically qualifies for <strong>100% year-one bonus depreciation</strong> — so your windfall deploys into a real asset <em>and</em> reduces same-year taxable income in one move.</p>
+          </div>
+        </div>
+
+        <div class="who-col">
+          <div class="who-h">Offsetting a <em>high-income year.</em></div>
+          <div class="who-sub">Active business income · W-2 windfall · K-1 from a strong year</div>
+          <div class="who-body">
+            <p>You have material active income this year — from a business, equity comp, or a particularly strong K-1 — and you're looking for an asset that legitimately reduces taxable income through 100% year-one bonus depreciation.</p>
+            <p>The equipment qualifies. Whether you qualify depends on at-risk basis, material participation, and your specific situation. Your CPA needs to validate the fit.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">02 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: THE OPPORTUNITY ============ -->
+  <section class="slide" data-slide="3">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">The Opportunity</div>
+        <h2>Three returns from <em>one fleet.</em></h2>
+        <p class="lede">A fleet across <em>earthmoving</em>, <em>aerial</em>, and <em>material handling</em> generates monthly rental income, typically qualifies for 100% year-one bonus depreciation, and holds residual value as hard collateral. Our managed ownership program lets you participate without operating a rental business yourself.</p>
+      </div>
+
+      <div class="pillars-grid">
+        <div class="pillar">
+          <div class="pillar-num">01</div>
+          <div class="pillar-title">Monthly rental income</div>
+          <div class="pillar-desc">Equipment generates revenue from day one. After debt service, monthly distributions to your LLC typically run <em>6–8% on your initial cash outlay</em> each year — modest by design, since rental income paying down the loan builds your equity in the equipment.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">02</div>
+          <div class="pillar-title">100% year-one bonus depreciation</div>
+          <div class="pillar-desc">The full equipment purchase <em>typically qualifies</em> for 100% bonus depreciation in year one under current federal tax law — applied directly against your active income. For most participants, this is the largest single piece of total economics. Your CPA confirms fit for your specific situation.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">03</div>
+          <div class="pillar-title">Real, mobile collateral</div>
+          <div class="pillar-desc">Durable, dollar-priced industrial assets serving national infrastructure spend. A limited-loss guarantee from the operator provides a floor on residual risk at exit.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">03 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5: EXAMPLE ECONOMICS ============ -->
+  <section class="slide" data-slide="4">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Example Economics</div>
+        <h2>What a $1M deal <em>looks like.</em></h2>
+        <p class="lede">Representative figures using the program's published pro forma assumptions. Your specific deal will vary — minimums, pricing, and fit are flexible through our partner relationships.</p>
+      </div>
+
+      <div class="economics">
+        <div class="econ-left">
+          <div class="econ-amount-label">Equipment Purchase</div>
+          <div class="econ-amount">$1,000,000</div>
+          <div class="econ-amount-sub">Representative example · pre-tax figures</div>
+          <div class="econ-sizing-note">Average fleet purchase: <strong>$1.2M</strong> &middot; Typical minimum: <strong>$500K</strong><br><span class="econ-sizing-fine">Smaller deals may be possible earlier in the year. Q4 peak demand may push the minimum to $1M — or fleet may be unavailable entirely.</span></div>
+
+          <div class="econ-assumptions">
+            <h4>Assumptions</h4>
+            <ul>
+              <li><span>Down payment</span><span>10%</span></li>
+              <li><span>Platform fee</span><span>3%</span></li>
+              <li><span>Financed</span><span>90%</span></li>
+              <li><span>Term</span><span>6 years</span></li>
+              <li><span>Combined marginal rate</span><span>40%</span></li>
+              <li><span>Bonus depreciation</span><span>100%</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="econ-right">
+          <div class="econ-metric">
+            <div class="econ-metric-label">Initial Cash Outlay</div>
+            <div class="econ-metric-value">$130,000</div>
+            <div class="econ-metric-sub">10% down + 3% platform fee</div>
+          </div>
+          <div class="econ-metric">
+            <div class="econ-metric-label">Annual Cash Flow · Yr 1–5</div>
+            <div class="econ-metric-value">~$9,100</div>
+            <div class="econ-metric-sub">After debt service — loan paydown dominates years 1–5</div>
+          </div>
+          <div class="econ-metric">
+            <div class="econ-metric-label">Year 6 Exit</div>
+            <div class="econ-metric-value">~$109,000</div>
+            <div class="econ-metric-sub">Final cash flow + recovery at fair market sale, after loan payoff</div>
+          </div>
+          <div class="econ-metric">
+            <div class="econ-metric-label">Total Cash · 6-Year</div>
+            <div class="econ-metric-value">~$155,000</div>
+            <div class="econ-metric-sub">Pre-tax cash-on-cash returned</div>
+          </div>
+          <div class="econ-metric highlight">
+            <div class="econ-metric-label accent">Est. Year-1 Tax Impact</div>
+            <div class="econ-metric-value">~$400,000</div>
+            <div class="econ-metric-sub">100% bonus depreciation × 40% combined marginal rate (37% top federal + ~3% representative state) · CPA-verified for your situation</div>
+          </div>
+          <div class="econ-metric highlight">
+            <div class="econ-metric-label accent">Total Economics</div>
+            <div class="econ-metric-value">~$555,000</div>
+            <div class="econ-metric-sub">Cash returned + estimated year-1 tax impact</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Projections only, not guaranteed. Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">04 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5 (NEW): LEVERAGE PLAY ============ -->
+  <section class="slide" data-slide="5">
+    <div class="slide-inner">
+      <div class="slide-header" style="margin-bottom: 14px;">
+        <div class="eyebrow">The Leverage Play</div>
+        <h2>What the tax savings <em>unlock.</em></h2>
+        <p class="lede">The year-one tax benefit doesn't sit idle. Redeploy it annually into tax-advantaged real estate or asset-backed yield strategies, and the equipment program becomes a multi-year tax engine for your broader portfolio. Clients working through Cochran Capital can integrate this directly with our real estate platform. An illustrative scenario on $1M of equipment, repeated each year of a 6-year contract:</p>
+      </div>
+
+      <div class="lev-grid">
+        <div class="lev-step">
+          <div class="lev-num">01</div>
+          <div class="lev-h">Year-one <em>net free capital.</em></div>
+          <div class="lev-stat">~$270K</div>
+          <div class="lev-stat-sub">per $1M deal</div>
+          <div class="lev-desc">$400K year-one tax benefit minus $130K cash outlay leaves ~$270K of net new capital — capital you wouldn't otherwise have, available the same tax year you deploy.</div>
+        </div>
+
+        <div class="lev-step">
+          <div class="lev-num">02</div>
+          <div class="lev-h">Run it <em>every year.</em></div>
+          <div class="lev-stat">6 years</div>
+          <div class="lev-stat-sub">contract horizon</div>
+          <div class="lev-desc">Each year's equipment deal generates a fresh ~$270K of net new capital. Over the 6-year contract horizon, ~$1.6M flows into your broader portfolio — separate from the equipment program's own cash flow.</div>
+        </div>
+
+        <div class="lev-step">
+          <div class="lev-num">03</div>
+          <div class="lev-h">Compounded <em>at 16%.</em></div>
+          <div class="lev-stat">~$2.4M</div>
+          <div class="lev-stat-sub">6-year value</div>
+          <div class="lev-desc">$270K invested annually at an illustrative 16% blended return — a historical range for tax-advantaged real estate strategies — compounds to ~$2.4M by year 6, separate from anything the equipment itself generates.</div>
+        </div>
+      </div>
+
+      <div class="lev-foot"><strong>Illustrative scenario only.</strong> The 16% figure is a historical range for tax-advantaged real estate strategies — not a projection or guarantee. Real estate carries different risks than equipment ownership. Cochran Capital can scope redeployment paths, or work with your own advisors. Consult your CPA.</div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Illustrative scenario. Returns not guaranteed. Not tax advice.</div>
+        <div class="pagenum">05 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 10 (NEW): YEAR-BY-YEAR CASH FLOW ============ -->
+  <section class="slide" data-slide="6">
+    <div class="slide-inner">
+      <div class="slide-header" style="margin-bottom: 14px;">
+        <div class="eyebrow">Year-by-Year</div>
+        <h2>Where the cash <em>actually flows.</em></h2>
+        <p class="lede">The same $1M example, broken down by year. This is the working math behind the $9,118 in years 1–5 and the $109,118 in year 6 — same assumptions as the previous slide.</p>
+      </div>
+
+      <div class="cf-wrap">
+        <table class="cf-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Y0</th>
+              <th>Y1</th>
+              <th>Y2</th>
+              <th>Y3</th>
+              <th>Y4</th>
+              <th>Y5</th>
+              <th>Y6</th>
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Initial outlay</td>
+              <td class="neg">−$130,000</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="total neg">−$130,000</td>
+            </tr>
+            <tr>
+              <td>Operating revenue</td>
+              <td class="muted">—</td>
+              <td>$162,500</td>
+              <td>$162,500</td>
+              <td>$162,500</td>
+              <td>$162,500</td>
+              <td>$162,500</td>
+              <td>$162,500</td>
+              <td class="total">$975,000</td>
+            </tr>
+            <tr>
+              <td>Operating expenses</td>
+              <td class="muted">—</td>
+              <td class="neg">−$29,400</td>
+              <td class="neg">−$29,400</td>
+              <td class="neg">−$29,400</td>
+              <td class="neg">−$29,400</td>
+              <td class="neg">−$29,400</td>
+              <td class="neg">−$29,400</td>
+              <td class="total neg">−$176,400</td>
+            </tr>
+            <tr class="subtotal">
+              <td>Net operating CF</td>
+              <td class="muted">—</td>
+              <td>$133,100</td>
+              <td>$133,100</td>
+              <td>$133,100</td>
+              <td>$133,100</td>
+              <td>$133,100</td>
+              <td>$133,100</td>
+              <td class="total">$798,600</td>
+            </tr>
+            <tr>
+              <td>Debt service (P&amp;I)</td>
+              <td class="muted">—</td>
+              <td class="neg">−$123,982</td>
+              <td class="neg">−$123,982</td>
+              <td class="neg">−$123,982</td>
+              <td class="neg">−$123,982</td>
+              <td class="neg">−$123,982</td>
+              <td class="neg">−$123,982</td>
+              <td class="total neg">−$743,892</td>
+            </tr>
+            <tr>
+              <td>Balloon + sale, net</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="pos">+$100,000</td>
+              <td class="total pos">+$100,000</td>
+            </tr>
+            <tr class="headline">
+              <td>Participant cash</td>
+              <td class="neg">−$130,000</td>
+              <td class="pos">$9,118</td>
+              <td class="pos">$9,118</td>
+              <td class="pos">$9,118</td>
+              <td class="pos">$9,118</td>
+              <td class="pos">$9,118</td>
+              <td class="pos">$109,118</td>
+              <td class="total pos">$24,708</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="cf-foot"><strong>Reading the table.</strong> Operating revenue is your equipment's share of rental income. Expenses cover the 2.74% annual program fee plus maintenance and insurance. Debt service is P&amp;I on the 90% loan. Year-6 "balloon + sale, net" is the equipment disposition (+$543,932) less the loan balloon (−$443,932). Total cash returned is modest by design — the headline economics come from the year-one tax overlay on slide 6, which is not modeled here.</div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Projections only, not guaranteed. Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">06 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 9 (NEW): PRO FORMA ASSUMPTIONS ============ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Economics — Assumptions</div>
+        <h2>The numbers behind <em>the numbers.</em></h2>
+        <p class="lede">The full pro forma the operator uses to size each deal. Cash flow projections in slide 6 are built directly on these assumptions — your specific deal will use the current rates at signing.</p>
+      </div>
+
+      <div class="pf-grid">
+        <div class="pf-col">
+          <div class="pf-col-h">Program <em>assumptions</em></div>
+          <ul class="pf-list">
+            <li><span>Avg revenue share to monthly target</span><b>80%</b></li>
+            <li><span>Agreement term</span><b>72 months</b></li>
+            <li><span>Extension option at term</span><b>Yes</b></li>
+            <li><span>Baseline example</span><b>$1M equipment</b></li>
+            <li><span>Utilization basis</span><b>3-yr avg</b></li>
+            <li><span>Start date</span><b>Full 12 mo</b></li>
+          </ul>
+        </div>
+
+        <div class="pf-col">
+          <div class="pf-col-h">Financing <em>assumptions</em></div>
+          <ul class="pf-list">
+            <li><span>Loan-to-cost</span><b>90% + 1.25% fee</b></li>
+            <li><span>Down payment</span><b>10%</b></li>
+            <li><span>Term</span><b>72 months</b></li>
+            <li><span>Amortization</span><b>120 months</b></li>
+            <li><span>Interest rate</span><b>6.75%</b></li>
+            <li><span>Year-6 sale basis</span><b>NOLV*</b></li>
+          </ul>
+          <div class="pf-foot"><strong>*NOLV — Net Orderly Liquidation Value.</strong> The fair sale price expected in normal markets over a reasonable selling period. Typically below retail fair-market value; this is the operator's standard year-6 buy-back basis.</div>
+        </div>
+
+        <div class="pf-col">
+          <div class="pf-col-h">Tax <em>assumptions</em></div>
+          <ul class="pf-list">
+            <li><span>In the cash projection</span><b>None</b></li>
+            <li><span>Bonus depreciation</span><b>100% (yr 1)</b></li>
+            <li><span>Tax overlay</span><b>Your CPA</b></li>
+          </ul>
+          <div class="pf-foot">Cash and tax economics are modeled separately so you can see each piece on its own. The tax overlay is the largest piece of total economics for most participants — your CPA scopes it against your specific situation.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">07 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8 (NEW): REVENUE SHARING + FEES ============ -->
+  <section class="slide" data-slide="8">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Economics — Revenue</div>
+        <h2>What the operator pays you — <em>and charges.</em></h2>
+        <p class="lede">The two recurring numbers behind the cash-flow line: how rental revenue is split with you each month, and what the asset manager bills you each year to keep the equipment running.</p>
+      </div>
+
+      <div class="rev-grid">
+        <div class="rev-stat">
+          <div class="rev-stat-label">Owner's revenue share</div>
+          <div class="rev-stat-number">75–85%</div>
+          <div class="rev-stat-h">Adjusted <em>quarterly</em> for seasonality.</div>
+          <div class="rev-stat-desc">Rates are higher in peak rental quarters (~85% in Q1 and Q4) and lower in softer quarters (~75% in Q2 and Q3), each up to a quarterly cap. The blended annual average lands near 80%.</div>
+        </div>
+        <div class="rev-stat">
+          <div class="rev-stat-label">Annual program fee</div>
+          <div class="rev-stat-number">2.74%</div>
+          <div class="rev-stat-h">The fee participants <em>gladly pay.</em></div>
+          <div class="rev-stat-desc">For one annual line item — 2.74% of purchase price — every operational headache is handled. Maintenance, repairs, insurance coordination, telematics, and the asset-management platform — all run by the partner team. Flat, predictable, and <em>entirely off your plate.</em></div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Figures per the operator's Q2 2026 program overview.</div>
+        <div class="pagenum">08 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 11 (NEW): LIMITED-LOSS GUARANTEE ============ -->
+  <section class="slide" data-slide="9">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Downside Protection</div>
+        <h2>When the floor <em>catches you.</em></h2>
+        <p class="lede">The single most common pre-call question: <em>what if my equipment is worth less than expected at exit?</em> Here's how the operator's limited-loss guarantee works in dollars, across three exit scenarios on a $1M deal.</p>
+      </div>
+
+      <div class="lg-wrap">
+        <table class="lg-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th class="num">Purchase</th>
+              <th class="num">Floor (54%)</th>
+              <th class="num">Sale price</th>
+              <th class="num">Shortfall</th>
+              <th class="num">Operator pays</th>
+              <th class="num">Owner net loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Projected exit</td>
+              <td class="num">$1,000,000</td>
+              <td class="num">$540,000</td>
+              <td class="num">$552,000</td>
+              <td class="num">$0</td>
+              <td class="num">$0</td>
+              <td class="num pos">$0</td>
+            </tr>
+            <tr>
+              <td>Soft market</td>
+              <td class="num">$1,000,000</td>
+              <td class="num">$540,000</td>
+              <td class="num">$480,000</td>
+              <td class="num">$60,000</td>
+              <td class="num">$60,000</td>
+              <td class="num pos">$0</td>
+            </tr>
+            <tr>
+              <td>Severe downturn</td>
+              <td class="num">$1,000,000</td>
+              <td class="num">$540,000</td>
+              <td class="num">$400,000</td>
+              <td class="num">$140,000</td>
+              <td class="num">$99,999</td>
+              <td class="num bad">$40,010</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="lg-explain"><strong>How the guarantee works.</strong> The operator makes an offer 180+ days before contract end — typically at NOLV (Net Orderly Liquidation Value). You can accept, or remarket to a third party. If the realized sale price falls below the agreed floor (~54% of original), the operator pays the lesser of the shortfall or <strong>9.99% of original purchase price</strong>. In a severe-downturn scenario, you may also elect to keep the equipment in the program for up to one additional year under existing terms.</div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Illustrative scenarios. Floor percentage set in your remarketing agreement.</div>
+        <div class="pagenum">09 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 12 (NEW): THESIS / TRANSITION ============ -->
+  <section class="slide thesis" data-slide="10">
+    <div class="slide-inner">
+      <div class="thesis-wrap">
+        <div class="thesis-eyebrow">The thesis</div>
+        <h2 class="thesis-h">You own it.<br><em>They run it.</em></h2>
+        <p class="thesis-body">Real, cash-flowing equipment in your name. Every operational hour handled by a major publicly-traded U.S. rental operator. The whole program is built on that one asymmetry.</p>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">The thesis in five words.</div>
+        <div class="pagenum">10 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6: WHY THIS WORKS ============ -->
+  <section class="slide" data-slide="11">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Built on real scale</div>
+        <h2>Backed by a publicly-traded <em>rental operator.</em></h2>
+        <p class="lede">Your equipment is owned, titled, and operated alongside the same fleet that powers one of the largest rental networks in the country. The operator's incentives are directly aligned with yours: they earn a share of the rental revenue your assets generate.</p>
+      </div>
+
+      <div class="why-tiles">
+        <div class="why-tile">
+          <div class="why-tile-label">Operator</div>
+          <div class="why-tile-title">Publicly-traded</div>
+          <div class="why-tile-desc">SEC-audited financials, public filings, and a national footprint. Operator name, ticker, and SEC EDGAR links shared on the intro call so you can verify independently.</div>
+        </div>
+        <div class="why-tile">
+          <div class="why-tile-label">Footprint</div>
+          <div class="why-tile-title">National rental network</div>
+          <div class="why-tile-desc">Branches across the country, equipment redeployed by the operator to chase demand. Participant-owned units are treated identically to the operator's balance-sheet fleet.</div>
+        </div>
+        <div class="why-tile">
+          <div class="why-tile-label">Technology</div>
+          <div class="why-tile-title">Telematics on every asset</div>
+          <div class="why-tile-desc">Real-time location, utilization, and revenue tracking for each piece of equipment you own. You can see what your fleet is doing, when.</div>
+        </div>
+        <div class="why-tile">
+          <div class="why-tile-label">Scale</div>
+          <div class="why-tile-title">$4B+ · 1,000+ participants</div>
+          <div class="why-tile-desc">Over $4B in equipment has been placed through the managed-ownership program, across more than 1,000 active participants. An established, mature channel — not a pilot.</div>
+        </div>
+        <div class="why-tile">
+          <div class="why-tile-label">Diligence</div>
+          <div class="why-tile-title">Independent reports</div>
+          <div class="why-tile-desc">Independent accountant reports specific to the program are available on request. The same documents the operator shares with institutional buyers.</div>
+        </div>
+        <div class="why-tile">
+          <div class="why-tile-label">Protection</div>
+          <div class="why-tile-title">Limited-loss guarantee</div>
+          <div class="why-tile-desc">The operator backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real floor on residual risk.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Operator name and verifying documents shared on the intro call.</div>
+        <div class="pagenum">11 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3 (NEW): EQUIPMENT CATEGORIES ============ -->
+  <section class="slide" data-slide="12">
+    <div class="slide-inner">
+      <div class="slide-header" style="margin-bottom: 0;">
+        <div class="eyebrow">The Fleet</div>
+        <h2 style="margin-bottom: 8px;">Three categories. <em>One platform.</em></h2>
+        <p class="lede" style="font-size: 16px; max-width: 940px;">Participant-owned equipment sits inside the operator's national rental network — same fleet, same software, same demand.</p>
+      </div>
+
+      <div class="cat-hero"></div>
+
+      <div class="cats-grid">
+        <div class="cat-col">
+          <div class="cat-num">01</div>
+          <div class="cat-title">Earthmoving</div>
+          <div class="cat-tagline">Site prep · Infrastructure</div>
+          <ul class="cat-items">
+            <li>Dozers</li>
+            <li>Excavators</li>
+            <li>Skid steers</li>
+          </ul>
+          <div class="cat-desc">The largest category by dollar volume. Steady demand from highway, utility, and commercial construction.</div>
+        </div>
+
+        <div class="cat-col">
+          <div class="cat-num">02</div>
+          <div class="cat-title">Aerial</div>
+          <div class="cat-tagline">Vertical access · Maintenance</div>
+          <ul class="cat-items">
+            <li>Scissor lifts</li>
+            <li>Telescopic booms</li>
+            <li>Articulating booms</li>
+          </ul>
+          <div class="cat-desc">High utilization across data centers, warehouses, and commercial maintenance — work that doesn't stop with the construction cycle.</div>
+        </div>
+
+        <div class="cat-col">
+          <div class="cat-num">03</div>
+          <div class="cat-title">Material Handling</div>
+          <div class="cat-tagline">Logistics · Yard operations</div>
+          <ul class="cat-items">
+            <li>Forklifts</li>
+            <li>Telehandlers</li>
+          </ul>
+          <div class="cat-desc">Workhorses of the rental yard — short rental cycles, broad customer base, indispensable to construction sites and distribution.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Categories per the operator's program overview.</div>
+        <div class="pagenum">12 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4: HOW IT WORKS ============ -->
+  <section class="slide" data-slide="13">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">How It Works</div>
+        <h2>Five steps. <em>One signature.</em></h2>
+        <p class="lede">From signed agreement to first rental check, the process is designed to be turnkey. The partner team handles operational complexity. You make the capital decision and collect.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-title">You buy</div>
+          <div class="step-desc">Through your LLC. The partner team arranges the equipment purchase and 90% lender financing. Typical first deal: $500K–$1M.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-title">We manage</div>
+          <div class="step-desc">Fleet enrollment, insurance, maintenance, and telematics — all coordinated by the partner team.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-title">It rents</div>
+          <div class="step-desc">Your equipment joins the operator's national rental network. Branch operators are agnostic to who owns each unit.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-title">You get paid</div>
+          <div class="step-desc">Monthly net revenue distributions to your LLC. Telematics software shows location, utilization, and revenue per asset.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">05</div>
+          <div class="step-title">Exit at year 6</div>
+          <div class="step-desc">The operating partner offers fair market value, or you remarket. A limited-loss guarantee provides a downside floor.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">13 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 11 (NEW): DEAL STRUCTURE ============ -->
+  <section class="slide" data-slide="14">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Deal Structure</div>
+        <h2>What you sign. <em>What gets put in place.</em></h2>
+        <p class="lede">Three counterparties, three agreements, one outcome — you own specific equipment and receive monthly net revenue distributions to your LLC's operating account.</p>
+      </div>
+
+      <div class="ds-grid">
+        <div class="ds-col">
+          <div class="ds-num">01</div>
+          <div class="ds-h">Participant <em>entity.</em></div>
+          <ul class="ds-list">
+            <li>Typically a <strong>single-member LLC</strong> you own</li>
+            <li>Holds <strong>sole title</strong> to specific equipment</li>
+            <li>Receives <strong>monthly net revenue share</strong> to operating account</li>
+            <li>~100 hrs/yr active participation for material participation tax treatment</li>
+          </ul>
+        </div>
+
+        <div class="ds-col">
+          <div class="ds-num">02</div>
+          <div class="ds-h">Agreements <em>in place.</em></div>
+          <ul class="ds-list">
+            <li><strong>Asset Management Agreement</strong> with the asset manager</li>
+            <li><strong>Remarketing Agreement</strong> with the operator to support year-6 exit</li>
+            <li><strong>Limited-Loss Guaranty</strong> up to 9.99% of purchase price</li>
+            <li>Telematics on every asset; insurance, repairs, and maintenance coordinated by the asset manager</li>
+          </ul>
+        </div>
+
+        <div class="ds-col">
+          <div class="ds-num">03</div>
+          <div class="ds-h">Financing <em>terms.</em></div>
+          <ul class="ds-list">
+            <li><strong>90% financed</strong> through the lending partner</li>
+            <li><strong>10% down</strong> at signing + 3% platform fee</li>
+            <li>Fixed rate up to <strong>7.25%</strong>, 72-mo balloon / 120-mo amort</li>
+            <li><strong>Unlimited personal guarantee</strong> from LLC owners (standard for commercial equipment financing)</li>
+            <li>Operating account typically held at the lending bank</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Structure simplified for illustration. Final terms in signed documents.</div>
+        <div class="pagenum">14 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 13: WHAT YOU DON'T DO ============ -->
+  <section class="slide" data-slide="15">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Turnkey</div>
+        <h2>What you <em>don't</em> do.</h2>
+        <p class="lede">This is not a rental business. You are not the operator. The whole point of the program is that the operational layer — the hard part — is owned by someone with national infrastructure to run it.</p>
+      </div>
+
+      <div class="dont-grid">
+        <div class="dont-item">
+          <div class="dont-mark">— 01</div>
+          <div class="dont-h">No <em>operations.</em></div>
+          <div class="dont-desc">No rental-yard staff, no dispatching, no customer service. The operator handles everything from quoting to invoicing.</div>
+        </div>
+        <div class="dont-item">
+          <div class="dont-mark">— 02</div>
+          <div class="dont-h">No <em>customers.</em></div>
+          <div class="dont-desc">You don't talk to renters. You don't chase payments. The operator's branch network owns the customer relationship.</div>
+        </div>
+        <div class="dont-item">
+          <div class="dont-mark">— 03</div>
+          <div class="dont-h">No <em>maintenance.</em></div>
+          <div class="dont-desc">Scheduled maintenance, repairs, parts, technicians — all handled by the operator's existing service infrastructure.</div>
+        </div>
+        <div class="dont-item">
+          <div class="dont-mark">— 04</div>
+          <div class="dont-h">No <em>insurance hassle.</em></div>
+          <div class="dont-desc">Coverage is arranged and maintained through the partner team. Standard commercial policies for your asset class.</div>
+        </div>
+        <div class="dont-item">
+          <div class="dont-mark">— 05</div>
+          <div class="dont-h">No <em>logistics.</em></div>
+          <div class="dont-desc">Transport between job sites, redeployment across regions, end-of-term remarketing — the operator moves the equipment.</div>
+        </div>
+        <div class="dont-item">
+          <div class="dont-mark">— 06</div>
+          <div class="dont-h">No <em>exit work.</em></div>
+          <div class="dont-desc">At year 6, the operator offers fair market value. You sign the sale. No remarketing legwork required if you don't want it.</div>
+        </div>
+      </div>
+
+      <div class="dont-tagline">One signature. <em>You collect.</em></div>
+      <div class="dont-note">One thing you <em>do</em> — typically ~100 hours per year of involvement to qualify for material participation tax treatment. Your CPA scopes the exact requirements.</div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">15 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8: WHY THROUGH OWNAFLEET ============ -->
+  <section class="slide" data-slide="16">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Through Cochran Capital</div>
+        <h2>Same program. Same economics. <em>Better access.</em></h2>
+        <p class="lede">Our referral fee is paid by the operating partner — not added to your deal. You pay the same as going direct, and get an advocate inside the door who already knows the program from the participant's side.</p>
+      </div>
+
+      <div class="why-us-grid">
+        <div class="why-us-item">
+          <div class="why-us-num">01</div>
+          <div class="why-us-h">Flexibility on <em>minimums.</em></div>
+          <div class="why-us-desc">$500K is a typical starting fleet, and smaller deals are possible depending on timing. We work the flexibility based on your situation.</div>
+        </div>
+        <div class="why-us-item">
+          <div class="why-us-num">02</div>
+          <div class="why-us-h">Single point of <em>contact.</em></div>
+          <div class="why-us-desc">One relationship through closing — from first conversation to wire instructions to first rental check. No bouncing between operator, lender, and fleet manager.</div>
+        </div>
+        <div class="why-us-item">
+          <div class="why-us-num">03</div>
+          <div class="why-us-h">Aligned <em>incentives.</em></div>
+          <div class="why-us-desc">Josh is a participant in the program himself. We earn a referral fee that does not affect your terms — meaning we want the program to perform for you as much as you do.</div>
+        </div>
+        <div class="why-us-item">
+          <div class="why-us-num">04</div>
+          <div class="why-us-h">Integrated <em>platform.</em></div>
+          <div class="why-us-desc">Equipment ownership fits inside Cochran Capital's broader tax-advantaged platform — opportunity-zone real estate, asset-backed yield, and infrastructure. Use the tax savings here to fund the next allocation.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Referral compensation does not affect participant terms.</div>
+        <div class="pagenum">16 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 9: TESTIMONIAL ============ -->
+  <section class="slide testimonial" data-slide="17">
+    <div class="slide-inner" style="padding-top: 64px;">
+      <div class="eyebrow">Participant Story</div>
+
+      <div class="testimonial-inner">
+        <div>
+          <div class="testimonial-quote">The numbers were straightforward, the process was clean, and the year-one tax impact <em>made a real difference</em> for us — the kind of outcome you actually feel.</div>
+          <div class="testimonial-attribution">
+            <div class="testimonial-name">Dr. Jeremiah Sturgill</div>
+            <div class="testimonial-role">Orthodontist · Tennessee · Program Participant</div>
+          </div>
+        </div>
+
+        <div class="testimonial-stats">
+          <div class="testimonial-stat">
+            <div class="testimonial-stat-label">Estimated Year-1 Tax Impact</div>
+            <div class="testimonial-stat-value">~$350K</div>
+            <div class="testimonial-stat-sub">On a single equipment purchase, before any of the standard cash returns from the asset itself.</div>
+          </div>
+          <div class="testimonial-stat">
+            <div class="testimonial-stat-label">Why It Worked</div>
+            <div class="testimonial-stat-value" style="font-size: 22px;">100% bonus depreciation</div>
+            <div class="testimonial-stat-sub">Year-one deduction against active income, fully scoped and verified by his CPA before signing.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Individual outcomes vary. Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">17 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 17: FROM JOSH ============ -->
+  <section class="slide" data-slide="18">
+    <div class="slide-inner">
+      <div class="josh-grid">
+        <div class="josh-photo"></div>
+        <div class="josh-text">
+          <div class="slide-header">
+            <div class="eyebrow">From Josh</div>
+            <h2>Why we built <em>this.</em></h2>
+          </div>
+
+          <div class="josh-note">
+            <p>I've been investing in real estate and asset-backed yield through <em>Cochran Capital</em> for years. When I found this program, I made the equipment purchase myself — the math worked, the operator was credible, and the structure was cleaner than anything else I'd seen in the asset-backed space.</p>
+            <p>I built OwnaFleet to give individual buyers access to a program that's structured around institutional-size participants. The minimums and the process are designed around larger buyers — most individuals never get a clean door in. Through our partner relationships, we open that door, advocate for you through closing, and integrate the outcome with the rest of what we do at <em>Cochran Capital.</em></p>
+            <p>The intro call is the next step. There's no script — bring your questions, your tax situation, and what you're trying to accomplish. We'll figure out together whether this fits.</p>
+
+            <div class="josh-sign">
+              <div class="josh-sign-name">Josh Cochran</div>
+              <div class="josh-sign-role">Founder · Cochran Capital · Dover, DE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Personal note from the founder.</div>
+        <div class="pagenum">18 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 11: COMMON QUESTIONS ============ -->
+  <section class="slide" data-slide="19">
+    <div class="slide-inner">
+      <div class="slide-header" style="margin-bottom: 12px;">
+        <div class="eyebrow">Frequently Asked</div>
+        <h2>Common <em>questions.</em></h2>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-q">Who actually owns the equipment?</div>
+          <div class="faq-a">You do — through your LLC. You hold sole title to specific serial numbers. This is a managed-ownership program, not a fund interest and not a security. The equipment does not appear on the operator's balance sheet.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What if my equipment doesn't get rented enough?</div>
+          <div class="faq-a">Revenue is collected at the pool level and distributed by formula, so an idle unit does not penalize you individually. The operator's national footprint redeploys underutilized equipment to follow demand. The program has historically met its monthly payout target.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Is there built-in equity in the equipment from day one?</div>
+          <div class="faq-a">Yes. The operator purchases at wholesale as one of the country's largest new-equipment buyers; participants typically acquire equipment at 10–12% below fair-market value. That cushion is part of why lenders extend 90% financing, and it's one of three layers protecting residual value at exit — alongside the limited-loss guarantee and the option to extend the term.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Can I actually use the depreciation? What are the gotchas?</div>
+          <div class="faq-a">Three conditions must align: (1) active income to absorb the deduction (W-2, K-1, etc.); (2) material participation — typically 100 hours per year and more time than any other individual (achievable because operator and management time is diluted across thousands of units while yours concentrates on your ~10–12); (3) at-risk basis, which the personally-guaranteed financing typically satisfies. Your CPA scopes these for your situation.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What about the personal guarantee?</div>
+          <div class="faq-a">Required by the lender on the financed portion of the equipment — standard for commercial equipment financing. The guarantee also activates the full depreciation deduction by satisfying the IRS at-risk rules. Lender underwriting requires approximately 3× net worth and 30% liquidity relative to the purchase amount.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What is the rebuy rate at end of term?</div>
+          <div class="faq-a">Approximately 93–94%. Most participants roll into a new tranche or extend the term rather than fully exit, because exiting triggers depreciation recapture (treated as ordinary income). The tax math typically favors continued deferral.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What is the biggest single risk?</div>
+          <div class="faq-a">Counterparty concentration. The program's economics flow through one publicly-traded operating partner. Mitigants include SEC-audited financials, public regulatory filings, the equipment being your titled asset (not the operator's), and the option to remarket through a different channel in an adverse scenario. Worth diligencing with your CPA and counsel.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">How long does the whole process take?</div>
+          <div class="faq-a">Approximately 4–6 weeks from completion of the lender's credit application to presentation of final terms. After signing, the first rental revenue and the first debt service hit your operating account together, typically within an additional 4–6 weeks. Q4 queues run longer; earlier in the year is materially faster.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">19 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 13: NEXT STEPS / CTA ============ -->
+  <section class="slide nextsteps" data-slide="20">
+    <div class="closing-photo"></div>
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Next Steps</div>
+        <h2>Three steps to <em>get started.</em></h2>
+        <p class="lede">No obligation, no hard pitch. The path is designed so you can step in at any point and step out at any point — until you actually sign.</p>
+      </div>
+
+      <div class="ns-flow">
+        <a class="ns-step ns-step-link" href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">
+          <div class="ns-step-num">— 01</div>
+          <div class="ns-step-title">Schedule a 20-minute call</div>
+          <div class="ns-step-desc">Walk through the program in detail with Josh.</div>
+          <div class="ns-step-cta">Book a Call <span class="ns-step-arrow">→</span></div>
+        </a>
+        <div class="ns-step">
+          <div class="ns-step-num">— 02</div>
+          <div class="ns-step-title">Complete the credit application</div>
+          <div class="ns-step-desc">With the lending partner — no commitment, no fees. Confirms your qualification before any documents are drafted.</div>
+        </div>
+        <div class="ns-step">
+          <div class="ns-step-num">— 03</div>
+          <div class="ns-step-title">Receive your deal structure</div>
+          <div class="ns-step-desc">For review before signing. Specific equipment, financing terms, and agreement set — your CPA can weigh in.</div>
+        </div>
+      </div>
+
+      <div class="ns-cta">
+        <div class="ns-cta-block">
+          <div class="ns-cta-label">Questions?</div>
+          <a class="ns-cta-link" href="mailto:josh@ownafleet.com">josh@<em>ownafleet.com</em></a>
+          <div class="ns-cta-sub">Or text/call <strong style="color:white;">(206) 755-6436</strong></div>
+        </div>
+        <div class="ns-cta-block">
+          <div class="ns-cta-label">Sign-off</div>
+          <div class="ns-cta-signoff-name">Josh Cochran</div>
+          <div class="ns-cta-sub">Founder · Cochran Capital · Dover, DE</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">Not tax advice. Consult your CPA.</div>
+        <div class="pagenum">20 / 21</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 19 (NEW): IMPORTANT DISCLOSURES ============ -->
+  <section class="slide" data-slide="21">
+    <div class="slide-inner">
+      <div class="slide-header">
+        <div class="eyebrow">Important Disclosures</div>
+        <h2>Read this. <em>Then call your CPA.</em></h2>
+        <p class="lede">Standard but necessary. The points below are not exhaustive — your full diligence kit before signing should include your CPA, your attorney, and the program's underlying documents.</p>
+      </div>
+
+      <div class="disc-grid">
+        <div>
+          <div class="disc-num">01</div>
+          <div class="disc-h">About this <em>document.</em></div>
+          <div class="disc-body">OwnaFleet is a referral service operated by Cochran Management, LLC, a Wyoming limited liability company. This deck is informational and is not an offer to sell, or a solicitation of an offer to buy, any security or interest. Participation is a direct purchase of specific physical equipment by your LLC — not a fund interest, not a security, and not a pooled vehicle.</div>
+        </div>
+
+        <div>
+          <div class="disc-num">02</div>
+          <div class="disc-h">Not <em>advice.</em></div>
+          <div class="disc-body">Nothing herein constitutes financial, tax, legal, investment, or accounting advice. Projections reflect the program operator's published pro forma assumptions, include forward-looking statements, and are not guaranteed. Actual cash flow varies with utilization, market conditions, equipment performance, and operational factors. Past performance is not indicative of future results. Tax outcomes depend entirely on your individual situation and require independent CPA review.</div>
+        </div>
+
+        <div>
+          <div class="disc-num">03</div>
+          <div class="disc-h">Risks <em>to know.</em></div>
+          <div class="disc-body">Participation involves a personal guarantee on the financed portion of equipment, dependence on a single national operating partner, and limited liquidity through the agreement term. The program is not suitable for all participants. You are strongly encouraged to conduct independent due diligence and consult licensed tax, legal, and financial advisors before signing.</div>
+        </div>
+
+        <div>
+          <div class="disc-num">04</div>
+          <div class="disc-h">Compensation <em>disclosure.</em></div>
+          <div class="disc-body">Cochran Management, LLC receives a referral fee from the program's operating partners for participants who complete the program. This compensation does not affect the terms offered to participants. Operator name, identity of the lending partner, and underlying program documents are shared with qualified prospects during the intro call.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="brand">OWNAFLEET</div>
+        <div class="disclaim">© 2026 Cochran Management, LLC · Jackson, WY · josh@ownafleet.com</div>
+        <div class="pagenum">21 / 21</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // ============ KEYBOARD NAV ============
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function findCurrentSlide() {
+    const mid = window.scrollY + window.innerHeight / 2;
+    for (let i = 0; i < slides.length; i++) {
+      const top = slides[i].offsetTop;
+      const bot = top + slides[i].offsetHeight;
+      if (mid >= top && mid <= bot) return i;
+    }
+    return current;
+  }
+
+  function goTo(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    current = i;
+    slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const c = findCurrentSlide();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      goTo(c + 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      goTo(c - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goTo(slides.length - 1);
+    }
+  });
+
+  // ============ NAV HINT ============
+  const hint = document.getElementById('navHint');
+  setTimeout(() => hint.classList.add('visible'), 800);
+  setTimeout(() => hint.classList.remove('visible'), 5000);
+</script>
+</body>
+</html>

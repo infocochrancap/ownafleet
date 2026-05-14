@@ -11,6 +11,19 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" }
       ]
+    },
+    {
+      "source": "/deck/view",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/deck",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
     }
   ]
 }
