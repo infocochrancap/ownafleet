@@ -384,6 +384,18 @@
           `).join('')
         }
       </div>
+
+      ${isOwner ? `
+      <div class="modal-section" style="border-top: 1px solid var(--line); padding-top: 24px; margin-top: 24px;">
+        <h3 style="color: var(--warn);">Danger zone</h3>
+        <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 14px;">
+          Permanently delete this lead and its status history. Use for fake / duplicate / test records. <strong>Cannot be undone.</strong>
+        </p>
+        <button class="save-btn" id="deleteLeadBtn" style="background: var(--warn); color: white;">
+          Delete lead permanently
+        </button>
+      </div>
+      ` : ''}
     `;
 
     // Auto-calculate commission when equipment value changes
@@ -458,6 +470,36 @@
           document.getElementById('saveNotes').textContent = 'Saved ✓';
           setTimeout(() => { document.getElementById('saveNotes').textContent = 'Save notes'; }, 1500);
         }
+      });
+
+      // Danger-zone: permanently delete this lead
+      document.getElementById('deleteLeadBtn').addEventListener('click', async () => {
+        const fullName = `${lead.first_name} ${lead.last_name}`;
+        const confirmed = confirm(
+          `Permanently delete ${fullName} (${lead.email})?\n\n` +
+          `This deletes the lead AND its status history. It cannot be undone.`
+        );
+        if (!confirmed) return;
+
+        const btn = document.getElementById('deleteLeadBtn');
+        btn.disabled = true;
+        btn.textContent = 'Deleting…';
+
+        const { error } = await supabase.from('leads').delete().eq('id', leadId);
+        if (error) {
+          alert('Delete failed: ' + error.message);
+          btn.disabled = false;
+          btn.textContent = 'Delete lead permanently';
+          return;
+        }
+
+        // Remove from local state + re-render
+        allLeads = allLeads.filter(l => l.id !== leadId);
+        renderStats();
+        renderTable();
+
+        // Close the modal
+        document.getElementById('modalBg').classList.remove('open');
       });
     }
 
