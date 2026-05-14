@@ -436,26 +436,47 @@
       }
     });
 
-    // Send 24-hour nudge button
+    // Send 24-hour nudge button — with Calendly pre-check
     document.getElementById('sendNudgeBtn').addEventListener('click', async () => {
       const btn = document.getElementById('sendNudgeBtn');
       const originalText = btn.textContent;
-      if (!confirm(`Send the 24-hour follow-up nudge to ${lead.first_name} ${lead.last_name} (${lead.email})?\n\nThis emails them a warm reminder + Calendly link and bumps their status to Contacted.`)) return;
+      if (!confirm(`Send the 24-hour follow-up nudge to ${lead.first_name} ${lead.last_name} (${lead.email})?\n\nThis emails them a warm reminder + Calendly link and bumps their status to Contacted.\n\n(We'll first check Calendly to make sure they haven't already booked.)`)) return;
+
       btn.disabled = true;
-      btn.textContent = 'Sending…';
-      try {
+      btn.textContent = 'Checking Calendly…';
+
+      const sendRequest = async (force = false) => {
         const res = await fetch('/api/send-nudge', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + session.access_token
           },
-          body: JSON.stringify({ lead_id: leadId })
+          body: JSON.stringify({ lead_id: leadId, force })
         });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || 'Failed to send');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Failed to send');
+        return data;
+      };
+
+      try {
+        let result = await sendRequest(false);
+
+        // If Calendly says they've already booked, prompt for override
+        if (result.requires_confirmation) {
+          btn.textContent = 'Awaiting confirmation…';
+          const proceed = confirm(`⚠ ${result.message}`);
+          if (!proceed) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+            return;
+          }
+          btn.textContent = 'Sending anyway…';
+          result = await sendRequest(true);  // retry with force
         }
+
+        if (!result.ok) throw new Error('Unexpected response');
+
         btn.textContent = 'Sent ✓ — bumped to Contacted';
         lead.status = 'contacted';
         renderStats();

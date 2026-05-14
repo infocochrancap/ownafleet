@@ -2,7 +2,16 @@
 // Admin-only. Called from admin.html lead detail modal.
 // Sends a warm "24-hour follow-up" email to a lead who hasn't booked a call yet,
 // then bumps their status to 'contacted'.
-// Body: { lead_id: string }
+//
+// BEFORE sending, queries Calendly to see if the lead has already booked an
+// event. If yes, returns { requires_confirmation: true, event: {...} } so the
+// frontend can prompt "they already booked — send anyway?" If admin retries
+// with body.force=true, the Calendly check is skipped.
+//
+// If Calendly is unreachable / not configured, the check fails open (nudge
+// proceeds normally) so a Calendly outage never blocks admin actions.
+//
+// Body: { lead_id: string, force?: boolean }
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
@@ -13,7 +22,7 @@ const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-own
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { lead_id } = req.body || {};
+  const { lead_id, force } = req.body || {};
   if (!lead_id) return res.status(400).json({ error: 'Missing lead_id' });
 
   const authHeader = req.headers.authorization || '';
@@ -44,6 +53,19 @@ export default async function handler(req, res) {
     .maybeSingle();
 
   if (leadErr || !lead) return res.status(404).json({ error: 'Lead not found' });
+
+  // Calendly pre-check (skipped if admin already confirmed via force=true)
+  if (!force) {
+    const calendlyCheck = await checkCalendlyBooking(lead.email);
+    if (calendlyCheck.booked) {
+      return res.status(200).json({
+        ok: false,
+        requires_confirmation: true,
+        event: calendlyCheck.event,
+        message: `${lead.first_name} ${lead.last_name} appears to have already booked a Calendly call — "${calendlyCheck.event.name}" on ${calendlyCheck.event.start_time_human} (${calendlyCheck.event.status}). Send the nudge anyway?`
+      });
+    }
+  }
 
   // Bump status to 'contacted' (the SECURITY DEFINER trigger logs to history)
   const { error: updateErr } = await supabase
@@ -90,4 +112,84 @@ function nudgeEmailHtml(lead) {
 
 function escape(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============================================================
+// Calendly pre-check
+// Queries Calendly's API to see if `leadEmail` has any scheduled
+// events with the OwnaFleet Calendly account. Fails open: if the
+// API is unreachable or the token isn't configured, returns
+// { booked: false } so the nudge proceeds without blocking.
+// ============================================================
+async function checkCalendlyBooking(leadEmail) {
+  const token = process.env.CALENDLY_API_TOKEN;
+  if (!token) {
+    console.warn('CALENDLY_API_TOKEN not set; skipping Calendly pre-check.');
+    return { booked: false };
+  }
+
+  try {
+    // 1. Get the authenticated user's URI (small overhead per call; acceptable)
+    const userRes = await fetch('https://api.calendly.com/users/me', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!userRes.ok) {
+      console.warn('Calendly /users/me failed:', userRes.status, await userRes.text());
+      return { booked: false };
+    }
+    const userData = await userRes.json();
+    const userUri = userData?.resource?.uri;
+    if (!userUri) {
+      console.warn('Calendly /users/me returned no URI');
+      return { booked: false };
+    }
+
+    // 2. List scheduled events for this invitee email
+    const url = new URL('https://api.calendly.com/scheduled_events');
+    url.searchParams.set('user', userUri);
+    url.searchParams.set('invitee_email', leadEmail);
+    // Calendly API requires sort+count for some endpoints; default to recent first
+    url.searchParams.set('count', '20');
+
+    const eventsRes = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!eventsRes.ok) {
+      console.warn('Calendly /scheduled_events failed:', eventsRes.status, await eventsRes.text());
+      return { booked: false };
+    }
+    const eventsData = await eventsRes.json();
+    const events = eventsData?.collection || [];
+    if (events.length === 0) return { booked: false };
+
+    // Prefer a future, still-active booking; otherwise the most recent past one
+    const now = Date.now();
+    const future = events
+      .filter(e => new Date(e.start_time).getTime() > now)
+      .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+    const past = events
+      .filter(e => new Date(e.start_time).getTime() <= now)
+      .sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+    const relevant = future[0] || past[0];
+
+    return {
+      booked: true,
+      event: {
+        name: relevant.name || 'Calendly meeting',
+        status: relevant.status || 'active',  // 'active' or 'canceled'
+        start_time: relevant.start_time,
+        start_time_human: new Date(relevant.start_time).toLocaleString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        })
+      }
+    };
+  } catch (err) {
+    console.warn('Calendly pre-check threw, failing open:', err.message);
+    return { booked: false };
+  }
 }
