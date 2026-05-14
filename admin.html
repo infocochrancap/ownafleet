@@ -341,13 +341,18 @@
       <div class="modal-section">
         <h3>Next-step actions</h3>
         <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
-          After the intro call, send the credit application link. This emails the lead with the Armada application link and bumps their status to <strong>Application Sent</strong>.
+          Lead hasn't booked a Calendly call within 24 hours? Send a warm follow-up nudge. After the call, send the Armada credit application link.
         </p>
-        <button class="save-btn" id="sendApplicationBtn" ${lead.status === 'dead' ? 'disabled' : ''}>
-          ${lead.status === 'application_sent' || lead.status === 'application_started' || lead.status === 'documents_uploaded' || lead.status === 'approved' || lead.status === 'funded' || lead.status === 'closed_won'
-            ? 'Re-send application link'
-            : 'Send Armada application →'}
-        </button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <button class="save-btn" id="sendNudgeBtn" ${lead.status === 'dead' ? 'disabled' : ''} style="background: var(--paper); color: var(--ink); border: 1px solid var(--ink);">
+            ${lead.status === 'contacted' ? 'Re-send nudge' : 'Send 24-hour nudge'}
+          </button>
+          <button class="save-btn" id="sendApplicationBtn" ${lead.status === 'dead' ? 'disabled' : ''}>
+            ${lead.status === 'application_sent' || lead.status === 'application_started' || lead.status === 'documents_uploaded' || lead.status === 'approved' || lead.status === 'funded' || lead.status === 'closed_won'
+              ? 'Re-send application link'
+              : 'Send Armada application →'}
+          </button>
+        </div>
       </div>
 
       <div class="modal-section">
@@ -420,6 +425,42 @@
         lead.estimated_total_commission = commission;
         document.getElementById('saveEconomics').textContent = 'Saved ✓';
         setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save economics'; }, 1500);
+      }
+    });
+
+    // Send 24-hour nudge button
+    document.getElementById('sendNudgeBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('sendNudgeBtn');
+      const originalText = btn.textContent;
+      if (!confirm(`Send the 24-hour follow-up nudge to ${lead.first_name} ${lead.last_name} (${lead.email})?\n\nThis emails them a warm reminder + Calendly link and bumps their status to Contacted.`)) return;
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/send-nudge', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.access_token
+          },
+          body: JSON.stringify({ lead_id: leadId })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to send');
+        }
+        btn.textContent = 'Sent ✓ — bumped to Contacted';
+        lead.status = 'contacted';
+        renderStats();
+        const tableSelect = document.querySelector(`select.status-select[data-id="${leadId}"]`);
+        if (tableSelect) tableSelect.value = 'contacted';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Re-send nudge';
+        }, 2500);
+      } catch (e) {
+        alert('Failed: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
     });
 
