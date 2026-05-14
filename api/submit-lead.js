@@ -89,9 +89,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to save lead' });
   }
 
-  // Hard-fail criteria per Josh's rule: net worth < $1M OR liquidity < $300K -> doesn't qualify
-  const isBelowThreshold =
-    lead.net_worth === 'Under $1M' || lead.liquidity === 'Under $300K';
+  // Qualification check — scales with deal size.
+  // Lender rule: ~3x net worth and ~30% liquidity of the equipment purchase price.
+  // We use the LOW end of the lead's equipment range (most charitable interpretation
+  // of deal size) and the HIGH end of their net-worth + liquidity ranges
+  // (most charitable interpretation of their financial picture).
+  const isBelowThreshold = !meetsQualification(lead.equipment_range, lead.net_worth, lead.liquidity);
 
   // Send notification + lead-facing email — don't fail the request if email fails
   try {
@@ -196,8 +199,8 @@ function declineEmailHtml(lead) {
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
       <p>Hi ${escape(lead.first_name)},</p>
       <p>Thanks for the interest in the equipment ownership program.</p>
-      <p>Based on what you shared, this specific program may not be the right fit right now. The lending partner typically requires net worth above $1M and at least $300K in liquid assets to underwrite the program's leverage — and without those, the Year-1 tax economics that make it worthwhile don't pencil out.</p>
-      <p>If your picture shifts — a strong income year, a liquidity event, a business sale — you're welcome to circle back. Just reply to this email.</p>
+      <p>Based on what you shared, the equipment purchase amount you indicated may not pencil out against the lender's qualification thresholds (roughly 3x net worth and 30% liquidity of the purchase price). It's possible a smaller starting deal would fit — or that your picture shifts in the next quarter or two with a strong income year, a liquidity event, or an asset sale.</p>
+      <p>If either of those is in view, just reply — happy to talk through what a right-sized starting deal would look like.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>
       <hr style="border: none; border-top: 1px solid #D9DDE3; margin: 32px 0 16px;">
       <p style="font-size: 11px; color: #6B7280; font-style: italic; line-height: 1.5;">
@@ -205,6 +208,61 @@ function declineEmailHtml(lead) {
       </p>
     </div>
   `;
+}
+
+// ============== Qualification logic ==============
+// Lender requires roughly 3x net worth and 30% liquidity of the equipment purchase.
+// We use the LOW end of equipment range and HIGH end of NW + liquidity ranges
+// (most charitable interpretation) to decide auto-disqualify.
+function meetsQualification(equipment_range, net_worth, liquidity) {
+  // Special-case: "Not sure yet" and "Over $5M — consultation" — assume qualifying
+  // (Josh handles these manually; not an auto-decline)
+  if (equipment_range === 'Not sure yet' || equipment_range === 'Over $5M — consultation') {
+    return true;
+  }
+
+  // LOW end of equipment-purchase range
+  const EQUIPMENT_LOW = {
+    '$250K – $500K': 250000,
+    '$500K – $1M':   500000,
+    '$1M – $2M':     1000000,
+    '$2M – $5M':     2000000
+  };
+
+  // HIGH end of net-worth range (top of stated range; Infinity for the top bracket)
+  const NW_HIGH = {
+    'Under $1M':       1000000,
+    '$1M – $3M':       3000000,
+    '$3M – $10M':      10000000,
+    '$10M – $30M':     30000000,
+    '$30M – $75M':     75000000,
+    '$75M – $150M':    150000000,
+    '$150M+':          Infinity
+  };
+
+  // HIGH end of liquidity range
+  const LIQ_HIGH = {
+    'Under $300K':    300000,
+    '$300K – $1M':    1000000,
+    '$1M – $3M':      3000000,
+    '$3M – $10M':     10000000,
+    '$10M – $25M':    25000000,
+    '$25M+':          Infinity
+  };
+
+  const eqLow = EQUIPMENT_LOW[equipment_range];
+  const nwHigh = NW_HIGH[net_worth];
+  const liqHigh = LIQ_HIGH[liquidity];
+
+  if (eqLow === undefined || nwHigh === undefined || liqHigh === undefined) {
+    // Unknown bucket — don't auto-disqualify; let Josh review
+    return true;
+  }
+
+  const requiredNW = eqLow * 3;
+  const requiredLiq = eqLow * 0.30;
+
+  return nwHigh >= requiredNW && liqHigh >= requiredLiq;
 }
 
 function escape(s) {
