@@ -3,13 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OwnaFleet — Heavy equipment that pays you</title>
-<meta property="og:image" content="https://ownafleet.com/assets/og-image.jpg?v=2">
+<title>OwnaFleet — Heavy equipment that pays you.</title>
+<meta name="description" content="Own heavy equipment rented out nationwide by a publicly-traded operating partner. Monthly distributions, Year-1 accelerated depreciation, fully managed.">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ownafleet.com/">
+<meta property="og:title" content="OwnaFleet — Heavy equipment that pays you.">
+<meta property="og:description" content="Own heavy equipment rented out nationwide by a publicly-traded operating partner. Monthly distributions, Year-1 accelerated depreciation, fully managed.">
+<meta property="og:image" content="https://ownafleet.com/assets/og-image.jpg?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="OwnaFleet — managed equipment ownership">
+<meta property="og:site_name" content="OwnaFleet">
+
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://ownafleet.com/assets/og-image.jpg?v=2">
+<meta name="twitter:title" content="OwnaFleet — Heavy equipment that pays you.">
+<meta name="twitter:description" content="Own heavy equipment rented out nationwide by a publicly-traded operating partner. Monthly distributions, Year-1 accelerated depreciation, fully managed.">
+<meta name="twitter:image" content="https://ownafleet.com/assets/og-image.jpg?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -167,8 +177,19 @@
     font-weight: 300;
     color: var(--ink-soft);
     line-height: 1.4;
-    margin-bottom: 56px;
+    margin-bottom: 32px;
     max-width: 820px;
+  }
+  .hero-context {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 56px;
+    max-width: 720px;
+    padding-left: 16px;
+    border-left: 2px solid var(--accent);
   }
   .hero-ctas {
     display: flex;
@@ -303,6 +324,28 @@
   .how {
     background: var(--paper-warm);
     border-top: 1px solid var(--line);
+  }
+  .how-subhead {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-top: 72px;
+    margin-bottom: -16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .how-subhead::before {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .how .steps {
+    margin-top: 40px;
   }
   .steps {
     margin-top: 64px;
@@ -759,7 +802,7 @@
   .fit .qual-list li::before { background: var(--success); }
   .notfit .qual-list li::before { background: var(--warn); }
 
-  /* ---------- WHY ARMADA ---------- */
+  /* ---------- WHY THIS WORKS ---------- */
   .why {
     background: var(--paper-warm);
     border-top: 1px solid var(--line);
@@ -821,6 +864,52 @@
     font-weight: 300;
     line-height: 1.5;
     color: var(--ink-soft);
+  }
+
+  /* ---------- TESTIMONIAL ---------- */
+  .testimonial {
+    background: var(--paper);
+    border-top: 1px solid var(--line-soft);
+    padding: 120px 0;
+  }
+  @media (max-width: 720px) {
+    .testimonial { padding: 72px 0; }
+  }
+  .testimonial-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 32px;
+    text-align: center;
+  }
+  .testimonial-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 96px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 0.6;
+    margin-bottom: 8px;
+  }
+  .testimonial-quote {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(24px, 3.2vw, 38px);
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
+  }
+  .testimonial-attr {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+  .testimonial-attr strong {
+    color: var(--ink);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
   }
 
   /* ---------- ABOUT JOSH (DARK SPLIT) ---------- */
@@ -1193,7 +1282,8 @@
     <div class="hero-inner">
       <div class="eyebrow">Equipment ownership, simplified</div>
       <h1>Heavy equipment that <em>pays you.</em></h1>
-      <p class="hero-sub">Buy a fleet that our operating partner rents out across 385 locations nationwide. Receive monthly rental income, claim accelerated depreciation, and own a real asset — fully managed by the 4th-largest equipment rental company in the U.S.</p>
+      <p class="hero-sub">Own a fleet that a publicly-traded operating partner rents out nationwide. Receive monthly distributions, claim accelerated depreciation, and hold a real, durable asset — fully managed end-to-end.</p>
+      <p class="hero-context">A way for individuals with a meaningful windfall — a capital gain, business sale, or strong income year — to diversify into a cash-flowing hard asset without operating it themselves.</p>
       <div class="hero-ctas">
         <a href="#contact" class="btn btn-primary">See if you qualify</a>
         <a href="#math" class="btn btn-secondary">Run the numbers</a>
@@ -1203,28 +1293,58 @@
   </div>
 </section>
 
-<!-- ============ OPPORTUNITY ============ -->
-<section class="opportunity">
+<!-- ============ HOW IT WORKS (merged: returns + steps) ============ -->
+<section class="how" id="how">
   <div class="container">
-    <div class="eyebrow">The Opportunity</div>
-    <h2>Three returns from <em>one asset.</em></h2>
-    <p class="lede">Heavy construction equipment generates rental income, qualifies for accelerated depreciation, and holds residual value as hard collateral. Our managed ownership program lets you participate without operating a rental business yourself.</p>
+    <div class="eyebrow">How it works</div>
+    <h2>Three returns. <em>Five steps.</em></h2>
+    <p class="lede">Heavy equipment generates rental income, qualifies for an accelerated-depreciation election, and holds residual value as a real, durable asset. The program lets you participate without operating a rental business yourself.</p>
 
+    <div class="how-subhead">Three returns from one asset</div>
     <div class="pillars">
       <div class="pillar">
         <div class="pillar-num">01</div>
-        <div class="pillar-title">Monthly rental income</div>
-        <div class="pillar-desc">Equipment generates revenue from day one. Owners receive 75–85% of net rental revenue, distributed monthly to your LLC's operating account.</div>
+        <div class="pillar-title">Monthly distributions</div>
+        <div class="pillar-desc">Equipment generates rental revenue from day one. Owners receive their share of net rental revenue, distributed monthly to their LLC's operating account.</div>
       </div>
       <div class="pillar">
         <div class="pillar-num">02</div>
         <div class="pillar-title">Accelerated depreciation</div>
-        <div class="pillar-desc">Heavy equipment qualifies for bonus depreciation under current tax law, often offsetting other ordinary income in year one. For most participants, the after-tax economics are the headline number — consult your CPA.</div>
+        <div class="pillar-desc">Heavy equipment qualifies for the available accelerated-depreciation election under current tax law, potentially offsetting other income in Year 1. For most participants, the after-tax economics are the headline. Your CPA confirms the specifics.</div>
       </div>
       <div class="pillar">
         <div class="pillar-num">03</div>
-        <div class="pillar-title">Real, mobile collateral</div>
-        <div class="pillar-desc">Mobile, durable, dollar-priced industrial assets serving infrastructure spend. The operating partner's limited-loss guarantee covers up to 9.99% of original purchase price at exit.</div>
+        <div class="pillar-title">Real, durable asset</div>
+        <div class="pillar-desc">Mobile, dollar-priced industrial equipment serving long-cycle infrastructure spend. The operating partner provides a meaningful downside floor on residual value at end of term.</div>
+      </div>
+    </div>
+
+    <div class="how-subhead">Five steps from inquiry to distribution</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Schedule a call</div>
+        <div class="step-desc">Walk through the program with Josh — economics, fit, timing — in about 30 minutes. No commitment.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Complete the credit application</div>
+        <div class="step-desc">No commitment. No fees. The lending partner confirms eligibility within a few business days.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Receive your deal structure</div>
+        <div class="step-desc">Typically 4–6 weeks later, you review the proposed equipment selection and financing terms before signing.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Distributions begin</div>
+        <div class="step-desc">Typically 4–6 weeks after closing, monthly cash distributions begin alongside your debt service.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-title">Capture Year-1 depreciation</div>
+        <div class="step-desc">Your accountant applies the available accelerated-depreciation election against the equipment basis at tax filing.</div>
       </div>
     </div>
   </div>
@@ -1241,12 +1361,12 @@
       <div class="calc-input">
         <div class="calc-input-label">Equipment Purchase</div>
         <div class="calc-amount" id="calcAmount">$1,000,000</div>
-        <input type="range" min="250000" max="50000000" value="1000000" step="250000" class="calc-slider" id="calcSlider">
+        <input type="range" min="250000" max="5000000" value="1000000" step="250000" class="calc-slider" id="calcSlider">
         <div class="calc-range-labels">
           <span>$250K min</span>
-          <span>$50M</span>
+          <span>$5M</span>
         </div>
-        <p style="margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6;"><span style="color: var(--accent); font-weight: 500;">Average fleet purchase is $1.2M.</span> Minimum is $500K.</p>
+        <p style="margin-top: 28px; font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6;"><span style="color: var(--accent); font-weight: 500;">Average fleet purchase is $1.2M.</span> Minimum is $500K. Inquiries above $5M — please <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline;">schedule a consultation</a>.</p>
 
         <div class="calc-tax-section">
           <div class="calc-input-label">Your tax assumptions</div>
@@ -1270,9 +1390,9 @@
       <div>
         <div class="calc-output">
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Initial Cash Outlay <span class="tip">?<span class="tip-content">10% down payment plus a 3% fleet aggregation fee. The remaining 90% is financed by the lending partner over 72 months with a balloon at exit.</span></span></div>
+            <div class="calc-metric-label">Initial Cash Outlay <span class="tip">?<span class="tip-content">10% down payment plus a 3% platform fee. The remaining 90% is financed by the lending partner over 72 months with a balloon at exit.</span></span></div>
             <div class="calc-metric-value" id="calcOutlay">$130,000</div>
-            <div class="calc-metric-sub">10% down + 3% fleet aggregation fee</div>
+            <div class="calc-metric-sub">10% down + 3% platform fee</div>
           </div>
           <div class="calc-metric">
             <div class="calc-metric-label">Annual Cash Flow (Yr 1–5) <span class="tip">?<span class="tip-content">Your share of monthly rental revenue, minus operating costs (maintenance, insurance, telematics) and debt service. The number is small because most of the rental income services the loan in years 1–5.</span></span></div>
@@ -1290,12 +1410,12 @@
             <div class="calc-metric-sub">Pre-tax cash-on-cash</div>
           </div>
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Est. Year-1 Tax Shelter <span class="tip">?<span class="tip-content">If you qualify for bonus depreciation and have active income to absorb the deduction, you can claim ~100% of the equipment value as a year-1 tax write-off. At your marginal rate, this is the value of those tax savings.</span></span></div>
+            <div class="calc-metric-label">Est. Year-1 Tax Savings <span class="tip">?<span class="tip-content">If the available accelerated-depreciation election applies and you have income to absorb the deduction, you can claim a meaningful Year-1 write-off against the equipment basis. Your CPA models the actual impact.</span></span></div>
             <div class="calc-metric-value" id="calcTax">$400,000</div>
-            <div class="calc-metric-sub">Bonus depreciation × marginal tax rate</div>
+            <div class="calc-metric-sub">Illustrative — your CPA confirms the actual figure</div>
           </div>
           <div class="calc-metric highlight">
-            <div class="calc-metric-label">Total Economics (Cash + Tax) <span class="tip">?<span class="tip-content">Cash returned plus estimated year-1 tax shelter. For most participants, the tax shelter is the largest single component — that's why this program is built around active-income offset, not yield.</span></span></div>
+            <div class="calc-metric-label">Total Economics (Cash + Tax) <span class="tip">?<span class="tip-content">Estimated cash returned plus illustrative Year-1 tax savings. Your CPA confirms the tax component for your specific situation.</span></span></div>
             <div class="calc-metric-value" id="calcGrand">$554,706</div>
             <div class="calc-metric-sub">On initial outlay above</div>
           </div>
@@ -1310,47 +1430,10 @@
         <div class="walkthrough-body" id="walkthroughBody"></div>
 
         <div class="calc-footnote">
-          <strong>Important assumptions for the tax line:</strong> you have sufficient active income to absorb the deduction, you materially participate (or qualify under another active rule), and your at-risk basis covers the equipment value (the personally-guaranteed loan typically counts). Depreciation recapture at year-6 exit is not modeled and will reduce total economics. <em>Your CPA must verify all of this for your specific situation — we don't give tax advice.</em>
+          <strong>Not tax advice.</strong> The Year-1 tax line is illustrative. Whether and how much of the available accelerated-depreciation election applies depends on your income, participation, basis, and entity structure. Depreciation recapture at year-6 exit is not modeled and will reduce total economics. <em>Your CPA must verify all of this for your specific situation.</em>
         </div>
 
-        <p class="calc-disclaimer">Projections only, not guaranteed. Cash flow figures based on the program's published Q2 2026 pro forma: 80% average rev share to monthly target, 72-month term, 90% financing at 7.25% with 120-month amortization, equipment sold at Net Orderly Liquidation Value (the fair sale price under normal market conditions over a reasonable period) in year 6. Tax figures are estimates only and depend entirely on your individual tax situation, which we are not qualified to assess. Actual cash flow varies due to utilization, market conditions, and equipment performance.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ HOW IT WORKS ============ -->
-<section class="how" id="how">
-  <div class="container-wide">
-    <div class="eyebrow">How It Works</div>
-    <h2>Five steps. <em>One signature.</em></h2>
-    <p class="lede">From signed agreement to first rental check, the process is designed to be turnkey. Our partner team handles the operational complexity. You make the capital decision and collect.</p>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-title">You buy</div>
-        <div class="step-desc">Through your LLC. Our partner team arranges the equipment purchase and 90% financing. Typical first deal: $500K–$1M, $65K–$130K initial outlay.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-title">We manage</div>
-        <div class="step-desc">Fleet enrollment, insurance, maintenance, telematics — all coordinated by the partner team. You're hands-off.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-title">The fleet rents it</div>
-        <div class="step-desc">Your equipment joins the nationwide rental fleet across 385 locations in 45 states. Branch operators are agnostic to ownership.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <div class="step-title">You get paid</div>
-        <div class="step-desc">Monthly net revenue distributions to your LLC. The software platform shows real-time location, utilization, and revenue per asset.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">05</div>
-        <div class="step-title">Exit at year 6</div>
-        <div class="step-desc">The operating partner offers to buy at fair market value. Limited-loss guarantee protects up to 9.99% of original cost. Or remarket to third parties.</div>
+        <p class="calc-disclaimer">Projections only, not guaranteed. Cash-flow figures based on the program's published Q2 2026 pro forma: revenue share to monthly target, 72-month term, 90% financing at commercial-equipment rates with 120-month amortization, equipment sold at Net Orderly Liquidation Value in year 6. Tax figures are illustrative and depend entirely on your individual tax situation, which we are not qualified to assess. Actual cash flow varies due to utilization, market conditions, and equipment performance. This is not a security and OwnaFleet does not offer or sell securities. Participants take direct title to specific equipment through their own LLC.</p>
       </div>
     </div>
   </div>
@@ -1388,43 +1471,55 @@
   </div>
 </section>
 
-<!-- ============ WHY ARMADA ============ -->
+<!-- ============ WHY THIS WORKS ============ -->
 <section class="why">
   <div class="container">
-    <div class="eyebrow">Built on real scale</div>
-    <h2>Backed by the <em>operator behind</em> every asset.</h2>
-    <p class="lede">Our operating partner is the 4th-largest equipment rental company in the U.S. and runs every dollar of equipment you'll own. Our fleet management partner aggregates participants and handles the relationship. Our lending partner arranges the debt. Together they make the program turnkey.</p>
+    <div class="eyebrow">Why this works</div>
+    <h2>A program with <em>real scale</em> behind it.</h2>
+    <p class="lede">The economics work because the platform sits on top of a publicly-traded operating partner running a national rental network. You hold direct title to specific equipment through your own LLC. The partner team handles operations, financing, insurance, and reporting end-to-end.</p>
 
     <div class="stats-grid">
       <div class="stat">
-        <div class="stat-value">$<span>4.4</span><span class="small">B</span></div>
-        <div class="stat-label">Operating partner 2025 revenue</div>
+        <div class="stat-value">$<span>7</span><span class="small">B+</span></div>
+        <div class="stat-label">Equipment purchased through the program to date</div>
       </div>
       <div class="stat">
-        <div class="stat-value">385</div>
-        <div class="stat-label">Operating locations · 45 states</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">4<span class="small">th</span></div>
-        <div class="stat-label">Largest rental company in the U.S.</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">$<span>3.9</span><span class="small">B</span></div>
-        <div class="stat-label">Equipment under management</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">1,000<span class="small">+</span></div>
-        <div class="stat-label">Existing program participants</div>
+        <div class="stat-value">Public</div>
+        <div class="stat-label">Operating partner is SEC-registered &amp; publicly traded</div>
       </div>
       <div class="stat">
         <div class="stat-value">100<span class="small">%</span></div>
-        <div class="stat-label">Assets connected to telematics software</div>
+        <div class="stat-label">Of assets tracked via telematics in real time</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Direct</div>
+        <div class="stat-label">You take title to specific equipment through your LLC</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">National</div>
+        <div class="stat-label">Rental network spans the U.S. — diversified utilization</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Floor</div>
+        <div class="stat-label">Limited-loss backstop from the operating partner at exit</div>
       </div>
     </div>
 
     <div class="why-callout">
-      <div class="why-callout-label">Limited-Loss Guarantee</div>
-      <div class="why-callout-text">The operating partner backstops up to 9.99% of original purchase price if equipment sells below its stated floor at end of term — a real downside floor on residual risk.</div>
+      <div class="why-callout-label">Not a security</div>
+      <div class="why-callout-text">OwnaFleet does not offer or sell securities. Participants take direct ownership of specific equipment through their own LLC. We connect qualified individuals to a managed equipment ownership program; the operating partner's name, audited financials, and program-specific independent accountant reports are shared during your intro call.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIAL ============ -->
+<section class="testimonial">
+  <div class="testimonial-inner">
+    <div class="testimonial-mark">&ldquo;</div>
+    <p class="testimonial-quote">OwnaFleet helped me keep roughly <em>$350,000</em> that otherwise would have gone to taxes — capital I've redeployed into other Cochran Capital strategies that keep working for me.</p>
+    <div class="testimonial-attr">
+      <strong>Dr. Jeremiah Sturgill</strong>
+      Tennessee
     </div>
   </div>
 </section>
@@ -1439,7 +1534,7 @@
       <div class="about-role">Founder · Cochran Capital · Spokane, WA</div>
       <p class="about-bio">Josh Cochran is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He works directly with the program's partner team to bring qualified participants into the managed equipment ownership program.</p>
       <p class="about-bio">Working with Josh means a single point of contact through closing, flexibility on minimums based on his partner relationships, and an advocate for your interests through the lifecycle of the deal.</p>
-      <p class="about-disclosure">Disclosure: Josh is not a financial, tax, or legal advisor. He is a participant in the program himself and earns a referral fee from the program's operating partners on completed deals. This relationship does not affect your terms.</p>
+      <p class="about-disclosure">Disclosure: Josh is not a financial, tax, or legal advisor. He is a participant in the program himself and earns a referral fee from the program's partner team on completed deals. This relationship does not affect your terms.</p>
     </div>
   </div>
 </section>
@@ -1453,35 +1548,31 @@
     <div class="faq-list">
       <div class="faq-item">
         <button class="faq-q">What's the minimum equipment purchase? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Officially $1M. In practice, Josh's partner relationships make $500K typical and $250K possible depending on timing. Q4 sees the most demand and the highest minimums — Q1–Q3 has the most flexibility.</p></div>
+        <div class="faq-a"><p>Program minimum is $1M. In practice, partner relationships make $500K typical, and $250K possible depending on timing. The site is sized for purchases up to $5M — inquiries above $5M, please schedule a consultation directly.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">How is this different from owning rental real estate? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Faster cash flow (rentals start in weeks, not months), shorter hold (6 years vs. 10–30), national diversification (one purchase, 45-state utilization), and dramatically faster depreciation (heavy equipment qualifies for bonus depreciation, while real estate depreciates over 27.5–39 years). Trade-off: less appreciation upside than real estate, and full reliance on a single operator.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">What are the tax benefits really worth? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Heavy equipment qualifies for bonus depreciation under current tax law. For a participant in the top federal bracket, year-one tax savings on $1M of equipment can equal a meaningful multiple of the cash outlay — often the largest single piece of total economics. Your CPA needs to model this for your specific situation; we don't give tax advice.</p></div>
+        <div class="faq-a"><p>Faster cash flow (rentals start in weeks, not months), shorter hold (about 6 years vs. 10–30), national diversification across one purchase, and a faster depreciation profile than real estate. Trade-off: less appreciation upside than real estate, and reliance on a single operating partner for rental performance.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">What if my equipment doesn't get rented enough? <span class="icon">+</span></button>
-        <div class="faq-a"><p>The operating partner runs the rental side and is incentivized by their 15–25% revenue share to maximize utilization. The fleet is moved between regions to chase demand. Participant-owned equipment is treated identically to the operator's own balance-sheet equipment. Utilization risk is real, but it's the operator's risk first.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">Can I exit before year 6? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Yes, but with friction. You can market equipment to third parties at any time, with the operating partner having a 15-day right of first refusal. Early exit means you forfeit the full depreciation schedule and may sell into a soft market. The program is designed for the full term.</p></div>
+        <div class="faq-a"><p>That's the advantage of the platform. Individual-equipment utilization variance is absorbed by the operating partner's national network — fleet is repositioned to chase demand, and participant-owned equipment is treated identically to the operator's own balance-sheet equipment. The operator's revenue share aligns their incentive with yours: they only earn when your asset earns.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Who actually owns the equipment? <span class="icon">+</span></button>
-        <div class="faq-a"><p>You do — through your LLC. You hold sole title. The partner team manages the relationship and the operating partner runs the rentals. This is a true sale, not a fund interest, and the equipment is not on the operator's balance sheet.</p></div>
+        <div class="faq-a"><p>You do — through your LLC. You hold sole title to specific, serialized assets. The partner team manages the relationship and the operating partner runs the rentals. This is direct ownership of equipment, not a fund interest, and not a security.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">What's the personal guarantee about? <span class="icon">+</span></button>
-        <div class="faq-a"><p>The lending partner requires unlimited personal guarantees from the LLC's owners on the financed portion (typically 90% of purchase price) — standard for equipment finance, and lenders qualify based on net worth (3× purchase) and liquidity (30% of purchase) accordingly.</p><p style="margin-top: 12px;">The personal guarantee also matters for tax treatment: under IRS at-risk rules, depreciation can generally only be deducted against active income up to your "at-risk" amount, which typically includes personally-guaranteed (recourse) debt but excludes nonrecourse debt. The personal guarantee, required by the lender, is also what enables the full depreciation benefit to flow against active income. Your CPA needs to walk through the at-risk and material participation rules for your specific situation — we don't give tax advice.</p></div>
+        <button class="faq-q">Is there a personal guarantee? <span class="icon">+</span></button>
+        <div class="faq-a"><p>Participants who finance the purchase complete a personal guarantee with the lender — standard for commercial equipment financing. Lenders qualify participants on that basis (net worth and liquidity thresholds). Specifics are walked through with you and the lending partner during application.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">How do I verify the operating partner? <span class="icon">+</span></button>
-        <div class="faq-a"><p>Our operating partner is the 4th-largest U.S. equipment rental company by revenue ($4.4B in 2025), with $3.9B of equipment under management across 1,000+ existing participants. They are a <strong>publicly-traded company</strong>, so audited financials, 10-K / 10-Q filings, and investor disclosures are available — Josh will share the company name, ticker, and SEC EDGAR links during your intro call so you can verify independently. Independent accountant reports specific to the program are also available on request.</p><p style="margin-top: 12px;">We strongly encourage diligence — this is a major capital decision and deserves the same scrutiny you'd apply to any private investment.</p></div>
+        <button class="faq-q">What are the tax benefits? <span class="icon">+</span></button>
+        <div class="faq-a"><p>Heavy equipment is eligible for an accelerated-depreciation election under current tax law, which may offset other income in Year 1. For most participants, the after-tax economics are a meaningful piece of total return. The actual impact depends on your income, participation, basis, and entity structure — your CPA models this for your specific situation. <em>This is not tax advice.</em></p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How do I verify the rental operator? <span class="icon">+</span></button>
+        <div class="faq-a"><p>The operating partner is publicly traded and SEC-registered. We share the company name, ticker, audited financials, and program-specific independent accountant reports during your intro call so you can verify independently before committing. Diligence is encouraged — this is a major capital decision.</p></div>
       </div>
     </div>
   </div>
@@ -1492,7 +1583,7 @@
   <div class="container">
     <div class="eyebrow">Get Started</div>
     <h2>Tell us <em>about you.</em></h2>
-    <p class="lede">Takes 60 seconds. We'll review your fit and, if it's a match, hand you off to the lending partner to start the application. No obligation, no hard pitch.</p>
+    <p class="lede">Takes 60 seconds. We'll review your fit and reach out within 1 business day to schedule a call. No obligation, no hard pitch. For inquiries above $5M, please <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline;">schedule a consultation directly</a>.</p>
 
     <div class="form-grid">
       <form class="form-card" id="leadForm">
@@ -1530,10 +1621,7 @@
               <option>$500K – $1M</option>
               <option>$1M – $2M</option>
               <option>$2M – $5M</option>
-              <option>$5M – $10M</option>
-              <option>$10M – $25M</option>
-              <option>$25M – $50M</option>
-              <option>$50M+</option>
+              <option>Over $5M — consultation</option>
               <option>Not sure yet</option>
             </select>
           </div>
@@ -1579,15 +1667,15 @@
       <div class="form-side">
         <h3>What happens next</h3>
         <ol class="next-steps">
-          <li><strong>We review your info</strong> within 24 hours and confirm fit.</li>
-          <li><strong>Our lending partner emails you a secure portal</strong> to start the credit application.</li>
-          <li><strong>You upload tax returns + supporting docs</strong> through the lender's portal.</li>
-          <li><strong>Schedule a call with Josh</strong> to walk through the deal in detail.</li>
+          <li><strong>We review your information</strong> within 1 business day to confirm fit.</li>
+          <li><strong>Schedule a 30-minute call</strong> to walk through the program in detail.</li>
+          <li><strong>Complete the credit application</strong> with the lending partner — no commitment, no fees.</li>
+          <li><strong>Receive your deal structure</strong> for review before signing.</li>
         </ol>
         <div class="form-side-cta">
           <div class="form-side-cta-label">Prefer to talk first?</div>
-          <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">Book 20 min with Josh →</a>
-          <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">Or text/call <strong style="color: var(--ink);">(206) 755-6436</strong></p>
+          <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">Schedule a consultation →</a>
+          <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">Inquiries above $5M — please use the consultation link above.</p>
         </div>
       </div>
     </div>
@@ -1616,7 +1704,7 @@
     </div>
 
     <div class="footer-disclaimer">
-      OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. Cochran Management LLC receives a referral fee from the program's operating partners for participants who complete the program. This compensation does not affect the terms offered to participants. The information on this site does not constitute financial, tax, legal, investment, or accounting advice. Projected returns are estimates only and not guaranteed. Actual cash flow may vary due to market conditions, equipment performance, utilization, and operational factors. Past performance is not indicative of future results. Participants are strongly encouraged to conduct independent due diligence and consult licensed tax, legal, and financial advisors before participating. The program involves a personal guarantee on financed equipment and is not suitable for all investors.
+      OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. Cochran Management LLC receives a referral fee from the program's partner team for participants who complete the program. This compensation does not affect the terms offered to participants. <strong>This is not a security and OwnaFleet does not offer or sell securities.</strong> Participants take direct title to specific equipment through their own LLC. The information on this site does not constitute financial, tax, legal, investment, or accounting advice — and is <strong>not tax advice</strong>. Projected returns are estimates only and not guaranteed. Actual cash flow may vary due to market conditions, equipment performance, utilization, and operational factors. Past performance is not indicative of future results. Participants are strongly encouraged to conduct independent due diligence and consult licensed tax, legal, and financial advisors — including their CPA — before participating. Financed purchases involve a personal guarantee with the lender and may not be suitable for all participants.
     </div>
 
     <div class="footer-bottom">
@@ -1647,27 +1735,27 @@
     const e = parseFloat(slider.value);
     const taxRate = parseFloat(taxRateEl.value);
 
-    // Cash economics — per Armada Q2 2026 pro forma, $1M baseline:
-    const outlay = e * 0.13;          // 10% down + 3% fleet aggregation fee
+    // Cash economics — per Q2 2026 program pro forma, $1M baseline:
+    const outlay = e * 0.13;          // 10% down + 3% platform fee
     const annual = e * 0.0091;        // ~$9,118 / $1M
     const exit = e * 0.1091;          // ~$109,118 / $1M (final year + balloon recovery)
     const total = (annual * 5) + exit;
 
-    // Year-1 tax shelter — equipment value × 100% bonus dep × marginal tax rate
-    // Assumes active income, material participation, sufficient at-risk basis
-    const taxShelter = e * BONUS_DEP * taxRate;
-    const grandTotal = total + taxShelter;
+    // Year-1 tax savings — equipment value × accelerated dep × marginal tax rate
+    // Illustrative; assumes income to absorb the deduction and applicable election
+    const taxSavings = e * BONUS_DEP * taxRate;
+    const grandTotal = total + taxSavings;
 
     amountEl.textContent = fmt(e);
     outlayEl.textContent = fmt(outlay);
     annualEl.textContent = fmt(annual);
     exitEl.textContent = fmt(exit);
     totalEl.textContent = fmt(total);
-    taxEl.textContent = fmt(taxShelter);
+    taxEl.textContent = fmt(taxSavings);
     grandEl.textContent = fmt(grandTotal);
 
     renderTimeline(outlay, annual, exit);
-    renderWalkthrough(e, outlay, annual, exit, total, taxRate, taxShelter, grandTotal);
+    renderWalkthrough(e, outlay, annual, exit, total, taxRate, taxSavings, grandTotal);
   }
 
   function renderTimeline(outlay, annual, exitVal) {
@@ -1693,19 +1781,19 @@
     }).join('');
   }
 
-  function renderWalkthrough(e, outlay, annual, exitVal, total, taxRate, taxShelter, grandTotal) {
+  function renderWalkthrough(e, outlay, annual, exitVal, total, taxRate, taxSavings, grandTotal) {
     const body = document.getElementById('walkthroughBody');
     if (!body) return;
     const debtAmt = Math.round(e * 0.90);
     const ratePct = Math.round(taxRate * 100);
     body.innerHTML = `
       <div class="walkthrough-step"><span class="num">01</span><strong>You commit ${fmt(e)} of equipment.</strong> Your LLC signs the purchase agreement coordinated by the partner team.</div>
-      <div class="walkthrough-step"><span class="num">02</span><strong>The lending partner finances ${fmt(debtAmt)} (90%)</strong> at ~7.25% over 72 months. You put ${fmt(e * 0.10)} cash down. Add a 3% fleet aggregation fee (${fmt(e * 0.03)}) and your <strong>total out-of-pocket is ${fmt(outlay)}.</strong></div>
-      <div class="walkthrough-step"><span class="num">03</span><strong>Year 1: claim ~100% bonus depreciation on ${fmt(e)}.</strong> At your ${ratePct}% combined marginal rate, that's roughly <strong>${fmt(taxShelter)} in tax savings</strong> (assuming you have active income to absorb it — your CPA will verify).</div>
-      <div class="walkthrough-step"><span class="num">04</span><strong>Years 1–5: equipment generates rental revenue</strong> across 385 locations. After your share of operating costs and the loan payment, you receive ~${fmt(annual)}/yr in cash distributions to your LLC. Modest by design — most of the rental income is paying down the loan.</div>
+      <div class="walkthrough-step"><span class="num">02</span><strong>The lending partner finances ${fmt(debtAmt)} (90%)</strong> at competitive commercial-equipment rates. You put ${fmt(e * 0.10)} cash down. Add a 3% platform fee (${fmt(e * 0.03)}) and your <strong>total out-of-pocket is ${fmt(outlay)}.</strong></div>
+      <div class="walkthrough-step"><span class="num">03</span><strong>Year 1: claim the available accelerated-depreciation election against ${fmt(e)}.</strong> At your ${ratePct}% combined marginal rate, that's roughly <strong>${fmt(taxSavings)} in illustrative tax savings</strong> — your CPA confirms the actual amount for your situation.</div>
+      <div class="walkthrough-step"><span class="num">04</span><strong>Years 1–5: equipment generates rental revenue</strong> across the operating partner's national network. After your share of operating costs and the loan payment, you receive ~${fmt(annual)}/yr in cash distributions to your LLC. Modest by design — most of the rental income is paying down the loan.</div>
       <div class="walkthrough-step"><span class="num">05</span><strong>Year 6: exit at fair market value.</strong> Equipment is sold (typically back to the operating partner). After paying off the loan balloon, you receive <strong>~${fmt(exitVal)}</strong> in your final year — including the year-6 cash flow and the cash recovery from the sale.</div>
-      <div class="walkthrough-step"><span class="num">06</span><strong>Total cash returned: ${fmt(total)}</strong> on a ${fmt(outlay)} outlay (years 1–5 distributions + year 6 exit). Add the year-1 tax shelter and total economics work out to <strong>${fmt(grandTotal)}.</strong></div>
-      <div class="walkthrough-step" style="border-left-color: #B85C3A; background: rgba(184,92,58,0.08);"><span class="num" style="color:#B85C3A;">⚠</span><strong>Watch-outs:</strong> the tax shelter assumes active income, material participation, and sufficient at-risk basis (the personal guarantee). Depreciation recapture at exit reduces total economics. These projections use the program's published assumptions; actuals vary with utilization and market conditions. Talk to your CPA before deciding.</div>
+      <div class="walkthrough-step"><span class="num">06</span><strong>Total cash returned: ${fmt(total)}</strong> on a ${fmt(outlay)} outlay (years 1–5 distributions + year 6 exit). Add the illustrative Year-1 tax savings and total economics work out to <strong>${fmt(grandTotal)}.</strong></div>
+      <div class="walkthrough-step" style="border-left-color: #B85C3A; background: rgba(184,92,58,0.08);"><span class="num" style="color:#B85C3A;">⚠</span><strong>Watch-outs:</strong> the Year-1 tax savings line is illustrative — your CPA verifies whether the depreciation election applies, how much income offsets, and the recapture impact at exit. Cash-flow projections use the program's published assumptions; actuals vary with utilization and market conditions. <em>Not tax advice — consult your CPA before deciding.</em></div>
     `;
   }
 
