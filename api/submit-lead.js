@@ -11,7 +11,7 @@ const REQUIRED = ['first_name', 'last_name', 'email', 'phone', 'state', 'equipme
 const ALLOWED = {
   equipment_range: ['$250K – $500K','$500K – $1M','$1M – $2M','$2M – $5M','Over $5M — consultation','Not sure yet'],
   net_worth: ['Under $1M','$1M – $3M','$3M – $10M','$10M – $30M','$30M – $75M','$75M – $150M','$150M+'],
-  liquidity: ['Under $300K','$300K – $1M','$1M – $3M','$3M – $10M','$10M – $25M','$25M+']
+  liquidity: ['Under $200K','$200K – $1M','$1M – $3M','$3M – $10M','$10M – $25M','$25M+']
 };
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
@@ -94,7 +94,7 @@ export default async function handler(req, res) {
   // worth a conversation, because they can adjust their equipment purchase
   // down to fit their financial picture.
   const isBelowThreshold =
-    lead.net_worth === 'Under $1M' && lead.liquidity === 'Under $300K';
+    lead.net_worth === 'Under $1M' && lead.liquidity === 'Under $200K';
 
   // Send notification + lead-facing email — don't fail the request if email fails
   try {
