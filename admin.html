@@ -475,7 +475,7 @@
             minute: '2-digit',
             timeZoneName: 'short'
           });
-          const msg = `⚠ ${result.lead_name} appears to have already booked a Calendly call — "${ev.name}" on ${localTime} (${ev.status}). Send the nudge anyway?`;
+          const msg = `⚠ ${result.lead_name} appears to have already booked a Calendly call — "${ev.name}" on ${localTime}. Send the nudge anyway?`;
           const proceed = confirm(msg);
           if (!proceed) {
             btn.disabled = false;

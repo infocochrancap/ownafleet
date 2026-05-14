@@ -159,10 +159,15 @@ async function checkCalendlyBooking(leadEmail) {
       return { booked: false };
     }
     const eventsData = await eventsRes.json();
-    const events = eventsData?.collection || [];
+    const allEvents = eventsData?.collection || [];
+    if (allEvents.length === 0) return { booked: false };
+
+    // Canceled bookings mean the slot was freed up — treat as "not booked"
+    // (otherwise a lead who once booked + canceled would forever block nudges).
+    const events = allEvents.filter(e => e.status === 'active');
     if (events.length === 0) return { booked: false };
 
-    // Prefer a future, still-active booking; otherwise the most recent past one
+    // Prefer a future booking; otherwise the most recent past one
     const now = Date.now();
     const future = events
       .filter(e => new Date(e.start_time).getTime() > now)
