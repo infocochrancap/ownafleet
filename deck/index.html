@@ -229,6 +229,8 @@
       </label>
     </div>
 
+    <input type="hidden" id="referralCode" name="referral_code">
+
     <button type="submit" id="submitBtn">Send me the overview →</button>
     <p class="error" id="errorMsg"></p>
   </form>
@@ -247,6 +249,18 @@
 </footer>
 
 <script>
+  // ============ REFERRAL CODE CAPTURE ============
+  // If they arrived via a partner link (ownafleet.com/deck?ref=CODE), capture
+  // the code from URL or sessionStorage so the deck request gets attributed
+  // to that partner. Persists across page navigations within the session.
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('ref');
+    if (fromUrl) sessionStorage.setItem('ownafleet_ref', fromUrl);
+    const stored = sessionStorage.getItem('ownafleet_ref');
+    if (stored) document.getElementById('referralCode').value = stored;
+  })();
+
   document.getElementById('deckForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -259,7 +273,8 @@
     const payload = {
       first_name: document.getElementById('firstName').value.trim(),
       email: document.getElementById('email').value.trim(),
-      disclaimer_accepted: document.getElementById('disclaimer').checked
+      disclaimer_accepted: document.getElementById('disclaimer').checked,
+      referral_code: document.getElementById('referralCode').value || null
     };
 
     try {
@@ -285,9 +300,11 @@
     }
   });
 
-  // If they already unlocked, skip the gate
+  // If they already unlocked, skip the gate (but preserve ref code in URL)
   if (document.cookie.split(';').some(c => c.trim().startsWith('deck_unlocked=1'))) {
-    window.location.replace('/deck/view');
+    const ref = sessionStorage.getItem('ownafleet_ref');
+    const target = ref ? `/deck/view?ref=${encodeURIComponent(ref)}` : '/deck/view';
+    window.location.replace(target);
   }
 </script>
 

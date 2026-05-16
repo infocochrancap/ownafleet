@@ -19,6 +19,7 @@ export default async function handler(req, res) {
   const first_name = (body.first_name || '').trim();
   const email = (body.email || '').trim().toLowerCase();
   const disclaimer_accepted = body.disclaimer_accepted === true;
+  const referral_code = (body.referral_code || '').trim() || null;
 
   if (!first_name) return res.status(400).json({ error: 'Missing first_name' });
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -33,6 +34,18 @@ export default async function handler(req, res) {
     process.env.SUPABASE_SECRET_KEY
   );
 
+  // Look up the referring partner if a code was provided
+  let referral_partner_id = null;
+  if (referral_code) {
+    const { data: partner } = await supabase
+      .from('referral_partners')
+      .select('id, status')
+      .eq('referral_code', referral_code)
+      .eq('status', 'active')
+      .maybeSingle();
+    if (partner) referral_partner_id = partner.id;
+  }
+
   // Capture audit trail
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
              req.headers['x-real-ip'] || null;
@@ -45,7 +58,9 @@ export default async function handler(req, res) {
       email,
       ip,
       user_agent,
-      disclaimer_accepted: true
+      disclaimer_accepted: true,
+      referral_partner_id,
+      source: 'gate'
     });
 
   if (insertErr) {
