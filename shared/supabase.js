@@ -16,8 +16,11 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   }
 });
 
-// Returns 'admin' | 'partner' | null based on user's role.
-// Checks the admins table first, then looks for an active partner record.
+// Returns 'admin' | 'partner' | 'partner_<status>' | null based on user's role.
+// Checks the admins table first, then looks for a partner record. If the
+// auth user has no partner row linked yet, calls /api/link-partner once to
+// attempt an email-based auto-link (first-sign-in flow — partner rows are
+// created without user_id).
 export async function getUserRole(userId) {
   if (!userId) return null;
 
@@ -35,6 +38,28 @@ export async function getUserRole(userId) {
     .maybeSingle();
   if (partnerRow && partnerRow.status === 'active') return 'partner';
   if (partnerRow) return 'partner_' + partnerRow.status;  // pending / paused / rejected
+
+  // No partner row linked by user_id — try email-based auto-link via service role.
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const resp = await fetch('/api/link-partner', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      if (resp.ok) {
+        const json = await resp.json();
+        const status = json?.partner?.status;
+        if (status === 'active') return 'partner';
+        if (status) return 'partner_' + status;
+      }
+    }
+  } catch (e) {
+    console.warn('link-partner attempt failed:', e);
+  }
 
   return null;
 }
