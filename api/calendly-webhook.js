@@ -147,12 +147,11 @@ function prepEmailHtml(first_name) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
       <p>Hi ${escape(first_name)},</p>
-      <p>Thanks for booking. Quick prep before our call — the 21-slide overview is here:</p>
+      <p>Thanks for booking. <strong>If you haven't already gone through it, here's the 21-slide overview</strong> — about 10 minutes, walks through structure, year-by-year economics on a representative deal, and the questions most people ask before a first call:</p>
       <p style="margin: 24px 0;">
         <a href="${DECK_URL}" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">View the overview →</a>
       </p>
-      <p>The deck walks through structure, year-by-year economics on a representative deal, and the questions most people ask before a first call. About 10 minutes to read through.</p>
-      <p>If you read it ahead, our 20-minute call can focus on <em>your</em> specific situation — income picture, tax position, what you're trying to accomplish. If not, no problem — we'll cover the highlights together.</p>
+      <p>If you've already read it, just hit reply with a quick note on what you'd like to focus on so I can come prepared. Either way, our 20-minute call will focus on your specific situation — income picture, tax position, what you're trying to accomplish.</p>
       <p>If anything urgent comes up before then, text me at <strong>(206) 755-6436</strong>.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>
       <hr style="border: none; border-top: 1px solid #D9DDE3; margin: 32px 0 16px;">
