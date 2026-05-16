@@ -105,26 +105,36 @@ export default async function handler(req, res) {
     process.env.SUPABASE_SECRET_KEY
   );
 
-  // 4. Check if we've already sent the deck to this email
+  const nowIso = new Date().toISOString();
+
+  // 4. Check if we've already sent the deck to this email. Either way, stamp
+  //    booked_at so the funnel's "Bookings" metric counts this booking.
   const { data: existing } = await supabase
     .from('deck_requests')
-    .select('id')
+    .select('id, booked_at')
     .eq('email', inviteeEmail)
     .limit(1)
     .maybeSingle();
 
   if (existing) {
-    // They've already gotten the deck — no need to spam them
-    return res.status(200).json({ ok: true, action: 'deck_already_sent', invitee: inviteeEmail });
+    // Already had the deck — just record that they booked (or re-booked).
+    // Don't re-send the prep email; they have it already.
+    await supabase
+      .from('deck_requests')
+      .update({ booked_at: nowIso })
+      .eq('id', existing.id);
+    return res.status(200).json({ ok: true, action: 'booking_recorded', invitee: inviteeEmail });
   }
 
-  // 5. Record + send the deck email
+  // 5. Record + send the deck email. This branch only fires when the booker
+  //    has never seen the deck, so booked_at = created_at effectively.
   await supabase.from('deck_requests').insert({
     first_name: firstName,
     email: inviteeEmail,
     disclaimer_accepted: true,  // Booking implies engagement consent
     source: 'calendly_book',
-    user_agent: 'calendly-webhook'
+    user_agent: 'calendly-webhook',
+    booked_at: nowIso
   });
 
   try {

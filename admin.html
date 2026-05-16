@@ -776,9 +776,21 @@
       });
     });
 
-    // Pull data once
-    const [deckRes, leadsRes, historyRes, partnersRes] = await Promise.all([
-      supabase.from('deck_requests').select('id, email, created_at, source, referral_partner_id'),
+    // Pull data once. Try deck_requests with booked_at; if that column doesn't
+    // exist yet (migration 008 not run), retry without it and fall back to the
+    // source-based booking proxy.
+    let deckRes = await supabase
+      .from('deck_requests')
+      .select('id, email, created_at, source, referral_partner_id, booked_at');
+    let bookedAtSupported = true;
+    if (deckRes.error && /booked_at/.test(deckRes.error.message || '')) {
+      bookedAtSupported = false;
+      deckRes = await supabase
+        .from('deck_requests')
+        .select('id, email, created_at, source, referral_partner_id');
+    }
+
+    const [leadsRes, historyRes, partnersRes] = await Promise.all([
       supabase.from('leads').select('id, email, created_at, status, referral_partner_id, estimated_total_commission, referral_partners(id, first_name, last_name, referral_code)'),
       supabase.from('lead_status_history').select('lead_id, to_status, changed_at'),
       supabase.from('referral_partners').select('id, first_name, last_name, referral_code, status')
@@ -794,7 +806,8 @@
       decks: deckRes.data || [],
       leads: leadsRes.data || [],
       history: historyRes.data || [],
-      partners: partnersRes.data || []
+      partners: partnersRes.data || [],
+      bookedAtSupported
     };
 
     renderFunnelBody();
@@ -831,7 +844,11 @@
 
     // ----- Top metrics
     const deckCount = decks.length;
-    const bookingCount = decks.filter(d => d.source === 'calendly_book').length;
+    // Use booked_at when the column exists (migration 008+). Pre-migration,
+    // fall back to source='calendly_book' (undercounts re-bookers).
+    const bookingCount = funnelData.bookedAtSupported
+      ? decks.filter(d => d.booked_at).length
+      : decks.filter(d => d.source === 'calendly_book').length;
     const leadCount = leads.length;
     const inPipelineCount = leads.filter(l => {
       const r = leadMaxRank.get(l.id) ?? 0;
@@ -962,7 +979,9 @@
         </div>
         ${stageRows}
         ${deadCount > 0 ? `<p class="funnel-note">${deadCount} lead${deadCount === 1 ? '' : 's'} marked dead in this period (included at last-reached stage above).</p>` : ''}
-        <p class="funnel-note">* Bookings = new Calendly bookings that auto-generated a deck request. Undercounts users who requested the deck first and then booked.</p>
+        <p class="funnel-note">* Bookings = ${funnelData.bookedAtSupported
+          ? 'deck requesters who booked a Calendly call (tracked via booked_at on deck_requests).'
+          : 'new Calendly bookings that auto-generated a deck request. Undercounts users who requested the deck first and then booked. Run migration 008 to tighten.'}</p>
       </div>
 
       <h3 style="font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; margin-bottom: 16px; letter-spacing: -0.01em;">By partner</h3>
