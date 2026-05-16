@@ -72,6 +72,43 @@
   .save-btn:hover { background: var(--accent); }
   .history-item { padding: 10px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; color: var(--ink-soft); }
   .history-item .when { color: var(--muted); font-size: 11px; }
+
+  /* Funnel view */
+  .period-bar { display: flex; gap: 8px; margin-bottom: 28px; align-items: center; flex-wrap: wrap; }
+  .period-bar .period-label { font-size: 10px; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-right: 8px; }
+  .period-btn { background: white; border: 1px solid var(--line); padding: 8px 16px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; color: var(--ink-soft); transition: all 0.15s; }
+  .period-btn:hover { border-color: var(--accent); }
+  .period-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .funnel-stages { background: white; border: 1px solid var(--line); padding: 32px; margin-bottom: 32px; }
+  .funnel-stages h3 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .funnel-stages .funnel-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .funnel-row { display: grid; grid-template-columns: 200px 1fr 80px 90px 90px; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-stage-label { font-size: 13px; color: var(--ink); font-weight: 500; }
+  .funnel-bar-wrap { background: var(--paper); height: 24px; position: relative; }
+  .funnel-bar-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+  .funnel-bar-fill.muted { background: var(--ink-soft); opacity: 0.35; }
+  .funnel-count { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 400; color: var(--ink); text-align: right; }
+  .funnel-pct { font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .funnel-pct.drop { color: var(--warn); }
+  .funnel-pct.good { color: var(--success); }
+  .funnel-header { display: grid; grid-template-columns: 200px 1fr 80px 90px 90px; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+  .funnel-header div { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
+  .funnel-header div.r { text-align: right; }
+
+  .funnel-note { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 20px; line-height: 1.5; }
+
+  .partner-funnel-table th, .partner-funnel-table td { text-align: right; }
+  .partner-funnel-table th:first-child, .partner-funnel-table td:first-child { text-align: left; }
+  .partner-funnel-table tr:hover { background: white; cursor: default; }
+  .partner-funnel-table .partner-name { font-weight: 500; }
+  .partner-funnel-table .partner-code { font-size: 11px; color: var(--muted); font-family: 'Courier New', monospace; margin-top: 2px; }
+
+  @media (max-width: 720px) {
+    .funnel-row, .funnel-header { grid-template-columns: 1fr 70px 70px; }
+    .funnel-row .funnel-bar-wrap, .funnel-header .funnel-bar-h { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -80,6 +117,7 @@
   <a href="/" class="nav-brand">OWNAFLEET · ADMIN</a>
   <div class="nav-right">
     <a href="/admin" class="nav-tab active">Leads</a>
+    <a href="/admin?view=funnel" class="nav-tab" id="funnelTab">Funnel</a>
     <a href="/admin?view=partners" class="nav-tab" id="partnersTab">Partners</a>
     <span class="nav-user" id="userEmail">—</span>
     <button class="signout-btn" id="signoutBtn">Sign out</button>
@@ -198,6 +236,13 @@
     document.getElementById('filterBar').style.display = 'none';
     document.getElementById('statsRow').style.display = 'none';
     await renderPartners();
+  } else if (view === 'funnel') {
+    document.getElementById('pageTitle').textContent = 'Funnel';
+    document.querySelector('.nav-tab.active').classList.remove('active');
+    document.getElementById('funnelTab').classList.add('active');
+    document.getElementById('filterBar').style.display = 'none';
+    document.getElementById('statsRow').style.display = 'none';
+    await renderFunnel();
   } else {
     await loadLeads();
   }
@@ -680,6 +725,249 @@
         }
       });
     });
+  }
+
+  // ============================================================
+  // FUNNEL VIEW
+  // ============================================================
+  // Stage ranks: monotonic forward progression. 'dead' is excluded.
+  // For each lead we compute the max rank they ever reached
+  // (current status + lead_status_history.to_status), so a lead that
+  // got to mini-app and then died still counts as having reached mini-app.
+  const STAGE_RANK = {
+    new: 0, contacted: 1, application_sent: 2, mini_app_submitted: 3,
+    full_app_submitted: 4, approved: 5, terms_accepted: 6, funded: 7, operating: 8,
+    // legacy aliases
+    application_started: 3, documents_uploaded: 4, closed_won: 7
+  };
+  const FUNNEL_STAGES = [
+    { key: 'submitted', label: 'Lead submitted', rank: 0 },
+    { key: 'contacted', label: 'Contacted', rank: 1 },
+    { key: 'application_sent', label: 'Application sent', rank: 2 },
+    { key: 'mini_app_submitted', label: 'Mini app submitted', rank: 3 },
+    { key: 'full_app_submitted', label: 'Full app submitted', rank: 4 },
+    { key: 'approved', label: 'Approved', rank: 5 },
+    { key: 'terms_accepted', label: 'Terms accepted', rank: 6 },
+    { key: 'funded', label: 'Funded', rank: 7 },
+    { key: 'operating', label: 'Operating', rank: 8 }
+  ];
+
+  let funnelData = null;  // cached after first load
+  let funnelPeriod = '30';  // days; 'all' = no filter
+
+  async function renderFunnel() {
+    document.getElementById('content').innerHTML = `
+      <div class="period-bar">
+        <span class="period-label">Period</span>
+        <button class="period-btn" data-period="7">Last 7d</button>
+        <button class="period-btn active" data-period="30">Last 30d</button>
+        <button class="period-btn" data-period="90">Last 90d</button>
+        <button class="period-btn" data-period="all">All time</button>
+      </div>
+      <div id="funnelBody"><div class="loading">Loading…</div></div>
+    `;
+
+    document.querySelectorAll('.period-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        funnelPeriod = btn.dataset.period;
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderFunnelBody();
+      });
+    });
+
+    // Pull data once
+    const [deckRes, leadsRes, historyRes, partnersRes] = await Promise.all([
+      supabase.from('deck_requests').select('id, email, created_at, source, referral_partner_id'),
+      supabase.from('leads').select('id, email, created_at, status, referral_partner_id, estimated_total_commission, referral_partners(id, first_name, last_name, referral_code)'),
+      supabase.from('lead_status_history').select('lead_id, to_status, changed_at'),
+      supabase.from('referral_partners').select('id, first_name, last_name, referral_code, status')
+    ]);
+
+    if (deckRes.error || leadsRes.error || historyRes.error || partnersRes.error) {
+      document.getElementById('funnelBody').innerHTML = `<div class="empty">Error loading funnel data.</div>`;
+      console.error('Funnel load errors:', deckRes.error, leadsRes.error, historyRes.error, partnersRes.error);
+      return;
+    }
+
+    funnelData = {
+      decks: deckRes.data || [],
+      leads: leadsRes.data || [],
+      history: historyRes.data || [],
+      partners: partnersRes.data || []
+    };
+
+    renderFunnelBody();
+  }
+
+  function renderFunnelBody() {
+    if (!funnelData) return;
+
+    // Period cutoff
+    const cutoff = funnelPeriod === 'all'
+      ? null
+      : new Date(Date.now() - Number(funnelPeriod) * 24 * 60 * 60 * 1000);
+    const inPeriod = (iso) => !cutoff || new Date(iso) >= cutoff;
+
+    const decks = funnelData.decks.filter(d => inPeriod(d.created_at));
+    const leads = funnelData.leads.filter(l => inPeriod(l.created_at));
+
+    // Build a map of lead_id -> max rank ever reached (via current status + history)
+    const historyByLead = new Map();
+    for (const h of funnelData.history) {
+      const r = STAGE_RANK[h.to_status];
+      if (r == null) continue;
+      const prev = historyByLead.get(h.lead_id) ?? -1;
+      if (r > prev) historyByLead.set(h.lead_id, r);
+    }
+
+    const leadMaxRank = new Map();
+    for (const l of leads) {
+      const currentRank = l.status === 'dead' ? -1 : (STAGE_RANK[l.status] ?? 0);
+      const historyRank = historyByLead.get(l.id) ?? -1;
+      const maxRank = Math.max(currentRank, historyRank, 0);  // every lead is at least 'submitted' (rank 0)
+      leadMaxRank.set(l.id, maxRank);
+    }
+
+    // ----- Top metrics
+    const deckCount = decks.length;
+    const bookingCount = decks.filter(d => d.source === 'calendly_book').length;
+    const leadCount = leads.length;
+    const inPipelineCount = leads.filter(l => {
+      const r = leadMaxRank.get(l.id) ?? 0;
+      return r >= 1 && r < 7 && l.status !== 'dead';
+    }).length;
+    const fundedCount = leads.filter(l => (leadMaxRank.get(l.id) ?? 0) >= 7).length;
+    const deadCount = leads.filter(l => l.status === 'dead').length;
+
+    // ----- Funnel stage counts (ever-reached)
+    const topCount = FUNNEL_STAGES[0] ? leadCount : 0;
+    const stageRows = FUNNEL_STAGES.map((stage, i) => {
+      const count = leads.filter(l => (leadMaxRank.get(l.id) ?? 0) >= stage.rank).length;
+      const pctOfTop = topCount > 0 ? (count / topCount) * 100 : 0;
+      const prev = i === 0 ? count : leads.filter(l => (leadMaxRank.get(l.id) ?? 0) >= FUNNEL_STAGES[i-1].rank).length;
+      const pctOfPrev = prev > 0 ? (count / prev) * 100 : 0;
+      const drop = i === 0 ? null : (100 - pctOfPrev);
+      const fillWidth = pctOfTop;
+      return `
+        <div class="funnel-row">
+          <div class="funnel-stage-label">${stage.label}</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar-fill ${i === FUNNEL_STAGES.length - 1 ? '' : ''}" style="width: ${fillWidth}%;"></div>
+          </div>
+          <div class="funnel-count">${count}</div>
+          <div class="funnel-pct">${pctOfTop.toFixed(0)}%</div>
+          <div class="funnel-pct ${drop == null ? '' : (drop > 50 ? 'drop' : (drop < 25 ? 'good' : ''))}">${drop == null ? '—' : '−' + drop.toFixed(0) + '%'}</div>
+        </div>
+      `;
+    }).join('');
+
+    // ----- Per-partner breakdown
+    // Group decks + leads by partner_id (null = Direct)
+    const partnerStats = new Map();  // partner_id (string|'direct') -> { name, code, decks, leads, in_pipeline, funded, paid_commission }
+    const ensureRow = (key, name, code) => {
+      if (!partnerStats.has(key)) {
+        partnerStats.set(key, { name, code, decks: 0, leads: 0, in_pipeline: 0, funded: 0, paid_commission: 0 });
+      }
+      return partnerStats.get(key);
+    };
+    ensureRow('direct', 'Direct (no partner)', '—');
+
+    for (const d of decks) {
+      const key = d.referral_partner_id || 'direct';
+      if (key !== 'direct' && !partnerStats.has(key)) {
+        const p = funnelData.partners.find(pp => pp.id === key);
+        ensureRow(key, p ? `${p.first_name} ${p.last_name}` : 'Unknown', p ? p.referral_code : '—');
+      }
+      partnerStats.get(key).decks += 1;
+    }
+
+    for (const l of leads) {
+      const key = l.referral_partner_id || 'direct';
+      if (key !== 'direct' && !partnerStats.has(key)) {
+        const p = l.referral_partners || funnelData.partners.find(pp => pp.id === key);
+        ensureRow(key, p ? `${p.first_name} ${p.last_name}` : 'Unknown', p ? p.referral_code : '—');
+      }
+      const row = partnerStats.get(key);
+      row.leads += 1;
+      const r = leadMaxRank.get(l.id) ?? 0;
+      if (r >= 7) {
+        row.funded += 1;
+        row.paid_commission += Number(l.estimated_total_commission || 0);
+      } else if (r >= 1 && l.status !== 'dead') {
+        row.in_pipeline += 1;
+      }
+    }
+
+    // Sort: funded desc, then leads desc, then decks desc. Direct row last.
+    const partnerRows = Array.from(partnerStats.entries())
+      .filter(([k, v]) => v.decks > 0 || v.leads > 0)
+      .sort((a, b) => {
+        if (a[0] === 'direct') return 1;
+        if (b[0] === 'direct') return -1;
+        return b[1].funded - a[1].funded || b[1].leads - a[1].leads || b[1].decks - a[1].decks;
+      });
+
+    const partnerTable = partnerRows.length === 0
+      ? `<div class="empty" style="padding:40px;">No partner activity in this period yet.</div>`
+      : `
+        <table class="partner-funnel-table">
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th>Deck requests</th>
+              <th>Lead submissions</th>
+              <th>In pipeline</th>
+              <th>Funded</th>
+              <th>Est. commission</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${partnerRows.map(([key, r]) => `
+              <tr>
+                <td>
+                  <div class="partner-name">${escapeHtml(r.name)}</div>
+                  ${r.code !== '—' ? `<div class="partner-code">${escapeHtml(r.code)}</div>` : ''}
+                </td>
+                <td>${r.decks}</td>
+                <td>${r.leads}</td>
+                <td>${r.in_pipeline}</td>
+                <td>${r.funded}</td>
+                <td>${r.paid_commission > 0 ? '$' + Math.round(r.paid_commission).toLocaleString() : '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+    // ----- Compose
+    document.getElementById('funnelBody').innerHTML = `
+      <div class="stats-row" style="display: grid;">
+        <div class="stat"><div class="stat-label">Deck requests</div><div class="stat-value">${deckCount}</div></div>
+        <div class="stat"><div class="stat-label">Bookings*</div><div class="stat-value">${bookingCount}</div></div>
+        <div class="stat"><div class="stat-label">Lead submissions</div><div class="stat-value">${leadCount}</div></div>
+        <div class="stat"><div class="stat-label">In pipeline</div><div class="stat-value">${inPipelineCount}</div></div>
+        <div class="stat"><div class="stat-label">Funded</div><div class="stat-value" style="color: var(--accent);">${fundedCount}</div></div>
+      </div>
+
+      <div class="funnel-stages">
+        <h3>Lead funnel</h3>
+        <p class="funnel-sub">Every lead's furthest stage reached. Dead leads still count at their last-reached stage.</p>
+        <div class="funnel-header">
+          <div>Stage</div>
+          <div class="funnel-bar-h">% of top</div>
+          <div class="r">Count</div>
+          <div class="r">% of top</div>
+          <div class="r">Drop from prev</div>
+        </div>
+        ${stageRows}
+        ${deadCount > 0 ? `<p class="funnel-note">${deadCount} lead${deadCount === 1 ? '' : 's'} marked dead in this period (included at last-reached stage above).</p>` : ''}
+        <p class="funnel-note">* Bookings = new Calendly bookings that auto-generated a deck request. Undercounts users who requested the deck first and then booked.</p>
+      </div>
+
+      <h3 style="font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; margin-bottom: 16px; letter-spacing: -0.01em;">By partner</h3>
+      ${partnerTable}
+    `;
   }
 
   function escapeHtml(s) {
