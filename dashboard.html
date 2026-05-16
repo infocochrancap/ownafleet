@@ -216,14 +216,45 @@
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = '/login'; throw new Error('redirect'); }
 
-  // Load partner profile
-  const { data: partner, error: pErr } = await supabase
-    .from('referral_partners')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .maybeSingle();
+  // Wire sign-out FIRST — before any early returns below — so the button works
+  // even on the "no partner profile" / inactive-account empty states.
+  document.getElementById('signoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  });
 
-  if (!partner || pErr) {
+  // Load partner profile by user_id. On first sign-in the partner row's user_id
+  // is NULL, so we fall back to /api/link-partner which matches by email
+  // (service-role) and stamps the user_id for next time.
+  let partner = null;
+  {
+    const { data, error } = await supabase
+      .from('referral_partners')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    if (data && !error) partner = data;
+  }
+
+  if (!partner) {
+    try {
+      const resp = await fetch('/api/link-partner', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      if (resp.ok) {
+        const json = await resp.json();
+        if (json && json.partner) partner = json.partner;
+      }
+    } catch (e) {
+      console.warn('link-partner call failed:', e);
+    }
+  }
+
+  if (!partner) {
     document.querySelector('main').innerHTML = `
       <div class="empty">
         <h3>No partner profile found</h3>
@@ -260,12 +291,6 @@
     btn.textContent = 'Copied ✓';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
-  });
-
-  // Sign out
-  document.getElementById('signoutBtn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/login';
   });
 
   // Load this partner's leads (RLS enforces filtering — they only see their own)

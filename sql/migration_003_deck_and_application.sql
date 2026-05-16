@@ -27,6 +27,7 @@ create index if not exists deck_requests_created_idx on deck_requests(created_at
 -- RLS — admins only
 alter table deck_requests enable row level security;
 
+drop policy if exists "Admins can read all deck requests" on deck_requests;
 create policy "Admins can read all deck requests"
 on deck_requests for select to authenticated
 using (is_admin(auth.uid()));
