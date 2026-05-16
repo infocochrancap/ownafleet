@@ -64,6 +64,54 @@
 
   .commission { font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink); }
   .commission-est { color: var(--muted); font-size: 12px; font-style: italic; }
+
+  /* ---------- TOOLKIT ---------- */
+  .toolkit { margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--line); }
+  .toolkit-eyebrow { font-size: 11px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; font-weight: 500; display: flex; align-items: center; gap: 14px; }
+  .toolkit-eyebrow::before { content: ''; width: 36px; height: 1px; background: var(--accent); }
+  .toolkit h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 36px; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .toolkit h2 em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .toolkit-lede { font-family: 'Fraunces', serif; font-size: 17px; color: var(--ink-soft); line-height: 1.5; max-width: 760px; margin-bottom: 32px; font-weight: 300; }
+
+  .tk-section-h { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-top: 40px; margin-bottom: 16px; font-weight: 500; }
+
+  /* Links */
+  .tk-links { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .tk-links { grid-template-columns: 1fr; } }
+  .tk-link-card { background: white; border-top: 3px solid var(--accent); padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .tk-link-info { flex: 1; min-width: 0; }
+  .tk-link-label { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .tk-link-url { font-family: 'Courier New', monospace; font-size: 13px; color: var(--ink); word-break: break-all; line-height: 1.3; }
+  .tk-link-desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+  /* Templates */
+  .tk-template { background: white; border-left: 3px solid var(--accent); padding: 24px 28px; margin-bottom: 16px; }
+  .tk-template-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tk-template-title { font-family: 'Fraunces', serif; font-weight: 400; font-size: 18px; color: var(--ink); }
+  .tk-template-when { font-size: 12px; color: var(--muted); font-style: italic; }
+  .tk-template-subject { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink); margin-bottom: 12px; padding: 10px 14px; background: var(--paper); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .tk-template-subject-label { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-right: 8px; }
+  .tk-template-subject-text { flex: 1; font-weight: 500; }
+  .tk-template-body { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink-soft); line-height: 1.65; white-space: pre-wrap; padding: 14px 0 14px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); margin-bottom: 14px; }
+  .tk-placeholder { background: rgba(139,111,63,0.12); color: var(--accent-deep); padding: 1px 4px; font-weight: 500; }
+  .tk-template-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .tk-btn { background: var(--ink); color: white; border: none; padding: 9px 16px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-family: 'Inter', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .tk-btn:hover { background: var(--accent); }
+  .tk-btn.copied { background: var(--success); }
+  .tk-btn.secondary { background: white; color: var(--ink); border: 1px solid var(--line); }
+  .tk-btn.secondary:hover { background: var(--paper); border-color: var(--accent); color: var(--accent); }
+
+  /* Talking points */
+  .tk-talking { background: white; border-top: 3px solid var(--accent); padding: 28px 32px; }
+  .tk-talking ul { list-style: none; padding: 0; margin: 0 0 18px; }
+  .tk-talking li { padding: 8px 0 8px 24px; font-size: 14px; color: var(--ink-soft); line-height: 1.55; position: relative; border-bottom: 1px solid var(--line-soft); }
+  .tk-talking li:last-child { border-bottom: none; }
+  .tk-talking li::before { content: '·'; position: absolute; left: 6px; color: var(--accent); font-size: 24px; line-height: 1; top: 4px; }
+
+  /* Short blurb */
+  .tk-blurb { background: var(--paper-warm); padding: 24px 28px; border-left: 3px solid var(--accent); }
+  .tk-blurb-text { font-family: 'Fraunces', serif; font-size: 15px; color: var(--ink); line-height: 1.6; margin-bottom: 14px; font-style: italic; }
 </style>
 </head>
 <body>
@@ -96,6 +144,52 @@
   </div>
 
   <div id="content"><div class="loading">Loading your referrals…</div></div>
+
+  <!-- ============ TOOLKIT ============ -->
+  <section class="toolkit" id="toolkit">
+    <div class="toolkit-eyebrow">Share OwnaFleet</div>
+    <h2>Materials to make <em>sharing easy.</em></h2>
+    <p class="toolkit-lede">Pre-written templates and links you can copy directly into an email, text, or LinkedIn message. Designed so you can introduce OwnaFleet without writing anything from scratch — and without making claims you don't want to make.</p>
+
+    <!-- Your links -->
+    <div class="tk-section-h">Your links</div>
+    <div class="tk-links">
+      <div class="tk-link-card">
+        <div class="tk-link-info">
+          <div class="tk-link-label">Deck link (recommended)</div>
+          <div class="tk-link-url" id="tkDeckUrl">—</div>
+          <div class="tk-link-desc">Sends prospects to the 21-slide overview. Best first touch — handles 80% of the standard questions before any call.</div>
+        </div>
+        <button class="tk-btn" data-copy-from="tkDeckUrl">Copy</button>
+      </div>
+      <div class="tk-link-card">
+        <div class="tk-link-info">
+          <div class="tk-link-label">Homepage link</div>
+          <div class="tk-link-url" id="tkHomeUrl">—</div>
+          <div class="tk-link-desc">Sends prospects to the public homepage. Use when you want them to choose between the deck and a direct call.</div>
+        </div>
+        <button class="tk-btn" data-copy-from="tkHomeUrl">Copy</button>
+      </div>
+    </div>
+
+    <!-- Email templates -->
+    <div class="tk-section-h">Email templates</div>
+    <div id="tkTemplates"><!-- rendered via JS --></div>
+
+    <!-- Talking points -->
+    <div class="tk-section-h">Talking points · for verbal pitches or follow-ups</div>
+    <div class="tk-talking">
+      <ul id="tkTalkingList"><!-- populated via JS --></ul>
+      <button class="tk-btn secondary" data-copy-talking>Copy all as bullets</button>
+    </div>
+
+    <!-- Short blurb -->
+    <div class="tk-section-h">Short blurb · for email signature, LinkedIn bio, group chats</div>
+    <div class="tk-blurb">
+      <p class="tk-blurb-text" id="tkBlurb">—</p>
+      <button class="tk-btn secondary" data-copy-from="tkBlurb">Copy blurb</button>
+    </div>
+  </section>
 </main>
 
 <script type="module">
@@ -104,12 +198,18 @@
   const STATUS_LABEL = {
     new: 'New',
     contacted: 'Contacted',
+    application_sent: 'Application Sent',
+    mini_app_submitted: 'Mini App Submitted',
+    full_app_submitted: 'Full App Submitted',
+    approved: 'Approved',
+    terms_accepted: 'Terms Accepted',
+    funded: 'Funded',
+    operating: 'Operating',
+    dead: 'Dead',
+    // Legacy values
     application_started: 'Application Started',
     documents_uploaded: 'Documents Uploaded',
-    approved: 'Approved',
-    funded: 'Funded',
-    closed_won: 'Closed Won',
-    dead: 'Dead'
+    closed_won: 'Closed Won'
   };
 
   // Auth gate
@@ -235,6 +335,151 @@
   function formatDate(iso) {
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // ============ TOOLKIT ============
+  // Pre-fill links and render email templates with the partner's name + deck link
+  const partnerHomeUrl = `https://ownafleet.com?ref=${partner.referral_code}`;
+  const partnerDeckUrl = `https://ownafleet.com/deck?ref=${partner.referral_code}`;
+  document.getElementById('tkHomeUrl').textContent = partnerHomeUrl;
+  document.getElementById('tkDeckUrl').textContent = partnerDeckUrl;
+
+  const partnerName = partner.first_name;
+
+  // Email templates — {first_name} placeholders left in for partner to customize per-recipient
+  const templates = [
+    {
+      key: 'A',
+      title: 'Template A — Warm 1:1 intro',
+      when: 'For a specific person you know would be a good fit',
+      subject: 'Something you might want to look at',
+      body: `Hey {first_name},
+
+Quick one. I've been spending time on a program called OwnaFleet — basically, you take direct title to specific heavy equipment, a major publicly-traded U.S. rental operator runs the actual rental business, and you collect monthly distributions plus some meaningful Year-1 tax mechanics (your CPA confirms how it fits your specific situation).
+
+Sending it your way because I thought of you given {your situation / strong year / recent event}.
+
+The best place to start is the 21-slide overview — about 10 minutes, walks through structure, year-by-year economics, and the questions most people ask. After that, there's a 20-min call with Josh (the founder) to talk through your specific situation.
+
+Start here:
+→ ${partnerDeckUrl}
+
+No pressure either way — most people who get this aren't a fit, and that's by design.
+
+— ${partnerName}`
+    },
+    {
+      key: 'B',
+      title: 'Template B — Broadcast to a list',
+      when: 'For sending to 5–15 people at once (BCC recommended)',
+      subject: 'A real-asset program worth a look (no pressure)',
+      body: `Hi — sending this to a small group of people I thought might find it interesting.
+
+There's a managed equipment-ownership program I've been spending time on called OwnaFleet. The structure: you take direct title to specific industrial equipment, a publicly-traded U.S. rental operator runs the actual rental business, and you collect monthly distributions plus meaningful Year-1 tax mechanics (your CPA confirms how it applies to you).
+
+Built for individuals coming off a strong income year, a capital gain, or a business sale who want a real-asset allocation that isn't correlated to public markets.
+
+The best place to start is the 21-slide overview — 10 minutes, handles most of the standard questions. After that, a 20-min call with Josh (the founder).
+
+Start here:
+→ ${partnerDeckUrl}
+
+No pressure either way — most people who get this won't be a fit, and that's by design. Happy to introduce you to Josh directly if it looks interesting.
+
+— ${partnerName}`
+    },
+    {
+      key: 'C',
+      title: 'Template C — Follow-up nudge',
+      when: 'When your first email got no response after ~2 weeks',
+      subject: 'Following up on the OwnaFleet note',
+      body: `Hey {first_name},
+
+Quick follow-up on the equipment-ownership note from a couple weeks back. If you wanted to take 10 minutes with the overview deck without booking a call yet, that's the easiest first step:
+
+→ ${partnerDeckUrl}
+
+No pressure if it's not for you — just didn't want it to get buried.
+
+— ${partnerName}`
+    }
+  ];
+
+  // Render templates
+  document.getElementById('tkTemplates').innerHTML = templates.map(t => {
+    // Highlight {placeholder} text visually
+    const bodyHtml = escapeHtml(t.body).replace(/\{([^}]+)\}/g, '<span class="tk-placeholder">{$1}</span>');
+    return `
+      <div class="tk-template">
+        <div class="tk-template-header">
+          <div class="tk-template-title">${escapeHtml(t.title)}</div>
+          <div class="tk-template-when">${escapeHtml(t.when)}</div>
+        </div>
+        <div class="tk-template-subject">
+          <span class="tk-template-subject-label">Subject</span>
+          <span class="tk-template-subject-text">${escapeHtml(t.subject)}</span>
+          <button class="tk-btn secondary" data-copy-text="${escapeAttr(t.subject)}">Copy subject</button>
+        </div>
+        <div class="tk-template-body">${bodyHtml}</div>
+        <div class="tk-template-actions">
+          <button class="tk-btn" data-copy-text="${escapeAttr(t.body)}">Copy email body</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Talking points — pre-cleared compliance-friendly bullets
+  const talkingPoints = [
+    'It is a turnkey program for individuals to own real, titled industrial equipment that is rented out by a major publicly-traded U.S. operating partner. You hold direct title through your own LLC.',
+    'It is not a fund, not a security, not pooled — direct ownership of specific, serialized equipment.',
+    'The operator handles the day-to-day rental business (customers, maintenance, telematics). Your role is strategic oversight of your specific equipment — typically around 100 hours per year.',
+    'It is built for two profiles: people coming off a strong income year (W-2 / K-1) and people diversifying a windfall (business sale, capital gain).',
+    'There are monthly distributions and meaningful Year-1 tax mechanics under current federal law. The actual tax impact depends entirely on the participant’s situation — their CPA scopes it.',
+    'The standard next step is the 21-slide overview deck (about 10 minutes), then a 20-minute call with Josh to talk through specifics.',
+    'It is not for everyone. Most people who hear about it will not be a fit, and that is by design.',
+    'OwnaFleet does not offer or sell securities. Anything related to projected outcomes is illustrative — never a guarantee — and is covered in the program’s underlying documents.'
+  ];
+  document.getElementById('tkTalkingList').innerHTML = talkingPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('');
+
+  // Short blurb — usable in email signature, LinkedIn bio, etc.
+  const blurbText = `OwnaFleet is a turnkey program for individuals to own real, titled industrial equipment — operated by a major publicly-traded U.S. rental operator. Built for windfall recipients and high-income earners looking for a real-asset allocation outside public markets. ${partnerDeckUrl}`;
+  document.getElementById('tkBlurb').textContent = blurbText;
+
+  // Wire all copy buttons
+  document.querySelectorAll('[data-copy-from]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const el = document.getElementById(btn.dataset.copyFrom);
+      if (!el) return;
+      await copyToClipboard(btn, el.textContent);
+    });
+  });
+  document.querySelectorAll('[data-copy-text]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await copyToClipboard(btn, btn.dataset.copyText);
+    });
+  });
+  document.querySelector('[data-copy-talking]').addEventListener('click', async (e) => {
+    const text = talkingPoints.map(p => `• ${p}`).join('\n\n');
+    await copyToClipboard(e.currentTarget, text);
+  });
+
+  async function copyToClipboard(btn, text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      const orig = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1800);
+    } catch (e) {
+      alert('Copy failed: ' + e.message);
+    }
+  }
+
+  function escapeAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 </script>
 
