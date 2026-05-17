@@ -136,6 +136,7 @@
   </div>
 
   <div class="filters" id="filterBar">
+    <button class="filter-btn" data-filter="inbox" id="inboxFilterBtn" style="display:none;">Inbox</button>
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="new">New</button>
     <button class="filter-btn" data-filter="contacted">Contacted</button>
@@ -206,7 +207,12 @@
   }
 
   if (!isOwner) {
+    // Operators don't manage partners or see funnel/commission analytics.
     document.getElementById('partnersTab').style.display = 'none';
+    document.getElementById('funnelTab').style.display = 'none';
+    // Show the Inbox filter and default to it — focuses on the stages an
+    // operator typically actions: Full App → Approved → Terms → Funded.
+    document.getElementById('inboxFilterBtn').style.display = '';
   }
 
   // Sign out
@@ -217,7 +223,21 @@
 
   // Module-level state — declare BEFORE any async call that touches them
   let allLeads = [];
-  let currentFilter = 'all';
+  let currentFilter = isOwner ? 'all' : 'inbox';
+
+  // "Inbox" = stages the operator typically actions next. Anything
+  // outside this range is either pre-app (Josh's lane) or post-funding.
+  const INBOX_STATUSES = new Set(['full_app_submitted', 'approved', 'terms_accepted']);
+
+  // Sync filter-button active state with whatever currentFilter starts as.
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === currentFilter);
+  });
+
+  // Customize header copy for operators.
+  if (!isOwner) {
+    document.getElementById('pageTitle').textContent = 'Inbox';
+  }
 
   // View switcher (leads vs partners)
   const params = new URLSearchParams(window.location.search);
@@ -265,14 +285,24 @@
   function renderStats() {
     const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
     document.getElementById('statTotal').textContent = allLeads.length;
-    document.getElementById('statHot').textContent = allLeads.filter(l => l.qualification === 'hot').length;
+    if (isOwner) {
+      document.getElementById('statHot').textContent = allLeads.filter(l => l.qualification === 'hot').length;
+    } else {
+      // For operators, repurpose the "Hot" slot to show their Inbox count.
+      document.querySelector('#statHot').previousElementSibling.textContent = 'Inbox';
+      document.getElementById('statHot').textContent = allLeads.filter(l => INBOX_STATUSES.has(l.status)).length;
+    }
     document.getElementById('statPipe').textContent = allLeads.filter(l => ['contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted'].includes(l.status)).length;
     document.getElementById('statFunded').textContent = allLeads.filter(l => ['funded','operating'].includes(l.status)).length;
     document.getElementById('statRecent').textContent = allLeads.filter(l => new Date(l.created_at) >= sevenDaysAgo).length;
   }
 
   function renderTable() {
-    const filtered = currentFilter === 'all' ? allLeads : allLeads.filter(l => l.status === currentFilter);
+    const filtered = currentFilter === 'all'
+      ? allLeads
+      : (currentFilter === 'inbox'
+          ? allLeads.filter(l => INBOX_STATUSES.has(l.status))
+          : allLeads.filter(l => l.status === currentFilter));
     if (filtered.length === 0) {
       document.getElementById('content').innerHTML = `<div class="empty">No leads in this view.</div>`;
       return;
