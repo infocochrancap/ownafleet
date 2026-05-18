@@ -259,6 +259,27 @@
   let funnelPeriod = '30';   // days; 'all' = no filter
   let ixData = null;
 
+  // Funnel constants — must be declared above the view switcher for the same
+  // TDZ reason. `let` AND `const` are both in TDZ until their declaration is
+  // hit during execution; an awaited render fn can't reach forward to them.
+  const STAGE_RANK = {
+    new: 0, contacted: 1, application_sent: 2, mini_app_submitted: 3,
+    full_app_submitted: 4, approved: 5, terms_accepted: 6, funded: 7, operating: 8,
+    // legacy aliases
+    application_started: 3, documents_uploaded: 4, closed_won: 7
+  };
+  const FUNNEL_STAGES = [
+    { key: 'submitted', label: 'Lead submitted', rank: 0 },
+    { key: 'contacted', label: 'Contacted', rank: 1 },
+    { key: 'application_sent', label: 'Application sent', rank: 2 },
+    { key: 'mini_app_submitted', label: 'Mini app submitted', rank: 3 },
+    { key: 'full_app_submitted', label: 'Full app submitted', rank: 4 },
+    { key: 'approved', label: 'Approved', rank: 5 },
+    { key: 'terms_accepted', label: 'Terms accepted', rank: 6 },
+    { key: 'funded', label: 'Funded', rank: 7 },
+    { key: 'operating', label: 'Operating', rank: 8 }
+  ];
+
   // "Inbox" = stages the operator typically actions next. Anything
   // outside this range is either pre-app (Josh's lane) or post-funding.
   const INBOX_STATUSES = new Set(['full_app_submitted', 'approved', 'terms_accepted']);
@@ -983,28 +1004,7 @@
   // ============================================================
   // FUNNEL VIEW
   // ============================================================
-  // Stage ranks: monotonic forward progression. 'dead' is excluded.
-  // For each lead we compute the max rank they ever reached
-  // (current status + lead_status_history.to_status), so a lead that
-  // got to mini-app and then died still counts as having reached mini-app.
-  const STAGE_RANK = {
-    new: 0, contacted: 1, application_sent: 2, mini_app_submitted: 3,
-    full_app_submitted: 4, approved: 5, terms_accepted: 6, funded: 7, operating: 8,
-    // legacy aliases
-    application_started: 3, documents_uploaded: 4, closed_won: 7
-  };
-  const FUNNEL_STAGES = [
-    { key: 'submitted', label: 'Lead submitted', rank: 0 },
-    { key: 'contacted', label: 'Contacted', rank: 1 },
-    { key: 'application_sent', label: 'Application sent', rank: 2 },
-    { key: 'mini_app_submitted', label: 'Mini app submitted', rank: 3 },
-    { key: 'full_app_submitted', label: 'Full app submitted', rank: 4 },
-    { key: 'approved', label: 'Approved', rank: 5 },
-    { key: 'terms_accepted', label: 'Terms accepted', rank: 6 },
-    { key: 'funded', label: 'Funded', rank: 7 },
-    { key: 'operating', label: 'Operating', rank: 8 }
-  ];
-
+  // Stage ranks (STAGE_RANK + FUNNEL_STAGES) live at module top for TDZ safety.
   async function renderFunnel() {
     document.getElementById('content').innerHTML = `
       <div class="period-bar">
