@@ -710,50 +710,141 @@
 
   // Partners view
   async function renderPartners() {
-    const { data: partners, error } = await supabase
-      .from('referral_partners')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Pull partners + every lead (so we can attribute & stat-aggregate per partner)
+    const [partnersRes, leadsRes] = await Promise.all([
+      supabase.from('referral_partners').select('*'),
+      supabase.from('leads').select('id, referral_partner_id, status, created_at, estimated_equipment_value, estimated_total_commission')
+    ]);
 
-    if (error) {
-      document.getElementById('content').innerHTML = `<div class="empty">Error: ${error.message}</div>`;
+    if (partnersRes.error) {
+      document.getElementById('content').innerHTML = `<div class="empty">Error loading partners: ${escapeHtml(partnersRes.error.message)}</div>`;
       return;
     }
-    if (!partners || partners.length === 0) {
-      document.getElementById('content').innerHTML = `<div class="empty">No referral partners yet.</div>`;
-      return;
+    if (leadsRes.error) {
+      console.warn('Lead load error (showing partners without stats):', leadsRes.error);
     }
 
-    const rows = partners.map(p => `
-      <tr>
-        <td>
-          <div class="lead-name">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</div>
-          <div class="lead-email">${escapeHtml(p.email)}</div>
-        </td>
-        <td>${escapeHtml(p.company || '—')}</td>
-        <td><code style="background:var(--paper);padding:3px 8px;font-size:12px;">${escapeHtml(p.referral_code)}</code></td>
-        <td>${p.commission_split_pct}%</td>
-        <td>
-          <select class="status-select" data-id="${p.id}" data-type="partner">
-            <option value="pending" ${p.status === 'pending' ? 'selected' : ''}>Pending</option>
-            <option value="active" ${p.status === 'active' ? 'selected' : ''}>Active</option>
-            <option value="paused" ${p.status === 'paused' ? 'selected' : ''}>Paused</option>
-            <option value="rejected" ${p.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-          </select>
-        </td>
-        <td style="font-size:12px;color:var(--muted);">${formatDate(p.created_at)}</td>
-      </tr>
-    `).join('');
+    const partners = partnersRes.data || [];
+    const leads = leadsRes.data || [];
+
+    // Compute per-partner stats
+    const FUNDED_STATUSES = new Set(['funded', 'operating', 'closed_won']);
+    const statsByPartner = new Map();
+    for (const lead of leads) {
+      if (!lead.referral_partner_id) continue;
+      const id = lead.referral_partner_id;
+      let s = statsByPartner.get(id);
+      if (!s) {
+        s = { total: 0, active: 0, funded: 0, pipeline_value: 0, earned_commission: 0, latest_lead_at: null };
+        statsByPartner.set(id, s);
+      }
+      s.total += 1;
+      if (lead.status !== 'dead') {
+        s.active += 1;
+        s.pipeline_value += Number(lead.estimated_equipment_value || 0);
+      }
+      if (FUNDED_STATUSES.has(lead.status)) {
+        s.funded += 1;
+        s.earned_commission += Number(lead.estimated_total_commission || 0);
+      }
+      if (!s.latest_lead_at || new Date(lead.created_at) > new Date(s.latest_lead_at)) {
+        s.latest_lead_at = lead.created_at;
+      }
+    }
+
+    // Sort: pending first (needs action), then active by recent activity, then paused, then rejected
+    const STATUS_PRIORITY = { pending: 0, active: 1, paused: 2, rejected: 3 };
+    const sorted = partners.slice().sort((a, b) => {
+      const pa = STATUS_PRIORITY[a.status] ?? 9;
+      const pb = STATUS_PRIORITY[b.status] ?? 9;
+      if (pa !== pb) return pa - pb;
+      // Within same status: more recent activity first
+      const sa = statsByPartner.get(a.id);
+      const sb = statsByPartner.get(b.id);
+      const la = (sa && sa.latest_lead_at) || a.created_at;
+      const lb = (sb && sb.latest_lead_at) || b.created_at;
+      return new Date(lb) - new Date(la);
+    });
+
+    // Top bar: stats + Quick-add button
+    const totalCount = partners.length;
+    const pendingCount = partners.filter(p => p.status === 'pending').length;
+    const activeCount = partners.filter(p => p.status === 'active').length;
+    const activeWithLeads = partners.filter(p =>
+      p.status === 'active' && statsByPartner.get(p.id)?.total > 0
+    ).length;
+
+    const rows = sorted.length === 0
+      ? `<tr><td colspan="8" style="text-align:center;padding:60px;color:var(--muted);">No referral partners yet. Click "Quick add partner" above to onboard your first one.</td></tr>`
+      : sorted.map(p => {
+          const s = statsByPartner.get(p.id) || { total: 0, active: 0, funded: 0, pipeline_value: 0, earned_commission: 0, latest_lead_at: null };
+          const lastActivity = s.latest_lead_at || p.created_at;
+          const daysSince = Math.floor((Date.now() - new Date(lastActivity).getTime()) / 86400000);
+          const STALE_DAYS = 30;
+          const activityLabel = s.latest_lead_at
+            ? (daysSince === 0 ? 'Today' : daysSince === 1 ? '1d ago' : `${daysSince}d ago`)
+            : (p.status === 'active' ? `No leads (${daysSince}d since joined)` : '—');
+          const activityClass = (p.status === 'active' && (!s.latest_lead_at && daysSince >= STALE_DAYS))
+            || (s.latest_lead_at && daysSince >= STALE_DAYS) ? 'muted-warn' : '';
+          return `
+            <tr>
+              <td>
+                <div class="lead-name">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</div>
+                <div class="lead-email">${escapeHtml(p.email)}${p.company ? ' · ' + escapeHtml(p.company) : ''}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px;"><code style="background:var(--paper);padding:1px 6px;">${escapeHtml(p.referral_code)}</code></div>
+              </td>
+              <td>
+                <select class="status-select" data-id="${p.id}" data-type="partner">
+                  <option value="pending" ${p.status === 'pending' ? 'selected' : ''}>Pending</option>
+                  <option value="active" ${p.status === 'active' ? 'selected' : ''}>Active</option>
+                  <option value="paused" ${p.status === 'paused' ? 'selected' : ''}>Paused</option>
+                  <option value="rejected" ${p.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                </select>
+              </td>
+              <td style="text-align:right;">${s.total}</td>
+              <td style="text-align:right;">${s.active}</td>
+              <td style="text-align:right;color:${s.funded > 0 ? 'var(--success)' : 'var(--ink-soft)'};">${s.funded}</td>
+              <td style="text-align:right;">${s.pipeline_value > 0 ? '$' + Math.round(s.pipeline_value).toLocaleString() : '—'}</td>
+              <td style="font-size:12px;color:${activityClass === 'muted-warn' ? 'var(--warn)' : 'var(--muted)'};">${escapeHtml(activityLabel)}</td>
+              <td style="font-size:12px;color:var(--muted);">${formatDate(p.created_at)}</td>
+            </tr>
+          `;
+        }).join('');
 
     document.getElementById('content').innerHTML = `
+      <div class="stats-row" style="display: grid;">
+        <div class="stat"><div class="stat-label">Total partners</div><div class="stat-value">${totalCount}</div></div>
+        <div class="stat"><div class="stat-label">Pending review</div><div class="stat-value" style="color:${pendingCount > 0 ? 'var(--warn)' : 'var(--ink)'}">${pendingCount}</div></div>
+        <div class="stat"><div class="stat-label">Active</div><div class="stat-value">${activeCount}</div></div>
+        <div class="stat"><div class="stat-label">Active w/ leads</div><div class="stat-value" style="color:var(--accent);">${activeWithLeads}</div></div>
+        <div class="stat"><div class="stat-label">Total leads</div><div class="stat-value">${leads.filter(l => l.referral_partner_id).length}</div></div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <button class="save-btn" id="quickAddPartnerBtn">+ Quick add partner</button>
+        <span style="margin-left:12px;font-size:12px;color:var(--muted);">Skips the application flow — auto-approves and sends the welcome email immediately.</span>
+      </div>
+
       <table>
-        <thead><tr><th>Partner</th><th>Company</th><th>Code</th><th>Split</th><th>Status</th><th>Joined</th></tr></thead>
+        <thead><tr>
+          <th>Partner</th>
+          <th>Status</th>
+          <th style="text-align:right;">Leads</th>
+          <th style="text-align:right;">Active</th>
+          <th style="text-align:right;">Funded</th>
+          <th style="text-align:right;">Pipeline $</th>
+          <th>Last activity</th>
+          <th>Joined</th>
+        </tr></thead>
         <tbody>${rows}</tbody>
       </table>
     `;
 
+    // Wire Quick-add button
+    document.getElementById('quickAddPartnerBtn').addEventListener('click', openQuickAddPartnerModal);
+
+    // Wire status changes (unchanged behavior)
     document.querySelectorAll('.status-select[data-type="partner"]').forEach(sel => {
-      // Capture previous status so we know whether to fire the approval email
       const previousStatus = sel.value;
       sel.dataset.previousStatus = previousStatus;
       sel.addEventListener('change', async () => {
@@ -772,7 +863,6 @@
         }
         sel.dataset.previousStatus = sel.value;
 
-        // Fire approval email if status moved INTO active from something else
         if (sel.value === 'active' && prev !== 'active') {
           if (!confirm('Send approval email with referral link to this partner?')) return;
           try {
@@ -796,6 +886,98 @@
         }
       });
     });
+  }
+
+  function openQuickAddPartnerModal() {
+    document.getElementById('modalBody').innerHTML = `
+      <h2>Quick add partner</h2>
+      <p class="modal-sub">Skips the application form. Creates an active partner record and sends the welcome email immediately. Use this for friends/known referrers — not strangers.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <label>
+          <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">First name *</span>
+          <input type="text" id="qapFirstName" style="width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);font-family:inherit;font-size:14px;">
+        </label>
+        <label>
+          <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">Last name *</span>
+          <input type="text" id="qapLastName" style="width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);font-family:inherit;font-size:14px;">
+        </label>
+        <label>
+          <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">Email *</span>
+          <input type="email" id="qapEmail" style="width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);font-family:inherit;font-size:14px;">
+        </label>
+        <label>
+          <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">Phone</span>
+          <input type="tel" id="qapPhone" style="width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);font-family:inherit;font-size:14px;">
+        </label>
+        <label>
+          <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">Company</span>
+          <input type="text" id="qapCompany" style="width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);font-family:inherit;font-size:14px;">
+        </label>
+      </div>
+      <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">Notes (private)</span>
+      <textarea id="qapNotes" placeholder="Optional — how do you know them, expected lead types, etc." style="width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper);font-family:inherit;font-size:14px;min-height:60px;margin-bottom:16px;"></textarea>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="save-btn" id="qapSubmit">Create + send welcome email</button>
+        <span class="ix-submit-msg" id="qapMsg"></span>
+      </div>
+    `;
+    document.getElementById('modalBg').classList.add('open');
+    document.getElementById('qapFirstName').focus();
+    document.getElementById('qapSubmit').addEventListener('click', submitQuickAddPartner);
+  }
+
+  async function submitQuickAddPartner() {
+    const btn = document.getElementById('qapSubmit');
+    const msg = document.getElementById('qapMsg');
+    msg.className = 'ix-submit-msg';
+    msg.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+
+    const payload = {
+      first_name: document.getElementById('qapFirstName').value.trim(),
+      last_name:  document.getElementById('qapLastName').value.trim(),
+      email:      document.getElementById('qapEmail').value.trim(),
+      phone:      document.getElementById('qapPhone').value.trim(),
+      company:    document.getElementById('qapCompany').value.trim(),
+      notes:      document.getElementById('qapNotes').value.trim()
+    };
+
+    if (!payload.first_name || !payload.last_name || !payload.email) {
+      msg.className = 'ix-submit-msg error';
+      msg.textContent = 'First name, last name, and email are required.';
+      btn.disabled = false;
+      btn.textContent = 'Create + send welcome email';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin-add-partner', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      msg.className = 'ix-submit-msg success';
+      msg.textContent = data.email_sent === false
+        ? `Created — but welcome email failed. ${data.warning || ''}`
+        : 'Created ✓ — welcome email sent';
+      btn.textContent = 'Done';
+      setTimeout(() => {
+        document.getElementById('modalBg').classList.remove('open');
+        renderPartners();  // refresh table
+      }, 1200);
+    } catch (err) {
+      msg.className = 'ix-submit-msg error';
+      msg.textContent = err.message;
+      btn.disabled = false;
+      btn.textContent = 'Create + send welcome email';
+    }
   }
 
   // ============================================================
