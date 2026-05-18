@@ -116,6 +116,48 @@ export default async function handler(req, res) {
     .limit(1)
     .maybeSingle();
 
+  // 4b. Always log a prospect_interactions row so the booking surfaces on
+  //     /admin?view=interactions alongside the funnel view. Idempotent via
+  //     the unique (source, external_id) index when the same invitee URI
+  //     fires twice (Calendly retries occasionally).
+  const inviteeUri = payload.uri || null;
+  const eventName  = payload.scheduled_event?.name || 'Calendly meeting';
+  const startTime  = payload.scheduled_event?.start_time || null;
+  const eventUri   = payload.scheduled_event?.uri || null;
+
+  const interactionNotes = [
+    `Booked: ${eventName}`,
+    startTime
+      ? `Start: ${new Date(startTime).toLocaleString('en-US', {
+          timeZone: 'America/Los_Angeles',
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        })} PT`
+      : null
+  ].filter(Boolean).join('\n');
+
+  // Fire-and-forget — interaction logging shouldn't fail the webhook.
+  try {
+    const { error: ixErr } = await supabase
+      .from('prospect_interactions')
+      .insert({
+        first_name: firstName,
+        email: inviteeEmail,
+        direction: 'inbound',           // they reached out by scheduling
+        method: 'phone',                // the booked meeting type
+        subject: `Calendly booking — ${eventName}`,
+        notes: interactionNotes,
+        external_id: inviteeUri,
+        external_url: eventUri,
+        source: 'calendly'
+      });
+    if (ixErr && ixErr.code !== '23505') {
+      console.warn('prospect_interactions insert error:', ixErr);
+    }
+  } catch (e) {
+    console.warn('prospect_interactions threw:', e);
+  }
+
   if (existing) {
     // Already had the deck — just record that they booked (or re-booked).
     // Don't re-send the prep email; they have it already.
