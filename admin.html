@@ -250,9 +250,14 @@
     window.location.href = '/login';
   });
 
-  // Module-level state — declare BEFORE any async call that touches them
+  // Module-level state — declare BEFORE any async call that touches them.
+  // (Declarations below the view switcher trigger Temporal-Dead-Zone errors
+  //  when an awaited render fn tries to read/assign before its `let` is hit.)
   let allLeads = [];
   let currentFilter = isOwner ? 'all' : 'inbox';
+  let funnelData = null;
+  let funnelPeriod = '30';   // days; 'all' = no filter
+  let ixData = null;
 
   // "Inbox" = stages the operator typically actions next. Anything
   // outside this range is either pre-app (Josh's lane) or post-funding.
@@ -818,9 +823,6 @@
     { key: 'operating', label: 'Operating', rank: 8 }
   ];
 
-  let funnelData = null;  // cached after first load
-  let funnelPeriod = '30';  // days; 'all' = no filter
-
   async function renderFunnel() {
     document.getElementById('content').innerHTML = `
       <div class="period-bar">
@@ -1061,8 +1063,6 @@
   // One row per touchpoint; we group by email in the UI so each
   // prospect shows up once with their latest activity. Engagement
   // status comes from cross-referencing deck_requests + leads.
-
-  let ixData = null;
 
   async function renderInteractions() {
     document.getElementById('content').innerHTML = `
