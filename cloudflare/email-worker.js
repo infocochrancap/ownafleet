@@ -30,14 +30,28 @@ const SELF_ADDRESS = 'log@ownafleet.com';
 const MAX_BODY_BYTES = 100_000;
 const MAX_NOTES_CHARS = 1000;
 
+// Per-sender allowlist for personal addresses (Gmail, etc.) that should
+// count as "us" when determining outbound vs inbound. Set via Worker env
+// var INTERNAL_EMAILS as a comma-separated list, e.g.
+//   "joshcochran@gmail.com, andrea.pabion@gmail.com"
+function getInternalEmails(env) {
+  const raw = (env && env.INTERNAL_EMAILS) || '';
+  return new Set(
+    raw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+  );
+}
+
 export default {
   async email(message, env, ctx) {
     try {
       const fromHeader = message.from || '';
       const toHeader   = message.headers.get('To')   || '';
       const ccHeader   = message.headers.get('Cc')   || '';
-      const subject    = message.headers.get('Subject')    || '';
+      const rawSubject = message.headers.get('Subject')    || '';
+      const subject    = decodeMimeWords(rawSubject);
       const messageId  = message.headers.get('Message-ID') || null;
+
+      const internalEmails = getInternalEmails(env);
 
       const fromAddr = extractAddresses(fromHeader)[0] || { email: '', name: '' };
       const recipients = [
@@ -45,7 +59,7 @@ export default {
         ...extractAddresses(ccHeader)
       ].filter(r => r.email && r.email !== SELF_ADDRESS);
 
-      const isOutbound = isInternal(fromAddr.email);
+      const isOutbound = isInternal(fromAddr.email, internalEmails);
 
       // Best-effort body excerpt
       let body = '';
@@ -57,8 +71,8 @@ export default {
       // For outbound: prospects = external recipients.
       // For inbound:  prospect  = the external sender.
       const parties = isOutbound
-        ? recipients.filter(r => !isInternal(r.email))
-        : (!isInternal(fromAddr.email) ? [fromAddr] : []);
+        ? recipients.filter(r => !isInternal(r.email, internalEmails))
+        : (!isInternal(fromAddr.email, internalEmails) ? [fromAddr] : []);
 
       if (parties.length === 0) {
         console.log('No external parties found, skipping.');
@@ -67,7 +81,8 @@ export default {
 
       for (let i = 0; i < parties.length; i++) {
         const p = parties[i];
-        const [first, ...rest] = (p.name || '').split(/\s+/).filter(Boolean);
+        const decodedName = decodeMimeWords(p.name || '');
+        const [first, ...rest] = decodedName.split(/\s+/).filter(Boolean);
 
         // Compose a unique external_id per row when one email goes to multiple
         // prospects, so the unique (source, external_id) index doesn't drop
@@ -124,9 +139,45 @@ function extractAddresses(header) {
   return out;
 }
 
-function isInternal(email) {
+function isInternal(email, internalEmails) {
   if (!email) return false;
-  return INTERNAL_DOMAINS.some(d => email.endsWith('@' + d));
+  const e = email.toLowerCase();
+  if (internalEmails && internalEmails.has(e)) return true;
+  return INTERNAL_DOMAINS.some(d => e.endsWith('@' + d));
+}
+
+// RFC 2047 encoded-word decoder: =?CHARSET?Q?TEXT?= and =?CHARSET?B?TEXT?=
+// Handles the most common cases (UTF-8, Q + B encoding). Subject lines and
+// display names can arrive encoded this way when they contain non-ASCII.
+function decodeMimeWords(s) {
+  if (!s) return '';
+  return s.replace(/=\?([^?]+)\?([QqBb])\?([^?]*)\?=/g, (_match, _charset, enc, encoded) => {
+    try {
+      if (enc.toUpperCase() === 'Q') {
+        // Q-encoding: _ → space, =XX → byte
+        const bytes = [];
+        for (let i = 0; i < encoded.length; i++) {
+          const c = encoded[i];
+          if (c === '_') {
+            bytes.push(0x20);
+          } else if (c === '=' && i + 2 < encoded.length) {
+            bytes.push(parseInt(encoded.slice(i + 1, i + 3), 16));
+            i += 2;
+          } else {
+            bytes.push(c.charCodeAt(0));
+          }
+        }
+        return new TextDecoder('utf-8').decode(new Uint8Array(bytes));
+      } else if (enc.toUpperCase() === 'B') {
+        // B-encoding: base64
+        const binary = atob(encoded);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new TextDecoder('utf-8').decode(bytes);
+      }
+    } catch (_) { /* fall through */ }
+    return encoded; // best-effort fallback
+  }).replace(/\?=\s+=\?/g, ''); // collapse adjacent encoded-word sequences
 }
 
 async function streamToString(stream, maxBytes) {
