@@ -109,6 +109,34 @@
     .funnel-row, .funnel-header { grid-template-columns: 1fr 70px 70px; }
     .funnel-row .funnel-bar-wrap, .funnel-header .funnel-bar-h { display: none; }
   }
+
+  /* Interactions view */
+  .ix-form-card { background: white; border-top: 3px solid var(--accent); padding: 28px 32px; margin-bottom: 32px; }
+  .ix-form-card h3 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 16px; }
+  .ix-form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media (max-width: 900px) { .ix-form-grid { grid-template-columns: 1fr 1fr; } }
+  .ix-form-grid label { display: block; }
+  .ix-form-grid input, .ix-form-grid select, .ix-form-card textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; font-size: 14px; color: var(--ink); border-radius: 0;
+  }
+  .ix-form-grid input:focus, .ix-form-grid select:focus, .ix-form-card textarea:focus { outline: none; border-color: var(--accent); background: white; }
+  .ix-form-card label .lbl { display: block; font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+  .ix-form-card textarea { min-height: 70px; margin-bottom: 12px; resize: vertical; }
+  .ix-submit-row { display: flex; align-items: center; gap: 14px; }
+  .ix-submit-msg { font-size: 12px; color: var(--muted); }
+  .ix-submit-msg.success { color: var(--success); }
+  .ix-submit-msg.error { color: var(--warn); }
+
+  .ix-prospect-table tr { cursor: pointer; }
+  .ix-status-badge { display: inline-block; padding: 3px 9px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  .ix-status-stale     { background: rgba(184,92,58,0.12);  color: var(--warn); }
+  .ix-status-recent    { background: rgba(107,114,128,0.12); color: var(--ink-soft); }
+  .ix-status-engaged   { background: rgba(139,111,63,0.15); color: var(--accent-deep); }
+  .ix-status-booked    { background: rgba(47,93,61,0.12);   color: var(--success); }
+  .ix-status-applied   { background: rgba(47,93,61,0.20);   color: var(--success); }
+
+  .ix-method-pill { display: inline-block; padding: 2px 7px; font-size: 10px; color: var(--ink-soft); background: var(--paper-warm); margin-right: 4px; text-transform: capitalize; }
+  .ix-dir-arrow { font-family: 'Courier New', monospace; font-size: 12px; color: var(--accent); margin-right: 6px; }
 </style>
 </head>
 <body>
@@ -117,6 +145,7 @@
   <a href="/" class="nav-brand">OWNAFLEET · ADMIN</a>
   <div class="nav-right">
     <a href="/admin" class="nav-tab active">Leads</a>
+    <a href="/admin?view=interactions" class="nav-tab" id="interactionsTab">Interactions</a>
     <a href="/admin?view=funnel" class="nav-tab" id="funnelTab">Funnel</a>
     <a href="/admin?view=partners" class="nav-tab" id="partnersTab">Partners</a>
     <span class="nav-user" id="userEmail">—</span>
@@ -263,6 +292,13 @@
     document.getElementById('filterBar').style.display = 'none';
     document.getElementById('statsRow').style.display = 'none';
     await renderFunnel();
+  } else if (view === 'interactions') {
+    document.getElementById('pageTitle').textContent = 'Interactions';
+    document.querySelector('.nav-tab.active').classList.remove('active');
+    document.getElementById('interactionsTab').classList.add('active');
+    document.getElementById('filterBar').style.display = 'none';
+    document.getElementById('statsRow').style.display = 'none';
+    await renderInteractions();
   } else {
     await loadLeads();
   }
@@ -1019,12 +1055,366 @@
     `;
   }
 
+  // ============================================================
+  // INTERACTIONS VIEW
+  // ============================================================
+  // One row per touchpoint; we group by email in the UI so each
+  // prospect shows up once with their latest activity. Engagement
+  // status comes from cross-referencing deck_requests + leads.
+
+  let ixData = null;
+
+  async function renderInteractions() {
+    document.getElementById('content').innerHTML = `
+      <div class="ix-form-card">
+        <h3>Log a new interaction</h3>
+        <div class="ix-form-grid">
+          <label>
+            <span class="lbl">Direction *</span>
+            <select id="ixDirection">
+              <option value="outbound">Outbound (we reached out)</option>
+              <option value="inbound">Inbound (they reached out)</option>
+            </select>
+          </label>
+          <label>
+            <span class="lbl">Method *</span>
+            <select id="ixMethod">
+              <option value="email">Email</option>
+              <option value="text">Text</option>
+              <option value="phone">Phone</option>
+              <option value="video_call">Video call</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="in_person">In person</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>
+            <span class="lbl">First name</span>
+            <input type="text" id="ixFirstName" autocomplete="off">
+          </label>
+          <label>
+            <span class="lbl">Last name</span>
+            <input type="text" id="ixLastName" autocomplete="off">
+          </label>
+          <label>
+            <span class="lbl">Email</span>
+            <input type="email" id="ixEmail" autocomplete="off">
+          </label>
+          <label>
+            <span class="lbl">Phone</span>
+            <input type="tel" id="ixPhone" autocomplete="off">
+          </label>
+          <label>
+            <span class="lbl">Subject / label</span>
+            <input type="text" id="ixSubject" autocomplete="off" placeholder="e.g. Intro email">
+          </label>
+          <label>
+            <span class="lbl">Referral source</span>
+            <input type="text" id="ixReferralSource" autocomplete="off" placeholder="e.g. Tim B intro">
+          </label>
+        </div>
+        <span class="lbl">Notes</span>
+        <textarea id="ixNotes" placeholder="What was discussed, agreed, or asked for…"></textarea>
+        <div class="ix-submit-row">
+          <button class="save-btn" id="ixSubmit">Log interaction</button>
+          <span class="ix-submit-msg" id="ixMsg"></span>
+        </div>
+      </div>
+
+      <div id="ixListContainer"><div class="loading">Loading…</div></div>
+    `;
+
+    document.getElementById('ixSubmit').addEventListener('click', submitInteractionForm);
+
+    await loadInteractions();
+  }
+
+  async function loadInteractions() {
+    const [interactionsRes, decksRes, leadsRes] = await Promise.all([
+      supabase.from('prospect_interactions').select('*').order('logged_at', { ascending: false }),
+      supabase.from('deck_requests').select('email, booked_at, created_at'),
+      supabase.from('leads').select('email, status')
+    ]);
+
+    if (interactionsRes.error) {
+      document.getElementById('ixListContainer').innerHTML = `<div class="empty">Error: ${escapeHtml(interactionsRes.error.message)}</div>`;
+      return;
+    }
+
+    ixData = {
+      interactions: interactionsRes.data || [],
+      decks: decksRes.data || [],
+      leads: leadsRes.data || []
+    };
+
+    renderInteractionsList();
+  }
+
+  function renderInteractionsList() {
+    if (!ixData) return;
+    const { interactions, decks, leads } = ixData;
+
+    // Build engagement lookup by email (lowercased)
+    const deckByEmail = new Map();
+    for (const d of decks) {
+      if (!d.email) continue;
+      const key = d.email.toLowerCase();
+      const existing = deckByEmail.get(key);
+      if (!existing || (d.booked_at && !existing.booked_at)) {
+        deckByEmail.set(key, d);
+      }
+    }
+    const leadByEmail = new Map();
+    for (const l of leads) {
+      if (!l.email) continue;
+      const key = l.email.toLowerCase();
+      const existing = leadByEmail.get(key);
+      if (!existing || statusRank(l.status) > statusRank(existing.status)) {
+        leadByEmail.set(key, l);
+      }
+    }
+
+    // Group interactions by email (lowercased) — primary identity key
+    const byProspect = new Map();
+    for (const ix of interactions) {
+      const key = (ix.email || ix.phone || ix.id).toLowerCase();
+      if (!byProspect.has(key)) {
+        byProspect.set(key, {
+          identity: {
+            first_name: ix.first_name,
+            last_name: ix.last_name,
+            email: ix.email,
+            phone: ix.phone
+          },
+          interactions: [],
+          latest: null
+        });
+      }
+      const group = byProspect.get(key);
+      group.interactions.push(ix);
+      if (!group.latest || new Date(ix.logged_at) > new Date(group.latest.logged_at)) {
+        group.latest = ix;
+        // Prefer the most-recent non-empty identity fields
+        if (ix.first_name) group.identity.first_name = ix.first_name;
+        if (ix.last_name) group.identity.last_name = ix.last_name;
+        if (ix.email) group.identity.email = ix.email;
+        if (ix.phone) group.identity.phone = ix.phone;
+      }
+    }
+
+    // Compute engagement status per prospect
+    const now = Date.now();
+    const STALE_DAYS = 7;
+    for (const group of byProspect.values()) {
+      const email = (group.identity.email || '').toLowerCase();
+      const lead = leadByEmail.get(email);
+      const deck = deckByEmail.get(email);
+      const days = Math.floor((now - new Date(group.latest.logged_at).getTime()) / (24*60*60*1000));
+
+      if (lead && statusRank(lead.status) >= 2) {
+        group.status = 'applied';     // they're in the lead pipeline at app_sent+
+        group.statusLabel = 'Applied';
+      } else if (deck && deck.booked_at) {
+        group.status = 'booked';
+        group.statusLabel = 'Booked';
+      } else if (deck || lead) {
+        group.status = 'engaged';
+        group.statusLabel = 'Engaged';
+      } else if (days >= STALE_DAYS) {
+        group.status = 'stale';
+        group.statusLabel = `Stale (${days}d)`;
+      } else {
+        group.status = 'recent';
+        group.statusLabel = days === 0 ? 'Today' : `${days}d ago`;
+      }
+      group.daysSinceLast = days;
+    }
+
+    // Stats
+    const groups = Array.from(byProspect.values());
+    const counts = {
+      total: groups.length,
+      stale: groups.filter(g => g.status === 'stale').length,
+      engaged: groups.filter(g => ['engaged','booked','applied'].includes(g.status)).length,
+      recent: groups.filter(g => g.status === 'recent').length
+    };
+
+    // Sort: stale first (needs action), then recent, then engaged tiers
+    const PRIORITY = { stale: 0, recent: 1, engaged: 2, booked: 3, applied: 4 };
+    groups.sort((a, b) => {
+      const ap = PRIORITY[a.status] ?? 99;
+      const bp = PRIORITY[b.status] ?? 99;
+      if (ap !== bp) return ap - bp;
+      return new Date(b.latest.logged_at) - new Date(a.latest.logged_at);
+    });
+
+    const tableRows = groups.map(g => {
+      const name = [g.identity.first_name, g.identity.last_name].filter(Boolean).join(' ') || '(no name)';
+      const contact = g.identity.email || g.identity.phone || '—';
+      const last = g.latest;
+      const lastSnippet = last.subject || (last.notes ? last.notes.slice(0, 60) + (last.notes.length > 60 ? '…' : '') : '');
+      const dirArrow = last.direction === 'outbound' ? '→' : '←';
+      return `
+        <tr data-key="${escapeHtml(g.identity.email || g.identity.phone || '')}">
+          <td>
+            <div class="lead-name">${escapeHtml(name)}</div>
+            <div class="lead-email">${escapeHtml(contact)}</div>
+          </td>
+          <td>
+            <div><span class="ix-dir-arrow">${dirArrow}</span><span class="ix-method-pill">${escapeHtml(last.method.replace('_',' '))}</span> ${escapeHtml(lastSnippet)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">${formatDate(last.logged_at)} · ${escapeHtml(last.source.replace('_',' '))}</div>
+          </td>
+          <td style="text-align:center;">${g.interactions.length}</td>
+          <td><span class="ix-status-badge ix-status-${g.status}">${escapeHtml(g.statusLabel)}</span></td>
+        </tr>
+      `;
+    }).join('');
+
+    document.getElementById('ixListContainer').innerHTML = `
+      <div class="stats-row" style="display: grid;">
+        <div class="stat"><div class="stat-label">Prospects logged</div><div class="stat-value">${counts.total}</div></div>
+        <div class="stat"><div class="stat-label">Stale</div><div class="stat-value" style="color:var(--warn);">${counts.stale}</div></div>
+        <div class="stat"><div class="stat-label">Recent</div><div class="stat-value">${counts.recent}</div></div>
+        <div class="stat"><div class="stat-label">Engaged+</div><div class="stat-value" style="color:var(--accent);">${counts.engaged}</div></div>
+        <div class="stat"><div class="stat-label">Total touches</div><div class="stat-value">${interactions.length}</div></div>
+      </div>
+
+      ${groups.length === 0
+        ? '<div class="empty"><h3 style="font-family:Fraunces,serif;font-weight:400;">No interactions logged yet</h3><p>Log your first warm intro or inbound contact using the form above.</p></div>'
+        : `<table class="ix-prospect-table">
+            <thead>
+              <tr>
+                <th>Prospect</th>
+                <th>Last touch</th>
+                <th style="text-align:center;">#</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>`
+      }
+    `;
+
+    // Wire row clicks → open history modal
+    document.querySelectorAll('.ix-prospect-table tbody tr').forEach(tr => {
+      tr.addEventListener('click', () => {
+        const key = tr.dataset.key.toLowerCase();
+        const group = byProspect.get(key);
+        if (group) openInteractionHistory(group);
+      });
+    });
+  }
+
+  function openInteractionHistory(group) {
+    const name = [group.identity.first_name, group.identity.last_name].filter(Boolean).join(' ') || '(no name)';
+    const rows = group.interactions
+      .slice()
+      .sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at))
+      .map(ix => {
+        const dirArrow = ix.direction === 'outbound' ? '→ outbound' : '← inbound';
+        return `
+          <div class="history-item" style="padding:14px 0;">
+            <div style="display:flex;align-items:baseline;gap:10px;font-size:13px;">
+              <span style="font-family:'Courier New',monospace;color:var(--accent);font-size:11px;">${dirArrow}</span>
+              <strong style="text-transform:capitalize;">${escapeHtml(ix.method.replace('_',' '))}</strong>
+              ${ix.subject ? `· <span>${escapeHtml(ix.subject)}</span>` : ''}
+            </div>
+            ${ix.notes ? `<div style="font-size:13px;color:var(--ink-soft);margin:6px 0;white-space:pre-wrap;">${escapeHtml(ix.notes)}</div>` : ''}
+            <div class="when">${formatDate(ix.logged_at)} · ${escapeHtml(ix.source.replace('_',' '))}${ix.referral_source ? ` · ref: ${escapeHtml(ix.referral_source)}` : ''}${ix.external_url ? ` · <a href="${escapeHtml(ix.external_url)}" target="_blank" style="color:var(--accent);">link →</a>` : ''}</div>
+          </div>
+        `;
+      }).join('');
+
+    document.getElementById('modalBody').innerHTML = `
+      <h2>${escapeHtml(name)}</h2>
+      <div class="modal-sub">
+        ${group.identity.email ? escapeHtml(group.identity.email) : ''}
+        ${group.identity.email && group.identity.phone ? ' · ' : ''}
+        ${group.identity.phone ? escapeHtml(group.identity.phone) : ''}
+        · <span class="ix-status-badge ix-status-${group.status}">${escapeHtml(group.statusLabel)}</span>
+      </div>
+      <div class="modal-section">
+        <h3>Interaction history (${group.interactions.length})</h3>
+        ${rows}
+      </div>
+    `;
+    document.getElementById('modalBg').classList.add('open');
+  }
+
+  async function submitInteractionForm() {
+    const btn = document.getElementById('ixSubmit');
+    const msg = document.getElementById('ixMsg');
+    msg.className = 'ix-submit-msg';
+    msg.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const payload = {
+      direction: document.getElementById('ixDirection').value,
+      method: document.getElementById('ixMethod').value,
+      first_name: document.getElementById('ixFirstName').value.trim(),
+      last_name: document.getElementById('ixLastName').value.trim(),
+      email: document.getElementById('ixEmail').value.trim(),
+      phone: document.getElementById('ixPhone').value.trim(),
+      subject: document.getElementById('ixSubject').value.trim(),
+      notes: document.getElementById('ixNotes').value.trim(),
+      referral_source: document.getElementById('ixReferralSource').value.trim(),
+      source: 'manual'
+    };
+
+    if (!payload.email && !payload.phone) {
+      msg.className = 'ix-submit-msg error';
+      msg.textContent = 'Email or phone is required.';
+      btn.disabled = false;
+      btn.textContent = 'Log interaction';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/log-interaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+
+      msg.className = 'ix-submit-msg success';
+      msg.textContent = 'Logged ✓';
+      // Clear the form
+      ['ixFirstName','ixLastName','ixEmail','ixPhone','ixSubject','ixNotes','ixReferralSource'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      // Refresh the list
+      await loadInteractions();
+    } catch (err) {
+      msg.className = 'ix-submit-msg error';
+      msg.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Log interaction';
+    }
+  }
+
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
   function formatDate(iso) {
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function statusRank(status) {
+    const RANKS = {
+      new: 0, contacted: 1, application_sent: 2, mini_app_submitted: 3,
+      full_app_submitted: 4, approved: 5, terms_accepted: 6, funded: 7,
+      operating: 8, dead: -1,
+      application_started: 3, documents_uploaded: 4, closed_won: 7
+    };
+    return RANKS[status] ?? 0;
   }
 </script>
 
