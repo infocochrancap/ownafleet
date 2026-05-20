@@ -96,7 +96,7 @@ export default async function handler(req, res) {
         // Skip if they already moved past 'new' — they're being worked.
         if (lead && lead.status !== 'new' && lead.status !== 'dead') continue;
         // Skip dead leads too.
-        if (lead && lead.status === 'dead') continue;
+        if (lead && ['dead', 'archived', 'not_now'].includes(lead.status)) continue;
         summary.no_book.eligible += 1;
         try {
           await resend.emails.send({
@@ -141,7 +141,7 @@ export default async function handler(req, res) {
         // Skip if they're past the application stage in the lead pipeline.
         if (lead && PAST_APP_STATUSES.has(lead.status)) continue;
         // Skip dead leads.
-        if (lead && lead.status === 'dead') continue;
+        if (lead && ['dead', 'archived', 'not_now'].includes(lead.status)) continue;
         summary.no_app.eligible += 1;
         try {
           await resend.emails.send({

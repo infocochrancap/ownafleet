@@ -51,7 +51,6 @@ export default async function handler(req, res) {
 
   // Look up referral partner if a code was provided
   let referral_partner_id = null;
-  let referral_source = 'direct';
   if (body.referral_code) {
     const { data: partner } = await supabase
       .from('referral_partners')
@@ -61,7 +60,6 @@ export default async function handler(req, res) {
       .maybeSingle();
     if (partner) {
       referral_partner_id = partner.id;
-      referral_source = `partner:${body.referral_code.trim()}`;
     }
   }
 
@@ -79,7 +77,7 @@ export default async function handler(req, res) {
       liquidity: body.liquidity,
       notes: (body.notes || '').trim() || null,
       referral_partner_id,
-      referral_source
+      import_source: 'website_form'
     })
     .select()
     .single();
@@ -109,7 +107,7 @@ export default async function handler(req, res) {
 
     const subject = isBelowThreshold
       ? `New OwnaFleet lead [BELOW THRESHOLD]: ${lead.first_name} ${lead.last_name}`
-      : `New OwnaFleet lead: ${lead.first_name} ${lead.last_name} [${lead.qualification}]`;
+      : `New OwnaFleet lead: ${lead.first_name} ${lead.last_name}`;
 
     await resend.emails.send({
       from: FROM,
@@ -147,10 +145,7 @@ function internalNotifyHtml(lead, isBelowThreshold) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.5; color: #0B1724;">
       <h2 style="color: #0B1724; margin-bottom: 8px;">New lead — ${escape(lead.first_name)} ${escape(lead.last_name)}</h2>
-      <p style="color: #6B7280; font-size: 13px; margin-top: 0;">
-        Qualification tier: <strong style="color: #8B6F3F;">${lead.qualification.toUpperCase()}</strong>
-        ${isBelowThreshold ? ' &nbsp;·&nbsp; <strong style="color: #B85C3A;">BELOW THRESHOLD — auto-decline sent</strong>' : ''}
-      </p>
+      ${isBelowThreshold ? '<p style="color: #B85C3A; font-size: 13px; margin-top: 0;"><strong>BELOW THRESHOLD — auto-decline sent</strong></p>' : ''}
       <table style="border-collapse: collapse; width: 100%; margin-top: 16px;">
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280; width: 40%;">EMAIL</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.email)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">PHONE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.phone)}</td></tr>
@@ -159,7 +154,6 @@ function internalNotifyHtml(lead, isBelowThreshold) {
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">NET WORTH</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.net_worth)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">LIQUIDITY</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.liquidity)}</td></tr>
         ${lead.notes ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">NOTES</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.notes)}</td></tr>` : ''}
-        ${lead.referral_source && lead.referral_source !== 'direct' ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">SOURCE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.referral_source)}</td></tr>` : ''}
       </table>
       <p style="margin-top: 24px; font-size: 13px; color: #6B7280;">View in admin: <a href="https://ownafleet.com/admin">ownafleet.com/admin</a></p>
     </div>

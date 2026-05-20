@@ -296,7 +296,7 @@
   // Load this partner's leads (RLS enforces filtering — they only see their own)
   const { data: leads, error: lErr } = await supabase
     .from('leads')
-    .select('id, created_at, first_name, last_name, equipment_range, status, qualification, estimated_total_commission')
+    .select('id, created_at, first_name, last_name, equipment_range, status, estimated_total_commission')
     .order('created_at', { ascending: false });
 
   if (lErr) {

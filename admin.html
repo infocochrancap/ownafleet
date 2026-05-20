@@ -28,8 +28,15 @@
   main { max-width: 1400px; margin: 0 auto; padding: 40px 32px; }
   h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 48px; letter-spacing: -0.02em; margin-bottom: 32px; }
 
+  .buckets { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 0; }
+  .bucket-btn { background: none; border: none; padding: 10px 18px; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; font-family: inherit; color: var(--muted); transition: all 0.15s; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+  .bucket-btn:hover { color: var(--accent); }
+  .bucket-btn.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .bucket-btn .bucket-count { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 11px; }
+  .bucket-btn.active .bucket-count { color: var(--accent); }
+
   .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-  .filter-btn { background: white; border: 1px solid var(--line); padding: 8px 16px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; color: var(--ink-soft); transition: all 0.15s; }
+  .filter-btn { background: white; border: 1px solid var(--line); padding: 6px 12px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; color: var(--ink-soft); transition: all 0.15s; }
   .filter-btn:hover { border-color: var(--accent); }
   .filter-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
 
@@ -157,16 +164,24 @@
   <h1 id="pageTitle">Leads</h1>
 
   <div class="stats-row" id="statsRow">
-    <div class="stat"><div class="stat-label">Total</div><div class="stat-value" id="statTotal">—</div></div>
-    <div class="stat"><div class="stat-label">Hot</div><div class="stat-value" id="statHot">—</div></div>
-    <div class="stat"><div class="stat-label">In Pipeline</div><div class="stat-value" id="statPipe">—</div></div>
-    <div class="stat"><div class="stat-label">Funded</div><div class="stat-value" id="statFunded">—</div></div>
-    <div class="stat"><div class="stat-label">Last 7 days</div><div class="stat-value" id="statRecent">—</div></div>
+    <div class="stat"><div class="stat-label">Active pipeline</div><div class="stat-value" id="statActive">—</div></div>
+    <div class="stat"><div class="stat-label">Clients</div><div class="stat-value" id="statClients" style="color: var(--accent);">—</div></div>
+    <div class="stat"><div class="stat-label">Not now</div><div class="stat-value" id="statNotNow">—</div></div>
+    <div class="stat"><div class="stat-label">Archived</div><div class="stat-value" id="statArchived">—</div></div>
+    <div class="stat"><div class="stat-label">New last 7d</div><div class="stat-value" id="statRecent">—</div></div>
+  </div>
+
+  <div class="buckets" id="bucketBar">
+    <button class="bucket-btn active" data-bucket="active">Active <span class="bucket-count" id="bucketCountActive"></span></button>
+    <button class="bucket-btn" data-bucket="clients">Clients <span class="bucket-count" id="bucketCountClients"></span></button>
+    <button class="bucket-btn" data-bucket="not_now">Not now <span class="bucket-count" id="bucketCountNotNow"></span></button>
+    <button class="bucket-btn" data-bucket="archived">Archived <span class="bucket-count" id="bucketCountArchived"></span></button>
+    <button class="bucket-btn" data-bucket="all">All <span class="bucket-count" id="bucketCountAll"></span></button>
   </div>
 
   <div class="filters" id="filterBar">
     <button class="filter-btn" data-filter="inbox" id="inboxFilterBtn" style="display:none;">Inbox</button>
-    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn active" data-filter="all">All in bucket</button>
     <button class="filter-btn" data-filter="new">New</button>
     <button class="filter-btn" data-filter="contacted">Contacted</button>
     <button class="filter-btn" data-filter="application_sent">App Sent</button>
@@ -176,7 +191,9 @@
     <button class="filter-btn" data-filter="terms_accepted">Terms</button>
     <button class="filter-btn" data-filter="funded">Funded</button>
     <button class="filter-btn" data-filter="operating">Operating</button>
-    <button class="filter-btn" data-filter="dead">Dead</button>
+    <button class="filter-btn" data-filter="not_now">Not now</button>
+    <button class="filter-btn" data-filter="archived">Archived</button>
+    <button class="filter-btn" data-filter="dead">Dead (legacy)</button>
   </div>
 
   <div id="content"><div class="loading">Loading…</div></div>
@@ -192,7 +209,7 @@
 <script type="module">
   import { supabase, getUserRole } from '/shared/supabase.js';
 
-  const STATUSES = ['new','contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating','dead'];
+  const STATUSES = ['new','contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating','not_now','archived','dead'];
   const STATUS_LABEL = {
     new: 'New',
     contacted: 'Contacted',
@@ -203,13 +220,25 @@
     terms_accepted: 'Terms Accepted',
     funded: 'Funded',
     operating: 'Operating',
-    dead: 'Dead',
-    // Legacy values from before migration_006 — only shown if a historical lead
-    // is still on one of these. Should not appear in fresh data.
+    not_now: 'Not Now',
+    archived: 'Archived',
+    dead: 'Dead (legacy)',
+    // Pre-migration-006 values; should not appear in fresh data.
     application_started: 'Application Started (legacy)',
     documents_uploaded: 'Documents Uploaded (legacy)',
     closed_won: 'Closed Won (legacy)'
   };
+  // 4-bucket grouping for the top tabs
+  const BUCKETS = {
+    active:   new Set(['new','contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','application_started','documents_uploaded']),
+    clients:  new Set(['funded','operating','closed_won']),
+    not_now:  new Set(['not_now']),
+    archived: new Set(['archived','dead'])
+  };
+  function bucketFor(status) {
+    for (const [b, set] of Object.entries(BUCKETS)) if (set.has(status)) return b;
+    return 'active';
+  }
 
   // Auth gate
   const { data: { session } } = await supabase.auth.getSession();
@@ -254,6 +283,7 @@
   // (Declarations below the view switcher trigger Temporal-Dead-Zone errors
   //  when an awaited render fn tries to read/assign before its `let` is hit.)
   let allLeads = [];
+  let currentBucket = isOwner ? 'active' : 'active';  // operators also default to active
   let currentFilter = isOwner ? 'all' : 'inbox';
   let funnelData = null;
   let funnelPeriod = '30';   // days; 'all' = no filter
@@ -346,25 +376,34 @@
 
   function renderStats() {
     const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
-    document.getElementById('statTotal').textContent = allLeads.length;
-    if (isOwner) {
-      document.getElementById('statHot').textContent = allLeads.filter(l => l.qualification === 'hot').length;
-    } else {
-      // For operators, repurpose the "Hot" slot to show their Inbox count.
-      document.querySelector('#statHot').previousElementSibling.textContent = 'Inbox';
-      document.getElementById('statHot').textContent = allLeads.filter(l => INBOX_STATUSES.has(l.status)).length;
-    }
-    document.getElementById('statPipe').textContent = allLeads.filter(l => ['contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted'].includes(l.status)).length;
-    document.getElementById('statFunded').textContent = allLeads.filter(l => ['funded','operating'].includes(l.status)).length;
-    document.getElementById('statRecent').textContent = allLeads.filter(l => new Date(l.created_at) >= sevenDaysAgo).length;
+    const inBucket = (b) => allLeads.filter(l => bucketFor(l.status) === b).length;
+
+    document.getElementById('statActive').textContent   = inBucket('active');
+    document.getElementById('statClients').textContent  = inBucket('clients');
+    document.getElementById('statNotNow').textContent   = inBucket('not_now');
+    document.getElementById('statArchived').textContent = inBucket('archived');
+    document.getElementById('statRecent').textContent   = allLeads.filter(l => new Date(l.created_at) >= sevenDaysAgo).length;
+
+    // Bucket-tab badge counts
+    document.getElementById('bucketCountActive').textContent   = inBucket('active');
+    document.getElementById('bucketCountClients').textContent  = inBucket('clients');
+    document.getElementById('bucketCountNotNow').textContent   = inBucket('not_now');
+    document.getElementById('bucketCountArchived').textContent = inBucket('archived');
+    document.getElementById('bucketCountAll').textContent      = allLeads.length;
   }
 
   function renderTable() {
+    // First filter by bucket (top tabs), then by sub-filter (status row)
+    let bucketed = currentBucket === 'all'
+      ? allLeads.slice()
+      : allLeads.filter(l => bucketFor(l.status) === currentBucket);
+
     const filtered = currentFilter === 'all'
-      ? allLeads
+      ? bucketed
       : (currentFilter === 'inbox'
-          ? allLeads.filter(l => INBOX_STATUSES.has(l.status))
-          : allLeads.filter(l => l.status === currentFilter));
+          ? bucketed.filter(l => INBOX_STATUSES.has(l.status))
+          : bucketed.filter(l => l.status === currentFilter));
+
     if (filtered.length === 0) {
       document.getElementById('content').innerHTML = `<div class="empty">No leads in this view.</div>`;
       return;
@@ -373,16 +412,17 @@
       const ref = lead.referral_partners
         ? `${escapeHtml(lead.referral_partners.first_name)} ${escapeHtml(lead.referral_partners.last_name)}`
         : '<span style="color:var(--muted);">Direct</span>';
+      const targetAmount = lead.estimated_equipment_value
+        ? '$' + Math.round(Number(lead.estimated_equipment_value)).toLocaleString()
+        : '—';
       return `
         <tr data-id="${lead.id}">
           <td>
-            <div class="lead-name">${escapeHtml(lead.first_name)} ${escapeHtml(lead.last_name)}</div>
-            <div class="lead-email">${escapeHtml(lead.email)} · ${escapeHtml(lead.phone)}</div>
+            <div class="lead-name">${escapeHtml(lead.first_name || '')} ${escapeHtml(lead.last_name || '')}</div>
+            <div class="lead-email">${escapeHtml(lead.email || '')}${lead.email && lead.phone ? ' · ' : ''}${escapeHtml(lead.phone || '')}</div>
           </td>
-          <td><span class="qual qual-${lead.qualification}">${lead.qualification.replace('_',' ')}</span></td>
-          <td>${escapeHtml(lead.equipment_range)}</td>
-          <td>${escapeHtml(lead.net_worth)}</td>
-          <td>${escapeHtml(lead.liquidity)}</td>
+          <td style="font-size:13px;">${escapeHtml(lead.company || '')}</td>
+          <td style="text-align:right;font-family:'Fraunces',serif;font-size:14px;">${targetAmount}</td>
           <td>${ref}</td>
           <td>
             <select class="status-select" data-id="${lead.id}">
@@ -398,7 +438,7 @@
       <table>
         <thead>
           <tr>
-            <th>Lead</th><th>Tier</th><th>Equipment</th><th>Net Worth</th><th>Liquidity</th><th>Source</th><th>Status</th><th>Submitted</th>
+            <th>Lead</th><th>Company</th><th style="text-align:right;">Equip $ target</th><th>Source</th><th>Status</th><th>Created</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -444,7 +484,20 @@
     });
   }
 
-  // Filter clicks
+  // Bucket-tab clicks (top-level filter)
+  document.querySelectorAll('.bucket-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.bucket-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentBucket = btn.dataset.bucket;
+      // Reset sub-filter to "all in bucket" when changing buckets
+      currentFilter = 'all';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+      renderTable();
+    });
+  });
+
+  // Status sub-filter clicks
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -469,18 +522,24 @@
       ? `${escapeHtml(lead.referral_partners.first_name)} ${escapeHtml(lead.referral_partners.last_name)} (${escapeHtml(lead.referral_partners.email)})`
       : 'Direct';
 
+    const isArchivedLike = ['archived', 'dead'].includes(lead.status);
+    const inActiveOrNotNow = !isArchivedLike;
+
     document.getElementById('modalBody').innerHTML = `
-      <h2>${escapeHtml(lead.first_name)} ${escapeHtml(lead.last_name)}</h2>
-      <div class="modal-sub">Submitted ${formatDate(lead.created_at)} · <span class="qual qual-${lead.qualification}">${lead.qualification.replace('_',' ')}</span></div>
+      <h2>${escapeHtml(lead.first_name || '')} ${escapeHtml(lead.last_name || '')}</h2>
+      <div class="modal-sub">
+        ${lead.company ? `<strong>${escapeHtml(lead.company)}</strong> · ` : ''}
+        Created ${formatDate(lead.created_at)}
+        ${lead.import_source ? ` · <span style="font-size:11px;color:var(--muted);">imported (${escapeHtml(lead.import_source)})</span>` : ''}
+      </div>
       <div class="detail-grid">
-        <div class="detail-label">Email</div><div class="detail-value">${escapeHtml(lead.email)}</div>
-        <div class="detail-label">Phone</div><div class="detail-value">${escapeHtml(lead.phone)}</div>
-        <div class="detail-label">State</div><div class="detail-value">${escapeHtml(lead.state)}</div>
-        <div class="detail-label">Equipment Target</div><div class="detail-value">${escapeHtml(lead.equipment_range)}</div>
-        <div class="detail-label">Net Worth</div><div class="detail-value">${escapeHtml(lead.net_worth)}</div>
-        <div class="detail-label">Liquidity</div><div class="detail-value">${escapeHtml(lead.liquidity)}</div>
+        ${lead.email   ? `<div class="detail-label">Email</div><div class="detail-value">${escapeHtml(lead.email)}</div>` : ''}
+        ${lead.phone   ? `<div class="detail-label">Phone</div><div class="detail-value">${escapeHtml(lead.phone)}</div>` : ''}
+        ${lead.state   ? `<div class="detail-label">State</div><div class="detail-value">${escapeHtml(lead.state)}</div>` : ''}
+        ${lead.equipment_range ? `<div class="detail-label">Equipment Target</div><div class="detail-value">${escapeHtml(lead.equipment_range)}</div>` : ''}
+        ${lead.net_worth ? `<div class="detail-label">Net Worth</div><div class="detail-value">${escapeHtml(lead.net_worth)}</div>` : ''}
+        ${lead.liquidity ? `<div class="detail-label">Liquidity</div><div class="detail-value">${escapeHtml(lead.liquidity)}</div>` : ''}
         <div class="detail-label">Source</div><div class="detail-value">${ref}</div>
-        ${lead.notes ? `<div class="detail-label">Lead notes</div><div class="detail-value">${escapeHtml(lead.notes)}</div>` : ''}
       </div>
 
       <div class="modal-section">
@@ -489,36 +548,47 @@
           Lead hasn't booked a Calendly call within 24 hours? Send a warm follow-up nudge. After the call, send the Armada credit application link.
         </p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <button class="save-btn" id="sendNudgeBtn" ${lead.status === 'dead' ? 'disabled' : ''} style="background: var(--paper); color: var(--ink); border: 1px solid var(--ink);">
+          <button class="save-btn" id="sendNudgeBtn" ${isArchivedLike || !lead.email ? 'disabled' : ''} style="background: var(--paper); color: var(--ink); border: 1px solid var(--ink);" title="${!lead.email ? 'No email on file' : ''}">
             ${lead.status === 'contacted' ? 'Re-send nudge' : 'Send 24-hour nudge'}
           </button>
-          <button class="save-btn" id="sendApplicationBtn" ${lead.status === 'dead' ? 'disabled' : ''}>
+          <button class="save-btn" id="sendApplicationBtn" ${isArchivedLike || !lead.email ? 'disabled' : ''} title="${!lead.email ? 'No email on file' : ''}">
             ${['application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating'].includes(lead.status)
               ? 'Re-send application link'
               : 'Send Armada application →'}
           </button>
         </div>
+        ${inActiveOrNotNow ? `
+          <div style="margin-top: 12px;">
+            <button class="save-btn" id="archiveBtn" style="background: var(--paper); color: var(--warn); border: 1px solid var(--warn);">
+              Archive — they said no / not a fit
+            </button>
+          </div>
+        ` : ''}
       </div>
 
       <div class="modal-section">
         <h3>Deal economics</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div>
-            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Equipment value (actual)</label>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Equipment value (target / actual)</label>
             <input type="number" id="equipmentValue" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_equipment_value || ''}" placeholder="e.g. 1200000">
           </div>
           <div>
             <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Total commission (2.1%)</label>
             <input type="number" id="totalCommission" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_total_commission || ''}" placeholder="auto-calculates from value">
           </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Company / LLC</label>
+            <input type="text" id="leadCompany" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.company || '')}" placeholder="e.g. Blackrail LLC">
+          </div>
         </div>
-        <button class="save-btn" id="saveEconomics">Save economics</button>
+        <button class="save-btn" id="saveEconomics">Save</button>
       </div>
 
       ${isOwner ? `
       <div class="modal-section">
-        <h3>Internal notes (owner only)</h3>
-        <textarea class="notes-input" id="internalNotes">${escapeHtml(lead.internal_notes || '')}</textarea>
+        <h3>Notes (private — admins only)</h3>
+        <textarea class="notes-input" id="leadNotes" placeholder="Conversation history, agreed next steps, anything to remember…">${escapeHtml(lead.notes || '')}</textarea>
         <button class="save-btn" id="saveNotes">Save notes</button>
       </div>
       ` : ''}
@@ -559,19 +629,51 @@
     document.getElementById('saveEconomics').addEventListener('click', async () => {
       const value = parseFloat(valueInput.value) || null;
       const commission = parseFloat(commissionInput.value) || null;
+      const company = (document.getElementById('leadCompany')?.value || '').trim() || null;
       const { error } = await supabase
         .from('leads')
-        .update({ estimated_equipment_value: value, estimated_total_commission: commission })
+        .update({
+          estimated_equipment_value: value,
+          estimated_total_commission: commission,
+          company
+        })
         .eq('id', leadId);
       if (error) {
         alert('Save failed: ' + error.message);
       } else {
         lead.estimated_equipment_value = value;
         lead.estimated_total_commission = commission;
+        lead.company = company;
         document.getElementById('saveEconomics').textContent = 'Saved ✓';
-        setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save economics'; }, 1500);
+        setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save'; }, 1500);
+        // Refresh the table to show the company column update
+        renderTable();
       }
     });
+
+    // Archive button — one-click "they said no"
+    const archiveBtn = document.getElementById('archiveBtn');
+    if (archiveBtn) {
+      archiveBtn.addEventListener('click', async () => {
+        if (!confirm(`Archive ${lead.first_name} ${lead.last_name}?\n\nThis moves them out of your active pipeline. Use when they've said no, they're not a fit, or you've decided to stop pursuing.`)) return;
+        archiveBtn.disabled = true;
+        archiveBtn.textContent = 'Archiving…';
+        const { error } = await supabase
+          .from('leads')
+          .update({ status: 'archived', status_updated_by: session.user.id })
+          .eq('id', leadId);
+        if (error) {
+          alert('Archive failed: ' + error.message);
+          archiveBtn.disabled = false;
+          archiveBtn.textContent = 'Archive — they said no / not a fit';
+          return;
+        }
+        lead.status = 'archived';
+        renderStats();
+        renderTable();
+        document.getElementById('modalBg').classList.remove('open');
+      });
+    }
 
     // Send 24-hour nudge button — with Calendly pre-check
     document.getElementById('sendNudgeBtn').addEventListener('click', async () => {
@@ -680,11 +782,11 @@
 
     if (isOwner) {
       document.getElementById('saveNotes').addEventListener('click', async () => {
-        const notes = document.getElementById('internalNotes').value;
-        const { error } = await supabase.from('leads').update({ internal_notes: notes }).eq('id', leadId);
+        const notes = document.getElementById('leadNotes').value;
+        const { error } = await supabase.from('leads').update({ notes }).eq('id', leadId);
         if (error) alert('Save failed: ' + error.message);
         else {
-          lead.internal_notes = notes;
+          lead.notes = notes;
           document.getElementById('saveNotes').textContent = 'Saved ✓';
           setTimeout(() => { document.getElementById('saveNotes').textContent = 'Save notes'; }, 1500);
         }
@@ -692,9 +794,9 @@
 
       // Danger-zone: permanently delete this lead
       document.getElementById('deleteLeadBtn').addEventListener('click', async () => {
-        const fullName = `${lead.first_name} ${lead.last_name}`;
+        const fullName = `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '(no name)';
         const confirmed = confirm(
-          `Permanently delete ${fullName} (${lead.email})?\n\n` +
+          `Permanently delete ${fullName} (${lead.email || lead.phone || 'no contact'})?\n\n` +
           `This deletes the lead AND its status history. It cannot be undone.`
         );
         if (!confirmed) return;
