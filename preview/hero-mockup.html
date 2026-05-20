@@ -221,6 +221,35 @@
     line-height: 1.55;
   }
 
+  /* Punchy comparison callout below the benefit tiles */
+  .hero-stat {
+    margin-top: 32px;
+    padding: 22px 28px;
+    background: white;
+    border-left: 3px solid var(--accent);
+    max-width: 720px;
+  }
+  .hero-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .hero-stat-text {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .hero-stat-text strong {
+    color: var(--accent);
+    font-weight: 500;
+    font-style: italic;
+  }
+
   /* What it is — compressed */
   .how {
     background: white;
@@ -466,6 +495,11 @@
         <div class="benefit-title">Managed fleet</div>
         <div class="benefit-desc">A publicly-traded U.S. operator runs the fleet business. You take a strategic-oversight role.</div>
       </div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-label">vs. the alternatives</div>
+      <p class="hero-stat-text">Up to <strong>8x</strong> more Year-1 depreciation than oil &amp; gas, per dollar invested.</p>
     </div>
 
     <div class="hero-cta-wrap">
