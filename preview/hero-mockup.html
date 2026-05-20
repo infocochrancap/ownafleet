@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Homepage mockup v2 — OwnaFleet</title>
+<title>Homepage mockup v3 — OwnaFleet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -101,13 +101,86 @@
     margin-bottom: 36px;
     max-width: 820px;
   }
+  .hero-cta-wrap { margin-top: 40px; }
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 18px 36px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    font-weight: 500;
+    display: inline-block;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-primary:hover { background: var(--accent); }
   .hero-disclaim {
     font-size: 12px;
     letter-spacing: 0.15em;
     color: var(--muted);
     text-transform: uppercase;
     font-weight: 500;
-    margin-top: 32px;
+    margin-top: 28px;
+  }
+
+  /* What happens next — 3-step process */
+  .next {
+    background: var(--paper);
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+  }
+  .next .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 56px;
+    max-width: 720px;
+    font-weight: 300;
+  }
+  .next-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    counter-reset: nextstep;
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 760px) { .next-steps { grid-template-columns: 1fr; } }
+  .next-step {
+    background: white;
+    padding: 36px 32px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+  .next-step:last-child { border-right: none; }
+  @media (max-width: 760px) {
+    .next-step { border-right: none; border-bottom: 1px solid var(--line); }
+    .next-step:last-child { border-bottom: none; }
+  }
+  .next-step-num {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    color: var(--accent);
+    font-weight: 400;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .next-step-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .next-step-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
   }
 
   /* Benefit tiles */
@@ -302,16 +375,14 @@
 </head>
 <body>
 
-<div class="preview-label">MOCKUP V2 — Problem-led top + single-CTA form at bottom (per Tim's feedback)</div>
+<div class="preview-label">MOCKUP V3 — Tax-problem-first top + one hero CTA pointing to the form + 3-step "what happens next"</div>
 
 <div class="preview-note">
-  <strong>What's new vs. the live site:</strong>
-  (1) Hero leads with the tax problem, not the equipment.
-  (2) Schedule-a-call CTA removed from the hero.
-  (3) Single conversion point — the form at the bottom.
-  (4) "Income to offset" replaces "Equipment target" on the form.
-  &nbsp;·&nbsp;
-  All sections in between ("Who it's for", "Why people trust it", testimonial, About Josh, FAQ) would stay roughly as-is; not shown here so you can focus on the changed pieces.
+  <strong>What's new in v3 vs. v2:</strong>
+  (1) Hero has ONE button that scrolls to the form (not a call, not the deck).
+  (2) Added "What happens next" 3-step section so leads see the path before they fill the form.
+  (3) Removed the "credit application" and "deal structure" steps entirely — those happen after conversion and don't need to be on the public site.
+  (4) Equipment framed as the IRS-defensible business purpose, not the sales pitch.
 </div>
 
 <nav>
@@ -343,6 +414,10 @@
       </div>
     </div>
 
+    <div class="hero-cta-wrap">
+      <a href="#form" class="btn btn-primary">See if this fits →</a>
+    </div>
+
     <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
   </div>
 </section>
@@ -350,25 +425,52 @@
 <!-- ============ WHAT IT IS (kept, condensed) ============ -->
 <section class="how">
   <div class="container">
-    <div class="eyebrow">How it works</div>
-    <h2>You own it. They run it. <em>The tax code does the rest.</em></h2>
-    <p class="lede">Direct title to specific, serialized heavy equipment through your own LLC. A national publicly-traded operator runs the rental business. The federal tax code rewards real-asset ownership.</p>
+    <div class="eyebrow">The structure</div>
+    <h2>A real business with a real <em>business purpose.</em></h2>
+    <p class="lede">For accelerated depreciation to apply, you need genuine ownership of a real, income-producing asset. The structure below is what makes that defensible — to your CPA, your lender, and the IRS.</p>
 
     <div class="pillars">
       <div>
         <div class="pillar-num">01</div>
-        <div class="pillar-title">You own it directly</div>
-        <div class="pillar-desc">Specific, serialized equipment titled to your LLC. Not a fund interest, not pooled, not a security — a real asset you can identify, track, and sell.</div>
+        <div class="pillar-title">You own real equipment</div>
+        <div class="pillar-desc">Specific, serialized heavy equipment titled to your LLC. Not a fund interest, not pooled, not a security — a real asset you can identify, track, and sell.</div>
       </div>
       <div>
         <div class="pillar-num">02</div>
-        <div class="pillar-title">Operationally outsourced</div>
-        <div class="pillar-desc">A national publicly-traded rental operator handles the business: enrollment, customers, maintenance, telematics, remarketing. You take a strategic-oversight role.</div>
+        <div class="pillar-title">It produces real income</div>
+        <div class="pillar-desc">Your equipment is rented across a national fleet run by a publicly-traded U.S. operating partner. Net rental income is distributed to your LLC monthly.</div>
       </div>
       <div>
         <div class="pillar-num">03</div>
-        <div class="pillar-title">Tax-advantaged by structure</div>
-        <div class="pillar-desc">The federal tax code rewards real-asset ownership with accelerated-depreciation elections. Whether and how those apply depends on your situation — your CPA confirms.</div>
+        <div class="pillar-title">The tax treatment follows</div>
+        <div class="pillar-desc">Genuine ownership of real income-producing equipment is what allows the federal tax code's accelerated-depreciation elections to apply. Your CPA confirms scope.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT HAPPENS NEXT — 3 sequential steps ============ -->
+<section class="next">
+  <div class="container">
+    <div class="eyebrow">What happens next</div>
+    <h2>A three-step <em>path forward.</em></h2>
+    <p class="lede">No commitments, no fees, no pressure at any step. The path is designed so you can step in at any point and step out at any point — until you actually sign.</p>
+
+    <div class="next-steps">
+      <div class="next-step">
+        <div class="next-step-num">01</div>
+        <div class="next-step-title">Fill out the form</div>
+        <div class="next-step-desc">Quick details on your tax year and financial picture so we can see if this is a fit. Takes about a minute.</div>
+      </div>
+      <div class="next-step">
+        <div class="next-step-num">02</div>
+        <div class="next-step-title">We review &amp; send the overview</div>
+        <div class="next-step-desc">Within one business day, we confirm fit and send you the detailed 21-slide overview — structure, economics, and the questions most people ask before a first call.</div>
+      </div>
+      <div class="next-step">
+        <div class="next-step-num">03</div>
+        <div class="next-step-title">Schedule a call with Josh</div>
+        <div class="next-step-desc">20-minute conversation, on your timeline. We work through your specific situation: income picture, tax position, what you're trying to accomplish.</div>
       </div>
     </div>
   </div>
@@ -377,7 +479,7 @@
 <!-- (Other sections — Who it's for, Why trust it, About Josh, FAQ — would live here, unchanged. Skipped in this mockup.) -->
 
 <!-- ============ SINGLE CTA — FORM AT BOTTOM ============ -->
-<section class="cta-section">
+<section class="cta-section" id="form">
   <div class="container">
     <div class="eyebrow" style="color: var(--accent);">Get the overview</div>
     <h2>Tell us about your <em>tax year.</em></h2>
