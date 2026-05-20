@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Hero mockup — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724;
+    --ink-soft: #2A3647;
+    --muted: #6B7280;
+    --line: #D9DDE3;
+    --line-soft: #EEF0F3;
+    --paper: #F8F7F4;
+    --paper-warm: #F2F0EA;
+    --accent: #8B6F3F;
+    --accent-deep: #6B5430;
+    --success: #2F5D3D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .container-wide { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+
+  /* Preview-frame chrome */
+  .preview-label {
+    background: var(--ink);
+    color: white;
+    padding: 12px 32px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .preview-label.proposed { background: var(--accent); }
+  .preview-frame { border-bottom: 8px solid var(--ink); }
+  .preview-note {
+    background: var(--paper-warm);
+    padding: 24px 32px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    border-bottom: 1px solid var(--line);
+  }
+  .preview-note strong { color: var(--ink); }
+
+  /* ============ Shared homepage styles ============ */
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); }
+  h1, h2 { font-family: 'Fraunces', serif; font-weight: 300; letter-spacing: -0.02em; line-height: 1.05; }
+  h1 { font-size: clamp(48px, 7vw, 96px); }
+  em { font-style: italic; color: var(--accent); font-weight: 300; }
+
+  .hero {
+    padding-top: 100px;
+    padding-bottom: 100px;
+    position: relative;
+  }
+  .hero-sub {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin-bottom: 32px;
+    max-width: 820px;
+  }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 18px 32px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    font-weight: 500;
+    display: inline-block;
+  }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-secondary { background: white; color: var(--ink); border-color: var(--line); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .hero-disclaim {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 24px;
+  }
+
+  h1 { margin-bottom: 32px; }
+
+  /* ============ NEW: benefit tiles row ============ */
+  .benefits-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 40px;
+    margin-top: 8px;
+    max-width: 980px;
+  }
+  @media (max-width: 760px) {
+    .benefits-row { grid-template-columns: 1fr; gap: 12px; }
+  }
+  .benefit-tile {
+    background: white;
+    border-top: 3px solid var(--accent);
+    padding: 22px 24px;
+  }
+  .benefit-check {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .benefit-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .benefit-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ CURRENT HERO ============ -->
+<div class="preview-frame">
+  <div class="preview-label">CURRENT — live at ownafleet.com today</div>
+
+  <section class="hero">
+    <div class="container-wide">
+      <div class="eyebrow">Equipment ownership, simplified</div>
+      <h1>Heavy equipment that <em>pays you.</em></h1>
+      <p class="hero-sub">A turnkey solution to own real, titled equipment that's rented out by a major publicly-traded U.S. operating partner — built for individuals with a meaningful windfall or a strong income year.</p>
+      <div class="hero-ctas">
+        <a href="#" class="btn btn-primary">Request the overview</a>
+        <a href="#" class="btn btn-secondary">Schedule a 20-min call</a>
+      </div>
+      <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
+    </div>
+  </section>
+</div>
+
+<div class="preview-note">
+  ⬇ <strong>Below: proposed rewrite</strong> per Tim's feedback. Three changes:
+  audience-specific eyebrow, problem-first subhead, and a benefit tiles row visible
+  above the CTAs. H1 + disclaim unchanged.
+</div>
+
+<!-- ============ PROPOSED HERO ============ -->
+<div class="preview-frame">
+  <div class="preview-label proposed">PROPOSED — what Tim was asking for</div>
+
+  <section class="hero">
+    <div class="container-wide">
+      <div class="eyebrow">For high-income years · capital events · tax-aware deployment</div>
+      <h1>Heavy equipment that <em>pays you.</em></h1>
+      <p class="hero-sub">You had a strong income year, sold a business, or hit a capital event. Now you're looking for a real-asset play — beyond more real estate, beyond more equities — that actually does something for your tax position.</p>
+
+      <div class="benefits-row">
+        <div class="benefit-tile">
+          <div class="benefit-check">✓</div>
+          <div class="benefit-title">Year-1 depreciation</div>
+          <div class="benefit-desc">Against ordinary income under current federal tax code. Your CPA confirms scope before you sign.</div>
+        </div>
+        <div class="benefit-tile">
+          <div class="benefit-check">✓</div>
+          <div class="benefit-title">Monthly distributions</div>
+          <div class="benefit-desc">Cash flow from rental income across a national equipment fleet. Paid monthly to your LLC.</div>
+        </div>
+        <div class="benefit-tile">
+          <div class="benefit-check">✓</div>
+          <div class="benefit-title">Hands-off operations</div>
+          <div class="benefit-desc">A publicly-traded U.S. operating partner runs the equipment business. You take strategic oversight.</div>
+        </div>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="#" class="btn btn-primary">Request the overview</a>
+        <a href="#" class="btn btn-secondary">Schedule a 20-min call</a>
+      </div>
+      <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
+    </div>
+  </section>
+</div>
+
+</body>
+</html>
