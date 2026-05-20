@@ -360,6 +360,55 @@
     font-style: italic;
   }
 
+  /* Who it's for */
+  .qualifier { background: var(--paper); border-top: 1px solid var(--line); padding: 100px 0; }
+  .qualifier .lede { font-family: 'Fraunces', serif; font-size: clamp(18px, 2vw, 22px); color: var(--ink-soft); line-height: 1.5; margin-bottom: 56px; max-width: 720px; font-weight: 300; }
+  .qual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 720px) { .qual-grid { grid-template-columns: 1fr; } }
+  .qual-col { background: white; padding: 36px 32px; border-top: 3px solid var(--success); }
+  .qual-col h3 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; color: var(--ink); margin-bottom: 22px; }
+  .qual-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .qual-list li { font-size: 14px; color: var(--ink-soft); line-height: 1.55; display: flex; align-items: flex-start; gap: 12px; }
+  .qual-list li::before { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--success); flex-shrink: 0; margin-top: 5px; }
+  .qual-notfit { margin-top: 40px; padding: 22px 26px; background: var(--paper-warm); border-left: 3px solid var(--warn); font-size: 14px; color: var(--ink-soft); line-height: 1.7; }
+  .qual-notfit strong { color: var(--ink); font-weight: 500; }
+
+  /* Why people trust it */
+  .why { background: var(--paper-warm); border-top: 1px solid var(--line); padding: 100px 0; }
+  .why .lede { font-family: 'Fraunces', serif; font-size: clamp(18px, 2vw, 22px); color: var(--ink-soft); line-height: 1.5; margin-bottom: 56px; max-width: 720px; font-weight: 300; }
+  .cred-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  @media (max-width: 720px) { .cred-grid { grid-template-columns: 1fr; } }
+  .cred-item { background: white; padding: 32px; border-top: 3px solid var(--accent); }
+  .cred-h { font-family: 'Fraunces', serif; font-weight: 400; font-size: 20px; color: var(--ink); margin-bottom: 12px; }
+  .cred-desc { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink-soft); line-height: 1.65; }
+  .why-callout { margin-top: 40px; background: white; padding: 32px 40px; border-left: 3px solid var(--accent); display: grid; grid-template-columns: 180px 1fr; gap: 32px; align-items: center; }
+  @media (max-width: 720px) { .why-callout { grid-template-columns: 1fr; gap: 14px; padding: 24px; } }
+  .why-callout-label { font-family: 'Fraunces', serif; font-size: 17px; color: var(--accent); font-style: italic; }
+  .why-callout-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 300; line-height: 1.5; color: var(--ink-soft); }
+
+  /* Testimonial */
+  .testimonial { background: var(--paper); padding: 100px 0; border-top: 1px solid var(--line-soft); }
+  .testimonial-inner { max-width: 920px; margin: 0 auto; padding: 0 32px; text-align: center; }
+  .testimonial-mark { font-family: 'Fraunces', serif; font-size: 80px; color: var(--accent); line-height: 0.6; margin-bottom: 8px; }
+  .testimonial-quote { font-family: 'Fraunces', serif; font-size: clamp(22px, 2.8vw, 32px); font-weight: 300; line-height: 1.4; color: var(--ink); margin-bottom: 28px; }
+  .testimonial-attr { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; line-height: 1.6; }
+  .testimonial-attr strong { color: var(--ink); font-weight: 500; display: block; margin-bottom: 2px; }
+
+  /* About Josh */
+  .about { background: var(--ink); color: white; padding: 0; overflow: hidden; position: relative; }
+  .about::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 20%, rgba(139,111,63,0.18) 0%, transparent 55%); pointer-events: none; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1.2fr; min-height: 560px; position: relative; z-index: 1; }
+  @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } }
+  .about-photo { background-size: cover; background-position: center top; min-height: 400px; }
+  .about-content { padding: 80px 64px; display: flex; flex-direction: column; justify-content: center; }
+  @media (max-width: 720px) { .about-content { padding: 48px 28px; } }
+  .about-content .eyebrow { color: rgba(255,255,255,0.65); }
+  .about-content .eyebrow::before { background: rgba(255,255,255,0.4); }
+  .about-name { font-family: 'Fraunces', serif; font-weight: 300; font-size: clamp(44px, 5vw, 64px); line-height: 0.95; margin-bottom: 14px; color: white; letter-spacing: -0.02em; }
+  .about-role { font-size: 12px; letter-spacing: 0.22em; color: rgba(255,255,255,0.55); text-transform: uppercase; margin-bottom: 30px; }
+  .about-bio { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(255,255,255,0.88); margin-bottom: 22px; }
+  .about-disclosure { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.65; font-style: italic; margin-top: 8px; }
+
   footer {
     background: var(--ink);
     color: rgba(255,255,255,0.5);
@@ -375,14 +424,18 @@
 </head>
 <body>
 
-<div class="preview-label">MOCKUP V3 — Tax-problem-first top + one hero CTA pointing to the form + 3-step "what happens next"</div>
+<div class="preview-label">MOCKUP V4 — Tightened tiles · "Managed fleet" · Who's-it-for + Trust + Testimonial + About Josh restored</div>
 
 <div class="preview-note">
-  <strong>What's new in v3 vs. v2:</strong>
-  (1) Hero has ONE button that scrolls to the form (not a call, not the deck).
-  (2) Added "What happens next" 3-step section so leads see the path before they fill the form.
-  (3) Removed the "credit application" and "deal structure" steps entirely — those happen after conversion and don't need to be on the public site.
-  (4) Equipment framed as the IRS-defensible business purpose, not the sales pitch.
+  <strong>What's new in v4:</strong>
+  (1) Hero benefit tiles are tighter — one sentence each.
+  "Year-1 tax depreciation" → "<strong>100% Year-1 depreciation</strong>";
+  "No business to run" → "<strong>Managed fleet</strong>".
+  (2) Eyebrow condensed — dropped the "7- and 8-figure" specificity.
+  (3) Sections restored between How-it-works and the form: <strong>Who it's for</strong>,
+  <strong>Why people trust it</strong>, <strong>Testimonial</strong>, <strong>About Josh</strong> —
+  faithful copies of what's currently on the live site.
+  (4) Single CTA at the bottom + 3-step path forward (unchanged from v3).
 </div>
 
 <nav>
@@ -392,25 +445,25 @@
 <!-- ============ NEW HERO ============ -->
 <section class="hero">
   <div class="container-wide">
-    <div class="eyebrow">For high-income earners · 7- and 8-figure business owners</div>
+    <div class="eyebrow">For high-income years · windfalls · capital events</div>
     <h1>Offset this year's tax bill with a <em>depreciating real asset.</em></h1>
-    <p class="hero-sub">If you're staring at a six- or seven-figure tax bill this year — from a strong income year, a business sale, or a major capital event — heavy equipment ownership is a structured way to convert that exposure into a real, depreciating asset on your balance sheet.</p>
+    <p class="hero-sub">If you're staring at a major tax bill this year — from a strong income year, a business sale, or a capital event — heavy equipment ownership is a structured way to convert that exposure into a real, depreciating asset on your balance sheet.</p>
 
     <div class="benefits-row">
       <div class="benefit-tile">
         <div class="benefit-check">✓</div>
-        <div class="benefit-title">Year-1 tax depreciation</div>
-        <div class="benefit-desc">Federal tax code allows accelerated depreciation on qualifying heavy equipment — applied against your ordinary income. Your CPA confirms scope before you sign.</div>
+        <div class="benefit-title">100% Year-1 depreciation</div>
+        <div class="benefit-desc">Against ordinary income, on qualifying equipment. Your CPA confirms scope.</div>
       </div>
       <div class="benefit-tile">
         <div class="benefit-check">✓</div>
         <div class="benefit-title">Monthly cash distributions</div>
-        <div class="benefit-desc">Your equipment is rented across a national fleet operated by a publicly-traded U.S. partner. Net rental income is distributed monthly to your LLC.</div>
+        <div class="benefit-desc">Net rental income, distributed monthly to your LLC.</div>
       </div>
       <div class="benefit-tile">
         <div class="benefit-check">✓</div>
-        <div class="benefit-title">No business to run</div>
-        <div class="benefit-desc">The operating partner handles enrollment, customers, maintenance, telematics, and remarketing. You take a strategic-oversight role on your specific equipment.</div>
+        <div class="benefit-title">Managed fleet</div>
+        <div class="benefit-desc">A publicly-traded U.S. operator runs the business. You take a strategic-oversight role.</div>
       </div>
     </div>
 
@@ -445,6 +498,100 @@
         <div class="pillar-title">The tax treatment follows</div>
         <div class="pillar-desc">Genuine ownership of real income-producing equipment is what allows the federal tax code's accelerated-depreciation elections to apply. Your CPA confirms scope.</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHO IT'S FOR ============ -->
+<section class="qualifier">
+  <div class="container">
+    <div class="eyebrow">Who it's for</div>
+    <h2>Is this <em>for you?</em></h2>
+    <p class="lede">Most participants come through one of two doors. Either is a fit — specifics get worked out on a call.</p>
+
+    <div class="qual-grid">
+      <div class="qual-col">
+        <h3>Diversifying a windfall</h3>
+        <ul class="qual-list">
+          <li>A recent capital gain, business sale, or strong investment year</li>
+          <li>Looking for something real — uncorrelated to public markets</li>
+          <li>Want cash flow without operating a business yourself</li>
+          <li>Comfortable holding through the program's contract horizon</li>
+        </ul>
+      </div>
+      <div class="qual-col">
+        <h3>Offsetting a high-income year</h3>
+        <ul class="qual-list">
+          <li>Active business, equity comp, or K-1 generating meaningful taxable income</li>
+          <li>Your CPA has flagged accelerated-depreciation strategies as relevant</li>
+          <li>Open to a multi-year horizon, not a one-off transaction</li>
+          <li>Comfortable with a personal guarantee on financed equipment</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qual-notfit">
+      <strong>This program likely isn't a fit if:</strong> you need full liquidity inside a 6-year window · you don't have an income or tax profile that benefits from accelerated depreciation · you'd want investor-style governance rights (this is direct ownership, not a fund interest) · you'd prefer a pooled-vehicle or fund-style structure.
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY PEOPLE TRUST IT ============ -->
+<section class="why">
+  <div class="container">
+    <div class="eyebrow">Why people trust it</div>
+    <h2>Built on <em>real scale.</em></h2>
+    <p class="lede">The economics work because the program sits on top of a publicly-traded U.S. rental operator running a national network. Underlying documents — operator identity, audited financials, and program-specific independent reports — are shared during your intro call so you can verify independently.</p>
+
+    <div class="cred-grid">
+      <div class="cred-item">
+        <div class="cred-h">Publicly-traded operator</div>
+        <div class="cred-desc">SEC-registered, audited financials, public regulatory filings. The operator's name and ticker are shared on your intro call so you can run independent diligence.</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-h">Direct title to your equipment</div>
+        <div class="cred-desc">Specific, serialized equipment held by your own LLC. Not a fund interest, not pooled, not a security. You can verify ownership on the operator's platform.</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-h">Independent diligence kit</div>
+        <div class="cred-desc">Program-specific independent accountant reports and pro-forma documents are available on request — the same materials shared with institutional participants.</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-h">Established, not a pilot</div>
+        <div class="cred-desc">A mature managed-ownership program with many years of operating history and a substantial existing participant base. References available during evaluation.</div>
+      </div>
+    </div>
+
+    <div class="why-callout">
+      <div class="why-callout-label">Not a security</div>
+      <div class="why-callout-text">OwnaFleet does not offer or sell securities. Participation is a direct purchase of specific equipment by your own LLC. The operating partner's identity, underlying documents, and diligence materials are shared during your intro call.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIAL ============ -->
+<section class="testimonial">
+  <div class="testimonial-inner">
+    <div class="testimonial-mark">&ldquo;</div>
+    <p class="testimonial-quote">The numbers were straightforward, the process was clean, and the year-one tax impact <em>made a real difference</em> for us — the kind of outcome you actually feel.</p>
+    <div class="testimonial-attr">
+      <strong>Dr. Jeremiah Sturgill</strong>
+      Orthodontist · Tennessee · Program Participant
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT JOSH ============ -->
+<section class="about">
+  <div class="about-grid">
+    <div class="about-photo" style="background-image: url('/assets/josh-about.jpg');"></div>
+    <div class="about-content">
+      <div class="eyebrow">About Josh</div>
+      <h2 class="about-name">Josh Cochran</h2>
+      <div class="about-role">Founder · Cochran Capital · Dover, DE</div>
+      <p class="about-bio">Josh is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He works directly with the program's partner team to bring qualified participants into the managed equipment ownership program.</p>
+      <p class="about-bio">Working with Josh means a single point of contact through closing, flexibility on minimums based on his partner relationships, and an advocate for your interests through the lifecycle of the deal.</p>
+      <p class="about-disclosure">Disclosure: Josh is not a financial, tax, or legal advisor. He is a participant in the program himself and earns a referral fee from the program's partner team on completed deals. This relationship does not affect your terms.</p>
     </div>
   </div>
 </section>
