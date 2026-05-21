@@ -250,16 +250,28 @@
     font-style: italic;
   }
 
-  /* What it is — compressed */
+  /* What it is — dark frame */
   .how {
-    background: white;
-    border-top: 1px solid var(--line);
+    background: var(--ink);
+    color: white;
     padding: 100px 0;
+    position: relative;
+    overflow: hidden;
   }
+  .how::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(139,111,63,0.12) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .how .container { position: relative; z-index: 1; }
+  .how .eyebrow { color: var(--accent); }
+  .how h2 { color: white; }
   .how .lede {
     font-family: 'Fraunces', serif;
     font-size: clamp(18px, 2vw, 22px);
-    color: var(--ink-soft);
+    color: rgba(255,255,255,0.78);
     line-height: 1.5;
     margin-bottom: 48px;
     max-width: 720px;
@@ -281,13 +293,13 @@
   .pillar-title {
     font-family: 'Fraunces', serif;
     font-size: 22px;
-    color: var(--ink);
+    color: white;
     margin-bottom: 14px;
     font-weight: 400;
   }
   .pillar-desc {
     font-size: 14px;
-    color: var(--ink-soft);
+    color: rgba(255,255,255,0.72);
     line-height: 1.65;
   }
 
