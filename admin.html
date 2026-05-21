@@ -715,8 +715,28 @@
       </div>
 
       <div class="modal-section">
-        <h3>Deal economics</h3>
+        <h3>Lead details &amp; deal economics</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">First name</label>
+            <input type="text" id="leadFirstName" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.first_name || '')}" placeholder="e.g. Jane">
+          </div>
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Last name</label>
+            <input type="text" id="leadLastName" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.last_name || '')}" placeholder="e.g. Doe">
+          </div>
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Email</label>
+            <input type="email" id="leadEmail" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.email || '')}" placeholder="name@example.com">
+          </div>
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Phone</label>
+            <input type="tel" id="leadPhone" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.phone || '')}" placeholder="(206) 555-0100">
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Company / LLC</label>
+            <input type="text" id="leadCompany" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.company || '')}" placeholder="e.g. Blackrail LLC">
+          </div>
           <div>
             <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Equipment value (target / actual)</label>
             <input type="number" id="equipmentValue" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_equipment_value || ''}" placeholder="e.g. 1200000">
@@ -724,10 +744,6 @@
           <div>
             <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Total commission (2.1%)</label>
             <input type="number" id="totalCommission" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_total_commission || ''}" placeholder="auto-calculates from value">
-          </div>
-          <div style="grid-column: 1 / -1;">
-            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Company / LLC</label>
-            <input type="text" id="leadCompany" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${escapeHtml(lead.company || '')}" placeholder="e.g. Blackrail LLC">
           </div>
         </div>
         <button class="save-btn" id="saveEconomics">Save</button>
@@ -785,23 +801,36 @@
       const value = parseFloat(valueInput.value) || null;
       const commission = parseFloat(commissionInput.value) || null;
       const company = (document.getElementById('leadCompany')?.value || '').trim() || null;
+      const firstName = (document.getElementById('leadFirstName')?.value || '').trim() || null;
+      const lastName  = (document.getElementById('leadLastName')?.value  || '').trim() || null;
+      const emailVal  = (document.getElementById('leadEmail')?.value     || '').trim().toLowerCase() || null;
+      const phoneVal  = (document.getElementById('leadPhone')?.value     || '').trim() || null;
+
       const { error } = await supabase
         .from('leads')
         .update({
+          first_name: firstName,
+          last_name: lastName,
+          email: emailVal,
+          phone: phoneVal,
+          company,
           estimated_equipment_value: value,
-          estimated_total_commission: commission,
-          company
+          estimated_total_commission: commission
         })
         .eq('id', leadId);
       if (error) {
         alert('Save failed: ' + error.message);
       } else {
+        lead.first_name = firstName;
+        lead.last_name = lastName;
+        lead.email = emailVal;
+        lead.phone = phoneVal;
+        lead.company = company;
         lead.estimated_equipment_value = value;
         lead.estimated_total_commission = commission;
-        lead.company = company;
         document.getElementById('saveEconomics').textContent = 'Saved ✓';
         setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save'; }, 1500);
-        // Refresh the table to show the company column update
+        // Refresh the table to show the column updates
         renderTable();
       }
     });
