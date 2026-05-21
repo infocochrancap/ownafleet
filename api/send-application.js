@@ -103,7 +103,7 @@ function applicationEmailHtml(lead) {
         <li>SSN, home address, ownership %</li>
       </ul>
 
-      <p>There's no fee to apply, and applying doesn't commit you to anything. The lender will confirm eligibility within a few business days; once that's back, we move to deal structure.</p>
+      <p>There's no fee to apply, and applying doesn't commit you to anything. The full enrollment cycle — application through funded equipment — typically runs <strong>4–6 weeks</strong>. We'll be in touch shortly after you submit with next steps.</p>
 
       <p>Reach me anytime — <a href="mailto:josh@ownafleet.com" style="color:#8B6F3F;">josh@ownafleet.com</a> or <strong>(206) 755-6436</strong>.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>

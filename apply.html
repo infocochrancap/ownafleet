@@ -84,9 +84,9 @@
     padding: 0;
     border: 1px solid var(--line);
     border-top: 3px solid var(--accent);
-    min-height: 700px;
+    overflow: hidden;
   }
-  .form-frame iframe { display: block; width: 100%; min-height: 1800px; border: none; }
+  .form-frame iframe { display: block; width: 100%; border: none; background: white; }
 
   footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 28px 32px; text-align: center; font-size: 11px; line-height: 1.7; font-style: italic; margin-top: 48px; }
   footer .disc { max-width: 880px; margin: 0 auto; }
@@ -99,7 +99,7 @@
 <main>
   <div class="eyebrow">Credit application</div>
   <h1>The Armada <em>commercial credit application.</em></h1>
-  <p class="lede">Powered by Bevel Financial, the program's lending partner. There's no fee to apply, and applying doesn't commit you to anything. The lender confirms eligibility within a few business days; once that's back, we move to deal structure.</p>
+  <p class="lede">Powered by Bevel Financial, the program's lending partner. There's no fee to apply, and applying doesn't commit you to anything. The full enrollment cycle — application through funded equipment — typically runs 4–6 weeks. We'll be in touch shortly after you submit with next steps.</p>
 
   <div class="tips">
     <h3>A few things to know before you start</h3>
@@ -122,7 +122,7 @@
       src="https://form.jotform.com/261395920834160"
       frameborder="0"
       scrolling="no"
-      style="min-width:100%;max-width:100%;height:1800px;border:none;"
+      style="min-width:100%;max-width:100%;height:600px;border:none;background:white;"
     ></iframe>
   </div>
 
@@ -137,17 +137,15 @@
   </div>
 </footer>
 
-<!-- Jotform iframe auto-resize handler — adjusts the iframe height as the
-     form's content height changes (e.g., when users add Principal 2 info). -->
+<!-- Jotform's official iframe embed handler — auto-resizes the iframe height
+     to match the form's actual content. Replaces the hand-rolled postMessage
+     listener which left a tall empty pane when content was shorter. -->
+<script src="https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js"></script>
 <script>
-window.addEventListener('message', function(e) {
-  if (!e.data || typeof e.data !== 'string') return;
-  if (!e.data.startsWith('setHeight:')) return;
-  var iframe = document.getElementById('JotFormIFrame-261395920834160');
-  if (iframe) {
-    iframe.style.height = e.data.substring(10) + 'px';
-  }
-});
+  window.jotformEmbedHandler(
+    "iframe[id='JotFormIFrame-261395920834160']",
+    "https://form.jotform.com/"
+  );
 </script>
 
 </body>
