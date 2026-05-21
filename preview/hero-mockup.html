@@ -250,28 +250,16 @@
     font-style: italic;
   }
 
-  /* What it is — dark frame */
+  /* What it is — light frame */
   .how {
-    background: var(--ink);
-    color: white;
+    background: white;
+    border-top: 1px solid var(--line);
     padding: 100px 0;
-    position: relative;
-    overflow: hidden;
   }
-  .how::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(139,111,63,0.12) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  .how .container { position: relative; z-index: 1; }
-  .how .eyebrow { color: var(--accent); }
-  .how h2 { color: white; }
   .how .lede {
     font-family: 'Fraunces', serif;
     font-size: clamp(18px, 2vw, 22px);
-    color: rgba(255,255,255,0.78);
+    color: var(--ink-soft);
     line-height: 1.5;
     margin-bottom: 48px;
     max-width: 720px;
@@ -293,13 +281,13 @@
   .pillar-title {
     font-family: 'Fraunces', serif;
     font-size: 22px;
-    color: white;
+    color: var(--ink);
     margin-bottom: 14px;
     font-weight: 400;
   }
   .pillar-desc {
     font-size: 14px;
-    color: rgba(255,255,255,0.72);
+    color: var(--ink-soft);
     line-height: 1.65;
   }
 
@@ -488,7 +476,7 @@
 <section class="hero">
   <div class="container">
     <div class="eyebrow">For high-income years · windfalls · capital events</div>
-    <h1>Offset this year's tax bill with a <em>depreciating real asset.</em></h1>
+    <h1>Offset this year's tax bill with <em>your own managed heavy equipment fleet.</em></h1>
     <p class="hero-sub">If you're staring at a major tax bill this year — from a strong income year, a business sale, or a capital event — owning heavy equipment in a managed rental fleet is a structured way to convert that exposure into a real, depreciating asset on your balance sheet.</p>
 
     <div class="benefits-row">
