@@ -54,10 +54,20 @@
   }
   .preview-note strong { color: var(--ink); }
 
-  /* Brand */
+  /* Nav (matches live site pattern) */
   nav {
-    padding: 18px 32px;
     border-bottom: 1px solid var(--line-soft);
+    background: rgba(248, 247, 244, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .nav-inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
   .nav-brand {
     font-family: 'Fraunces', serif;
@@ -66,6 +76,35 @@
     letter-spacing: 0.4em;
     color: var(--ink);
     text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+  }
+  .nav-links a {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--ink);
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 2px;
+    letter-spacing: 0.15em !important;
+    font-weight: 500;
+  }
+  .nav-cta:hover { background: var(--accent); }
+  @media (max-width: 720px) {
+    .nav-links { gap: 18px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    .nav-inner { padding: 14px 20px; }
   }
 
   .eyebrow {
@@ -479,11 +518,18 @@
 </div>
 
 <nav>
-  <a href="#" class="nav-brand">OWNAFLEET</a>
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">OWNAFLEET</a>
+    <div class="nav-links">
+      <a href="#fit">Is It For Me?</a>
+      <a href="#about">About Cochran Capital</a>
+      <a href="#form" class="nav-cta">Get In Touch</a>
+    </div>
+  </div>
 </nav>
 
 <!-- ============ NEW HERO (slimmed) ============ -->
-<section class="hero">
+<section class="hero" id="top">
   <div class="container">
     <div class="eyebrow">For high-income years · windfalls · capital events</div>
     <h1>Offset this year's tax bill with <em>your own managed heavy equipment fleet.</em></h1>
@@ -559,7 +605,7 @@
 </section>
 
 <!-- ============ WHO IT'S FOR ============ -->
-<section class="qualifier">
+<section class="qualifier" id="fit">
   <div class="container">
     <div class="eyebrow">Who it's for</div>
     <h2>Is this <em>for you?</em></h2>
@@ -638,11 +684,11 @@
 </section>
 
 <!-- ============ ABOUT JOSH ============ -->
-<section class="about">
+<section class="about" id="about">
   <div class="about-grid">
     <div class="about-photo" style="background-image: url('/assets/josh-about.jpg');"></div>
     <div class="about-content">
-      <div class="eyebrow">About Josh</div>
+      <div class="eyebrow">About Cochran Capital</div>
       <h2 class="about-name">Josh Cochran</h2>
       <div class="about-role">Founder · Cochran Capital · Dover, DE</div>
       <p class="about-bio">Josh is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He works directly with the program's partner team to bring qualified participants into the managed fleet ownership program.</p>
