@@ -195,21 +195,68 @@
 <script type="module">
   import { supabase, getUserRole } from '/shared/supabase.js';
 
+  // Status labels for partner-visible rows. Matches the new (post-013) admin
+  // status set plus legacy fallbacks for any unmigrated rows.
   const STATUS_LABEL = {
-    new: 'New',
-    contacted: 'Contacted',
-    application_sent: 'Application Sent',
-    mini_app_submitted: 'Mini App Submitted',
-    full_app_submitted: 'Full App Submitted',
-    approved: 'Approved',
-    terms_accepted: 'Terms Accepted',
-    funded: 'Funded',
-    operating: 'Operating',
-    dead: 'Dead',
-    // Legacy values
-    application_started: 'Application Started',
-    documents_uploaded: 'Documents Uploaded',
-    closed_won: 'Closed Won'
+    submitted_homepage:      'Submitted on Homepage',
+    booked_call:             'Booked a Call with Josh',
+    call_completed_app_sent: 'Call Completed, Application Sent',
+    application_submitted:   'Application Submitted',
+    incomplete_application:  'Incomplete Application',
+    credit_review:           'Credit Review',
+    in_progress:             'In Progress (with lenders)',
+    prelim_approved:         'Prelim Approved',
+    bank_approved:           'Bank Approved',
+    closing:                 'Closing',
+    funded_enrolled:         'Funded / Enrolled',
+    not_now:                 'Not Now',
+    archived:                'Archived',
+    // Legacy values (pre-013)
+    new:                     'New',
+    contacted:               'Contacted',
+    application_sent:        'Application Sent',
+    mini_app_submitted:      'Mini App Submitted',
+    full_app_submitted:      'Full App Submitted',
+    approved:                'Approved',
+    terms_accepted:          'Terms Accepted',
+    funded:                  'Funded',
+    operating:               'Operating',
+    dead:                    'Dead',
+    application_started:     'Application Started',
+    documents_uploaded:      'Documents Uploaded',
+    closed_won:              'Closed Won'
+  };
+
+  // Short, partner-friendly description per status. Shown as small text under
+  // the badge so a referrer knows what each step actually means.
+  const STATUS_DESC = {
+    submitted_homepage:      'Filled out the form on ownafleet.com',
+    booked_call:             'Scheduled an intro call with Josh',
+    call_completed_app_sent: 'Had the intro call; credit application link was sent',
+    application_submitted:   'Credit application received by our lending partner',
+    incomplete_application:  'Application started — awaiting documents / financials',
+    credit_review:           'In underwriting review',
+    in_progress:             'Out for review with our lender marketplace',
+    prelim_approved:         'Preliminary term sheet received; awaiting final',
+    bank_approved:           'Final approval received; awaiting term acceptance',
+    closing:                 'Terms accepted — deal closing',
+    funded_enrolled:         'Funded and enrolled on the Armada platform',
+    not_now:                 'Interested, timing is off — circle back later',
+    archived:                'Closed out — not pursuing further',
+    // Legacy descriptions (for any pre-013 leads still on old status)
+    new:                     'Submitted to the platform',
+    contacted:               'Reached out for a first conversation',
+    application_sent:        'Credit application link sent',
+    mini_app_submitted:      'Initial application received',
+    full_app_submitted:      'Full application in underwriting',
+    approved:                'Lender approved',
+    terms_accepted:          'Terms accepted, closing',
+    funded:                  'Funded',
+    operating:               'Equipment funded and enrolled',
+    dead:                    'Closed out',
+    application_started:     'Application started',
+    documents_uploaded:      'Documents uploaded',
+    closed_won:              'Deal closed'
   };
 
   // Auth gate
@@ -304,13 +351,29 @@
     throw lErr;
   }
 
-  // Stats
+  // Stats — covers post-013 status names plus legacy fallbacks.
+  const IN_PIPELINE_STATUSES = new Set([
+    // post-013
+    'booked_call','call_completed_app_sent','application_submitted',
+    'incomplete_application','credit_review','in_progress',
+    'prelim_approved','bank_approved','closing',
+    // legacy
+    'contacted','application_sent','mini_app_submitted',
+    'full_app_submitted','approved','terms_accepted',
+    'application_started','documents_uploaded'
+  ]);
+  const FUNDED_STATUSES = new Set([
+    'funded_enrolled',
+    // legacy
+    'funded','operating','closed_won'
+  ]);
+
   const earnedSplit = (partner.commission_split_pct || 40) / 100;
   document.getElementById('statTotal').textContent = leads.length;
-  document.getElementById('statPipe').textContent = leads.filter(l => ['contacted','application_started','documents_uploaded','approved'].includes(l.status)).length;
-  document.getElementById('statFunded').textContent = leads.filter(l => ['funded','closed_won'].includes(l.status)).length;
+  document.getElementById('statPipe').textContent = leads.filter(l => IN_PIPELINE_STATUSES.has(l.status)).length;
+  document.getElementById('statFunded').textContent = leads.filter(l => FUNDED_STATUSES.has(l.status)).length;
   const earned = leads
-    .filter(l => l.status === 'closed_won')
+    .filter(l => FUNDED_STATUSES.has(l.status))
     .reduce((sum, l) => sum + (Number(l.estimated_total_commission || 0) * earnedSplit), 0);
   document.getElementById('statEarned').textContent = '$' + Math.round(earned).toLocaleString();
 
@@ -325,15 +388,20 @@
     const rows = leads.map(lead => {
       const totalCommission = Number(lead.estimated_total_commission || 0);
       const partnerCut = totalCommission * earnedSplit;
-      const isPaidStatus = lead.status === 'closed_won';
+      const isPaidStatus = FUNDED_STATUSES.has(lead.status);
+      const statusLabel = STATUS_LABEL[lead.status] || lead.status;
+      const statusDesc  = STATUS_DESC[lead.status]  || '';
       return `
         <tr>
           <td>
-            <div class="lead-name">${escapeHtml(lead.first_name)} ${escapeHtml(lead.last_name)}</div>
+            <div class="lead-name">${escapeHtml(lead.first_name || '')} ${escapeHtml(lead.last_name || '')}</div>
             <div class="lead-meta">Submitted ${formatDate(lead.created_at)}</div>
           </td>
-          <td>${escapeHtml(lead.equipment_range)}</td>
-          <td><span class="status-badge status-${lead.status}">${STATUS_LABEL[lead.status]}</span></td>
+          <td>${escapeHtml(lead.equipment_range || '—')}</td>
+          <td>
+            <span class="status-badge status-${lead.status}">${escapeHtml(statusLabel)}</span>
+            ${statusDesc ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;">${escapeHtml(statusDesc)}</div>` : ''}
+          </td>
           <td>
             ${partnerCut > 0
               ? `<div class="commission">$${Math.round(partnerCut).toLocaleString()}</div>
