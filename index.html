@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OwnaFleet — Heavy equipment that pays you.</title>
-<meta name="description" content="Own heavy equipment rented out nationwide by a publicly-traded operating partner. Monthly distributions, Year-1 accelerated depreciation, fully managed.">
+<title>OwnaFleet — Offset your tax bill with a managed heavy equipment fleet.</title>
+<meta name="description" content="For high-income years and capital events: direct ownership of titled heavy equipment, deployed into a national rental fleet. 100% Year-1 depreciation, monthly distributions, hands-off operations.">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ownafleet.com/">
-<meta property="og:title" content="OwnaFleet — Heavy equipment that pays you.">
-<meta property="og:description" content="Own heavy equipment rented out nationwide by a publicly-traded operating partner. Monthly distributions, Year-1 accelerated depreciation, fully managed.">
+<meta property="og:title" content="OwnaFleet — Offset your tax bill with a managed heavy equipment fleet.">
+<meta property="og:description" content="For high-income years and capital events: direct ownership of titled heavy equipment, deployed into a national rental fleet. 100% Year-1 depreciation, monthly distributions, hands-off operations.">
 <meta property="og:image" content="https://ownafleet.com/assets/og-image.jpg?v=4">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -17,8 +17,8 @@
 <meta property="og:site_name" content="OwnaFleet">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OwnaFleet — Heavy equipment that pays you.">
-<meta name="twitter:description" content="Own heavy equipment rented out nationwide by a publicly-traded operating partner. Monthly distributions, Year-1 accelerated depreciation, fully managed.">
+<meta name="twitter:title" content="OwnaFleet — Offset your tax bill with a managed heavy equipment fleet.">
+<meta name="twitter:description" content="For high-income years and capital events: direct ownership of titled heavy equipment, deployed into a national rental fleet. 100% Year-1 depreciation, monthly distributions, hands-off operations.">
 <meta name="twitter:image" content="https://ownafleet.com/assets/og-image.jpg?v=4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -205,6 +205,70 @@
     gap: 20px;
     align-items: center;
     flex-wrap: wrap;
+  }
+
+  /* Hero benefit tiles + 8x comparison callout */
+  .benefits-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin-top: 8px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 760px) { .benefits-row { grid-template-columns: 1fr; gap: 12px; } }
+  .benefit-tile {
+    background: white;
+    border-top: 3px solid var(--accent);
+    padding: 24px 26px;
+  }
+  .benefit-check {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .benefit-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .benefit-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .hero-stat {
+    margin-bottom: 36px;
+    padding: 22px 28px;
+    background: white;
+    border-left: 3px solid var(--accent);
+    max-width: 720px;
+  }
+  .hero-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .hero-stat-text {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .hero-stat-text strong {
+    color: var(--accent);
+    font-weight: 500;
+    font-style: italic;
   }
   .btn {
     font-family: 'Inter', sans-serif;
@@ -999,6 +1063,58 @@
   }
   .nextsteps-card:hover .ns-arrow { transform: translateX(4px); }
 
+  /* What happens next — 3 sequential steps (replaces the old 3-card panel) */
+  .whatnext { background: var(--paper); padding: 100px 0; border-top: 1px solid var(--line); }
+  .whatnext .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 56px;
+    max-width: 720px;
+    font-weight: 300;
+  }
+  .whatnext-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 760px) { .whatnext-steps { grid-template-columns: 1fr; } }
+  .whatnext-step {
+    background: white;
+    padding: 36px 32px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+  .whatnext-step:last-child { border-right: none; }
+  @media (max-width: 760px) {
+    .whatnext-step { border-right: none; border-bottom: 1px solid var(--line); }
+    .whatnext-step:last-child { border-bottom: none; }
+  }
+  .whatnext-num {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    color: var(--accent);
+    font-weight: 400;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .whatnext-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .whatnext-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
   /* ---------- WHY THIS WORKS ---------- */
   .why {
     background: var(--paper-warm);
@@ -1274,6 +1390,7 @@
     gap: 64px;
     align-items: start;
   }
+  .form-grid.single-col { grid-template-columns: 1fr; max-width: 800px; }
   @media (max-width: 900px) {
     .form-grid { grid-template-columns: 1fr; gap: 40px; }
   }
@@ -1501,7 +1618,6 @@
   <div class="nav-inner">
     <a href="#top" class="nav-brand">OWNAFLEET</a>
     <div class="nav-links">
-      <a href="#how">Overview</a>
       <a href="#fit">Is It For Me?</a>
       <a href="#about">About Josh</a>
       <a href="#contact" class="nav-cta">Get In Touch</a>
@@ -1511,15 +1627,39 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero" id="top">
-  <div class="container-wide">
+  <div class="container">
     <div class="hero-inner">
-      <div class="eyebrow">Equipment ownership, simplified</div>
-      <h1>Heavy equipment that <em>pays you.</em></h1>
-      <p class="hero-sub">A turnkey solution to own real, titled equipment that's rented out by a major publicly-traded U.S. operating partner — built for individuals with a meaningful windfall or a strong income year.</p>
-      <div class="hero-ctas">
-        <a href="/deck" class="btn btn-primary">Request the overview</a>
-        <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" class="btn btn-secondary" target="_blank" rel="noopener">Schedule a 20-min call</a>
+      <div class="eyebrow">For high-income years · windfalls · capital events</div>
+      <h1>Offset this year's tax bill with <em>your own managed heavy equipment fleet.</em></h1>
+      <p class="hero-sub">If you're staring at a major tax bill this year — from a strong income year, a business sale, or a capital event — owning heavy equipment in a managed rental fleet is a structured way to convert that exposure into a real, depreciating asset on your balance sheet.</p>
+
+      <div class="benefits-row">
+        <div class="benefit-tile">
+          <div class="benefit-check">✓</div>
+          <div class="benefit-title">100% Year-1 depreciation</div>
+          <div class="benefit-desc">Against ordinary income, on qualifying equipment. Your CPA confirms scope.</div>
+        </div>
+        <div class="benefit-tile">
+          <div class="benefit-check">✓</div>
+          <div class="benefit-title">Monthly cash distributions</div>
+          <div class="benefit-desc">Your equipment runs in a national fleet. Net rental income comes back monthly to your LLC.</div>
+        </div>
+        <div class="benefit-tile">
+          <div class="benefit-check">✓</div>
+          <div class="benefit-title">Managed fleet</div>
+          <div class="benefit-desc">A publicly-traded U.S. operator runs the fleet business. You take a strategic-oversight role.</div>
+        </div>
       </div>
+
+      <div class="hero-stat">
+        <div class="hero-stat-label">vs. the alternatives</div>
+        <p class="hero-stat-text">Up to <strong>8x</strong> more Year-1 depreciation than oil &amp; gas, per dollar invested.</p>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="#contact" class="btn btn-primary">See if this fits →</a>
+      </div>
+
       <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
     </div>
   </div>
@@ -1528,25 +1668,25 @@
 <!-- ============ WHAT IT IS ============ -->
 <section class="how" id="how">
   <div class="container">
-    <div class="eyebrow">What it is</div>
-    <h2>A different kind of <em>real asset.</em></h2>
-    <p class="lede">A turnkey program for individuals to own specific heavy equipment that's rented out across the U.S. by a major publicly-traded operating partner. You hold direct title through your own LLC. The operator runs the rental business. The entire structure is built so you don't have to.</p>
+    <div class="eyebrow">The structure</div>
+    <h2>A real business with a real <em>business purpose.</em></h2>
+    <p class="lede">For accelerated depreciation to apply, you need genuine ownership of a real, income-producing asset. The structure below is what makes that defensible — to your CPA, your lender, and the IRS.</p>
 
     <div class="pillars">
       <div class="pillar">
         <div class="pillar-num">01</div>
-        <div class="pillar-title">You own it directly</div>
-        <div class="pillar-desc">Specific, serialized equipment titled to your LLC. Not a fund interest, not pooled, not a security — a real asset you can identify, track, and sell.</div>
+        <div class="pillar-title">You own real equipment</div>
+        <div class="pillar-desc">Specific, serialized fleet equipment titled to your LLC. Not a fund interest, not pooled, not a security — a real asset you can identify, track, and sell.</div>
       </div>
       <div class="pillar">
         <div class="pillar-num">02</div>
-        <div class="pillar-title">Operationally outsourced</div>
-        <div class="pillar-desc">You take a strategic-oversight role — reviewing performance, decisions, and reporting on your specific equipment — while a national publicly-traded rental operator handles the operational business: enrollment, customers, maintenance, telematics, and remarketing.</div>
+        <div class="pillar-title">It produces real income</div>
+        <div class="pillar-desc">Your equipment is deployed in a national rental fleet run by a publicly-traded U.S. operating partner. Net fleet rental income is distributed to your LLC monthly.</div>
       </div>
       <div class="pillar">
         <div class="pillar-num">03</div>
-        <div class="pillar-title">Tax-advantaged by structure</div>
-        <div class="pillar-desc">The federal tax code rewards real-asset ownership with accelerated-depreciation elections. Whether and how those apply depends on your situation — your CPA confirms before you sign.</div>
+        <div class="pillar-title">The tax treatment follows</div>
+        <div class="pillar-desc">Genuine ownership of real income-producing equipment is what allows the federal tax code's accelerated-depreciation elections to apply. Your CPA confirms scope.</div>
       </div>
     </div>
   </div>
@@ -1675,31 +1815,28 @@
 </section>
 
 <!-- ============ NEXT STEPS ============ -->
-<section class="nextsteps">
+<section class="whatnext">
   <div class="container">
-    <div class="eyebrow">Next steps</div>
-    <h2>Three ways to <em>start.</em></h2>
-    <p class="lede">No obligation, no hard pitch. The path is designed so you can step in at any point and step out at any point — until you actually sign.</p>
+    <div class="eyebrow">What happens next</div>
+    <h2>A three-step <em>path forward.</em></h2>
+    <p class="lede">No commitments, no fees, no pressure at any step. The path is designed so you can step in at any point and step out at any point — until you actually sign.</p>
 
-    <div class="nextsteps-grid">
-      <a class="nextsteps-card" href="/deck">
-        <div class="nextsteps-num">— 01</div>
-        <div class="nextsteps-title">Request the overview</div>
-        <div class="nextsteps-desc">A 21-slide walkthrough of structure, year-by-year economics on a representative deal, and the questions most people ask before a first call.</div>
-        <div class="nextsteps-cta">Request the deck <span class="ns-arrow">→</span></div>
-      </a>
-      <a class="nextsteps-card" href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">
-        <div class="nextsteps-num">— 02</div>
-        <div class="nextsteps-title">Schedule a 20-min call</div>
-        <div class="nextsteps-desc">Walk through the program directly with Josh. No script — bring your questions, your tax picture, and what you're trying to accomplish.</div>
-        <div class="nextsteps-cta">Book the call <span class="ns-arrow">→</span></div>
-      </a>
-      <a class="nextsteps-card" href="#contact">
-        <div class="nextsteps-num">— 03</div>
-        <div class="nextsteps-title">Tell us about you</div>
-        <div class="nextsteps-desc">Share your situation through the form below. We'll review your fit and reach out within one business day to schedule the next conversation.</div>
-        <div class="nextsteps-cta">Open the form <span class="ns-arrow">→</span></div>
-      </a>
+    <div class="whatnext-steps">
+      <div class="whatnext-step">
+        <div class="whatnext-num">01</div>
+        <div class="whatnext-title">Fill out the form</div>
+        <div class="whatnext-desc">Quick details on your tax year and financial picture so we can see if this is a fit. Takes about a minute.</div>
+      </div>
+      <div class="whatnext-step">
+        <div class="whatnext-num">02</div>
+        <div class="whatnext-title">We review &amp; send the overview</div>
+        <div class="whatnext-desc">Within one business day, we confirm fit and send you the detailed 21-slide overview — structure, economics, and the questions most people ask before a first call.</div>
+      </div>
+      <div class="whatnext-step">
+        <div class="whatnext-num">03</div>
+        <div class="whatnext-title">Schedule a call with Josh</div>
+        <div class="whatnext-desc">20-minute conversation, on your timeline. We work through your specific situation: income picture, tax position, what you're trying to accomplish.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1707,11 +1844,11 @@
 <!-- ============ LEAD FORM ============ -->
 <section class="lead" id="contact">
   <div class="container">
-    <div class="eyebrow">Tell us about you</div>
-    <h2>Start a <em>conversation.</em></h2>
-    <p class="lede">A few quick details so the first call is useful. We'll reach out within one business day. No obligation, no hard pitch. For inquiries above $5M, please <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline;">schedule a consultation directly</a>.</p>
+    <div class="eyebrow">Tell us about your tax year</div>
+    <h2>Drop your <em>details below.</em></h2>
+    <p class="lede">A few quick details so we can see if this is a fit. We'll review within one business day and send you the 21-slide overview deck, then Josh follows up personally to schedule your call.</p>
 
-    <div class="form-grid">
+    <div class="form-grid single-col">
       <form class="form-card" id="leadForm">
         <input type="hidden" name="referral_code" id="referralCode">
         <div class="form-row">
@@ -1740,7 +1877,7 @@
             <input type="text" id="state" name="state" required>
           </div>
           <div class="form-field">
-            <label for="equipment">Equipment target *</label>
+            <label for="equipment">Income to offset this year *</label>
             <select id="equipment" name="equipment_range" required>
               <option value="">Select range</option>
               <option>$250K – $500K</option>
@@ -1781,29 +1918,14 @@
         </div>
         <div class="form-row single">
           <div class="form-field">
-            <label for="notes">Anything else we should know? (optional)</label>
-            <textarea id="notes" name="notes"></textarea>
+            <label for="notes">What are you trying to accomplish? (optional)</label>
+            <textarea id="notes" name="notes" placeholder="Strong income year, business sale, exit, capital event, planning for next year — whatever's relevant."></textarea>
           </div>
         </div>
         <button type="submit" class="form-submit" id="submitBtn">Submit & Get Started</button>
         <p id="formError" style="display:none; margin-top: 14px; padding: 12px 16px; background: rgba(184,92,58,0.08); border-left: 2px solid var(--warn); color: var(--warn); font-size: 13px;"></p>
         <p class="form-fineprint">By submitting, you consent to be contacted by Josh Cochran and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
       </form>
-
-      <div class="form-side">
-        <h3>What happens next</h3>
-        <ol class="next-steps">
-          <li><strong>We review your information</strong> within 1 business day to confirm fit.</li>
-          <li><strong>Schedule a 20-minute call</strong> to walk through the program in detail.</li>
-          <li><strong>Complete the credit application</strong> with the lending partner — no commitment, no fees.</li>
-          <li><strong>Receive your deal structure</strong> for review before signing.</li>
-        </ol>
-        <div class="form-side-cta">
-          <div class="form-side-cta-label">Prefer to talk first?</div>
-          <a href="https://calendly.com/drjoshcochran/connect-about-fleet-ownership" target="_blank" rel="noopener">Schedule a consultation →</a>
-          <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">Inquiries above $5M — please use the consultation link above.</p>
-        </div>
-      </div>
     </div>
   </div>
 </section>
