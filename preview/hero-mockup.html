@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Homepage mockup v3 — OwnaFleet</title>
+<title>Homepage mockup v5 — OwnaFleet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -221,11 +221,22 @@
     line-height: 1.55;
   }
 
+  /* "Why this works" — benefit tiles + 8x callout, their own section below hero */
+  .benefits-section {
+    background: white;
+    border-top: 1px solid var(--line);
+    padding: 80px 0;
+  }
+  .benefits-section .benefits-row {
+    margin-bottom: 36px;
+    max-width: 1100px;
+  }
+
   /* Punchy comparison callout below the benefit tiles */
   .hero-stat {
     margin-top: 32px;
     padding: 22px 28px;
-    background: white;
+    background: var(--paper);
     border-left: 3px solid var(--accent);
     max-width: 720px;
   }
@@ -454,31 +465,41 @@
 </head>
 <body>
 
-<div class="preview-label">MOCKUP V4 — Tightened tiles · "Managed fleet" · Who's-it-for + Trust + Testimonial + About Josh restored</div>
+<div class="preview-label">MOCKUP V5 — Hero slimmed to current-page weight · benefits moved to their own section below</div>
 
 <div class="preview-note">
-  <strong>What's new in v4:</strong>
-  (1) Hero benefit tiles are tighter — one sentence each.
-  "Year-1 tax depreciation" → "<strong>100% Year-1 depreciation</strong>";
-  "No business to run" → "<strong>Managed fleet</strong>".
-  (2) Eyebrow condensed — dropped the "7- and 8-figure" specificity.
-  (3) Sections restored between How-it-works and the form: <strong>Who it's for</strong>,
-  <strong>Why people trust it</strong>, <strong>Testimonial</strong>, <strong>About Josh</strong> —
-  faithful copies of what's currently on the live site.
-  (4) Single CTA at the bottom + 3-step path forward (unchanged from v3).
+  <strong>What's new in v5:</strong>
+  Hero now matches the visual weight of the live page — just eyebrow, H1,
+  one-line subhead, one CTA, disclaim. The 3 benefit tiles + 8x callout
+  moved into their own "Why this works" section below the hero so the top
+  frame can breathe.
+  <strong>Who / problem / solution clarity preserved:</strong> eyebrow names
+  the audience, H1 names the problem + solution, subhead is the elevator pitch.
 </div>
 
 <nav>
   <a href="#" class="nav-brand">OWNAFLEET</a>
 </nav>
 
-<!-- ============ NEW HERO ============ -->
+<!-- ============ NEW HERO (slimmed) ============ -->
 <section class="hero">
   <div class="container">
     <div class="eyebrow">For high-income years · windfalls · capital events</div>
     <h1>Offset this year's tax bill with <em>your own managed heavy equipment fleet.</em></h1>
-    <p class="hero-sub">If you're staring at a major tax bill this year — from a strong income year, a business sale, or a capital event — owning heavy equipment in a managed rental fleet is a structured way to convert that exposure into a real, depreciating asset on your balance sheet.</p>
+    <p class="hero-sub">A real-asset deployment for high-income years — direct ownership of heavy equipment in a national managed rental fleet.</p>
 
+    <div class="hero-cta-wrap">
+      <a href="#form" class="btn btn-primary">See if this fits →</a>
+    </div>
+
+    <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
+  </div>
+</section>
+
+<!-- ============ WHY THIS WORKS (benefit tiles + 8x callout) ============ -->
+<section class="benefits-section">
+  <div class="container">
+    <div class="eyebrow">What you get</div>
     <div class="benefits-row">
       <div class="benefit-tile">
         <div class="benefit-check">✓</div>
@@ -501,12 +522,6 @@
       <div class="hero-stat-label">vs. the alternatives</div>
       <p class="hero-stat-text">Up to <strong>8x</strong> more Year-1 depreciation than oil &amp; gas, per dollar invested.</p>
     </div>
-
-    <div class="hero-cta-wrap">
-      <a href="#form" class="btn btn-primary">See if this fits →</a>
-    </div>
-
-    <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
   </div>
 </section>
 
