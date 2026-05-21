@@ -35,8 +35,11 @@
   .bucket-btn .bucket-count { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 11px; }
   .bucket-btn.active .bucket-count { color: var(--accent); }
 
-  .filters { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-  .filter-btn { background: white; border: 1px solid var(--line); padding: 6px 12px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; color: var(--ink-soft); transition: all 0.15s; }
+  .filters { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
+  .filter-label { font-size: 10px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
+  .filter-select { background: white; border: 1px solid var(--line); padding: 10px 36px 10px 14px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--ink); transition: border-color 0.15s; min-width: 240px; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238B6F3F' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+  .filter-select:hover, .filter-select:focus { border-color: var(--accent); outline: none; }
+  .filter-btn { background: white; border: 1px solid var(--line); padding: 10px 16px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-family: inherit; color: var(--ink-soft); transition: all 0.15s; font-weight: 500; }
   .filter-btn:hover { border-color: var(--accent); }
   .filter-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
 
@@ -180,21 +183,24 @@
   </div>
 
   <div class="filters" id="filterBar">
-    <button class="filter-btn" data-filter="inbox" id="inboxFilterBtn" style="display:none;">Inbox</button>
-    <button class="filter-btn active" data-filter="all">All in bucket</button>
-    <button class="filter-btn" data-filter="submitted_homepage">Submitted</button>
-    <button class="filter-btn" data-filter="booked_call">Booked Call</button>
-    <button class="filter-btn" data-filter="call_completed_app_sent">App Sent</button>
-    <button class="filter-btn" data-filter="application_submitted">App Submitted</button>
-    <button class="filter-btn" data-filter="incomplete_application">Incomplete</button>
-    <button class="filter-btn" data-filter="credit_review">Credit Review</button>
-    <button class="filter-btn" data-filter="in_progress">In Progress</button>
-    <button class="filter-btn" data-filter="prelim_approved">Prelim Approved</button>
-    <button class="filter-btn" data-filter="bank_approved">Bank Approved</button>
-    <button class="filter-btn" data-filter="closing">Closing</button>
-    <button class="filter-btn" data-filter="funded_enrolled">Funded</button>
-    <button class="filter-btn" data-filter="not_now">Not Now</button>
-    <button class="filter-btn" data-filter="archived">Archived</button>
+    <span class="filter-label">Filter by status</span>
+    <select class="filter-select" id="statusFilter">
+      <option value="all" selected>All in bucket</option>
+      <option value="inbox" id="inboxOption" style="display:none;">Operator inbox</option>
+      <option value="submitted_homepage">Submitted on Homepage</option>
+      <option value="booked_call">Booked a Call</option>
+      <option value="call_completed_app_sent">Call Completed, App Sent</option>
+      <option value="application_submitted">Application Submitted</option>
+      <option value="incomplete_application">Incomplete Application</option>
+      <option value="credit_review">Credit Review</option>
+      <option value="in_progress">In Progress (lenders)</option>
+      <option value="prelim_approved">Prelim Approved</option>
+      <option value="bank_approved">Bank Approved</option>
+      <option value="closing">Closing</option>
+      <option value="funded_enrolled">Funded / Enrolled</option>
+      <option value="not_now">Not Now</option>
+      <option value="archived">Archived</option>
+    </select>
   </div>
 
   <div id="content"><div class="loading">Loading…</div></div>
@@ -337,9 +343,10 @@
     // Operators don't manage partners or see funnel/commission analytics.
     document.getElementById('partnersTab').style.display = 'none';
     document.getElementById('funnelTab').style.display = 'none';
-    // Show the Inbox filter and default to it — focuses on the stages an
-    // operator typically actions: Full App → Approved → Terms → Funded.
-    document.getElementById('inboxFilterBtn').style.display = '';
+    // Show the "Operator inbox" option in the filter dropdown for operators;
+    // it covers the stages they typically action (Application Submitted →
+    // Credit Review → In Progress → … → Closing).
+    document.getElementById('inboxOption').style.display = '';
   }
 
   // Sign out
@@ -415,10 +422,9 @@
     'full_app_submitted', 'approved', 'terms_accepted'
   ]);
 
-  // Sync filter-button active state with whatever currentFilter starts as.
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.filter === currentFilter);
-  });
+  // Sync the filter dropdown with whatever currentFilter starts as.
+  const statusFilterEl = document.getElementById('statusFilter');
+  if (statusFilterEl) statusFilterEl.value = currentFilter;
 
   // Customize header copy for operators.
   if (!isOwner) {
@@ -593,20 +599,20 @@
       currentBucket = btn.dataset.bucket;
       // Reset sub-filter to "all in bucket" when changing buckets
       currentFilter = 'all';
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+      const sel = document.getElementById('statusFilter');
+      if (sel) sel.value = 'all';
       renderTable();
     });
   });
 
-  // Status sub-filter clicks
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
+  // Status sub-filter dropdown
+  const filterSelectEl = document.getElementById('statusFilter');
+  if (filterSelectEl) {
+    filterSelectEl.addEventListener('change', (e) => {
+      currentFilter = e.target.value;
       renderTable();
     });
-  });
+  }
 
   // Lead detail modal
   async function openModal(leadId) {
