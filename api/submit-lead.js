@@ -67,6 +67,7 @@ export default async function handler(req, res) {
   // step in the new pipeline. Auto-bumps to 'booked_call' when the
   // Calendly webhook fires, then 'call_completed_app_sent' when the
   // admin clicks "Send Armada application".
+  const submissionText = (body.notes || '').trim();
   const { data: lead, error } = await supabase
     .from('leads')
     .insert({
@@ -78,7 +79,6 @@ export default async function handler(req, res) {
       equipment_range: body.equipment_range,
       net_worth: body.net_worth,
       liquidity: body.liquidity,
-      notes: (body.notes || '').trim() || null,
       referral_partner_id,
       import_source: 'website_form',
       status: 'submitted_homepage'
@@ -89,6 +89,21 @@ export default async function handler(req, res) {
   if (error) {
     console.error('Supabase insert error:', error);
     return res.status(500).json({ error: 'Failed to save lead' });
+  }
+
+  // If the lead wrote anything in the "What you'd like to discuss" textarea,
+  // capture it as the first comment on the lead. author_id is null because
+  // the submission is from the public form, not from an authenticated admin.
+  if (submissionText) {
+    try {
+      await supabase.from('lead_comments').insert({
+        lead_id: lead.id,
+        author_id: null,
+        comment: '[From their form submission]' + '\n\n' + submissionText
+      });
+    } catch (commentErr) {
+      console.warn('Comment insert failed (non-fatal):', commentErr);
+    }
   }
 
   // Hard-decline ONLY the truly stuck — folks where even a right-sized smaller
@@ -117,7 +132,7 @@ export default async function handler(req, res) {
       from: FROM,
       to: notifyTo,
       subject,
-      html: internalNotifyHtml(lead, isBelowThreshold)
+      html: internalNotifyHtml(lead, isBelowThreshold, submissionText)
     });
 
     // 2. Lead-facing email — branch on qualification
@@ -145,7 +160,7 @@ export default async function handler(req, res) {
 }
 
 // ============== Internal notification (Brian/Alondra/Josh) ==============
-function internalNotifyHtml(lead, isBelowThreshold) {
+function internalNotifyHtml(lead, isBelowThreshold, submissionText) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.5; color: #0B1724;">
       <h2 style="color: #0B1724; margin-bottom: 8px;">New lead — ${escape(lead.first_name)} ${escape(lead.last_name)}</h2>
@@ -157,7 +172,7 @@ function internalNotifyHtml(lead, isBelowThreshold) {
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">EQUIPMENT TARGET</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.equipment_range)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">NET WORTH</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.net_worth)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">LIQUIDITY</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.liquidity)}</td></tr>
-        ${lead.notes ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">NOTES</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.notes)}</td></tr>` : ''}
+        ${submissionText ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280; vertical-align: top;">THEY SAID</td><td style="padding: 8px 0; border-bottom: 1px solid #eee; white-space: pre-wrap;">${escape(submissionText)}</td></tr>` : ''}
       </table>
       <p style="margin-top: 24px; font-size: 13px; color: #6B7280;">View in admin: <a href="https://ownafleet.com/admin">ownafleet.com/admin</a></p>
     </div>

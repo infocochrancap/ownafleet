@@ -751,32 +751,32 @@
         </div>
       </div>
 
-      ${isOwner ? `
       <div class="modal-section">
-        <h3>Notes (private — admins only)</h3>
-        <textarea class="notes-input" id="leadNotes" placeholder="Conversation history, agreed next steps, anything to remember…">${escapeHtml(lead.notes || '')}</textarea>
-        <div style="margin-top:8px;font-size:12px;color:var(--muted);min-height:18px;">
-          <span id="leadNotesStatus" style="font-style:italic;"></span>
-        </div>
-      </div>
-      ` : ''}
-
-      <div class="modal-section">
-        <h3>Activity &amp; comments</h3>
+        <h3>Comments</h3>
         <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
-          Everyone with admin access can read this feed. Add a comment about a conversation, a follow-up, anything you want everyone to see.
+          Visible to all admins. Add a comment about a conversation, an action you took, or anything worth remembering. Attribution + timestamps are automatic.
         </p>
 
         <div style="margin-bottom:24px;">
-          <textarea class="notes-input" id="newCommentInput" placeholder="Add a comment — visible to Josh and the underwriting team…" style="min-height:80px;"></textarea>
+          <textarea class="notes-input" id="newCommentInput" placeholder="Add a comment…" style="min-height:80px;"></textarea>
           <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
             <button class="save-btn" id="postCommentBtn">Post comment</button>
             <span id="commentMsg" style="font-size:12px;color:var(--muted);"></span>
           </div>
         </div>
 
-        <div id="activityFeed">
-          ${renderActivityFeed(history, comments, adminsById, myUserId)}
+        <div id="commentsFeed">
+          ${renderCommentsFeed(comments, adminsById, myUserId)}
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>Activity</h3>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
+          System-recorded events — status changes, automated transitions. Read-only.
+        </p>
+        <div id="statusActivity">
+          ${renderStatusActivity(history, adminsById)}
         </div>
       </div>
 
@@ -876,16 +876,7 @@
         }
         textarea.value = '';
         msg.textContent = '';
-        // Refresh the activity feed
-        const { data: freshComments } = await supabase
-          .from('lead_comments')
-          .select('*')
-          .eq('lead_id', leadId)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false });
-        document.getElementById('activityFeed').innerHTML =
-          renderActivityFeed(history, freshComments || [], adminsById, myUserId);
-        wireCommentActions(leadId, history, adminsById, myUserId);
+        await refreshComments(leadId, history, adminsById, myUserId);
       });
     }
 
@@ -1019,26 +1010,8 @@
     });
 
     if (isOwner) {
-      // Autosave notes on blur — same pattern as the deal-economics fields above.
-      const notesEl = document.getElementById('leadNotes');
-      const notesStatus = document.getElementById('leadNotesStatus');
-      notesEl.addEventListener('change', async () => {
-        const notes = notesEl.value.trim() || null;
-        if (lead.notes === notes) return;  // no-op
-        notesStatus.textContent = 'Saving…';
-        notesStatus.style.color = 'var(--success)';
-        const { error } = await supabase.from('leads').update({ notes }).eq('id', leadId);
-        if (error) {
-          notesStatus.textContent = 'Save failed: ' + error.message;
-          notesStatus.style.color = 'var(--warn)';
-          return;
-        }
-        lead.notes = notes;
-        notesStatus.textContent = 'Saved ✓';
-        setTimeout(() => {
-          if (notesStatus.textContent === 'Saved ✓') notesStatus.textContent = '';
-        }, 2000);
-      });
+      // Notes textarea was removed in migration 014 — all team commentary
+      // lives in the Comments feed now.
 
       // Danger-zone: permanently delete this lead
       document.getElementById('deleteLeadBtn').addEventListener('click', async () => {
@@ -1940,74 +1913,63 @@
   }
 
   // ============================================================
-  // Activity feed (status changes + comments, interleaved chronologically)
+  // Comments feed — team commentary, with attribution + edit/delete.
   // ============================================================
-  function renderActivityFeed(history, comments, adminsById, myUserId) {
-    const events = [];
-    for (const h of (history || [])) {
-      events.push({
-        type: 'status',
-        when: h.changed_at,
-        from: h.from_status,
-        to: h.to_status,
-        by: h.changed_by
-      });
+  function renderCommentsFeed(comments, adminsById, myUserId) {
+    if (!comments || comments.length === 0) {
+      return '<p style="color:var(--muted);font-size:13px;">No comments yet — be the first to add one.</p>';
     }
-    for (const c of (comments || [])) {
-      events.push({
-        type: 'comment',
-        when: c.created_at,
-        comment: c,
-        by: c.author_id
-      });
-    }
-    events.sort((a, b) => new Date(b.when) - new Date(a.when));
-
-    if (events.length === 0) {
-      return '<p style="color:var(--muted);font-size:13px;">No activity yet — be the first to add a comment above.</p>';
-    }
-
-    return events.map(e => {
-      const authorEmail = e.by && adminsById.get(e.by)?.email;
-      const authorName = authorEmail ? authorEmail.split('@')[0] : (e.by ? 'system' : 'system');
-
-      if (e.type === 'status') {
-        const fromLabel = STATUS_LABEL[e.from] || (e.from ? e.from : 'New');
-        const toLabel   = STATUS_LABEL[e.to]   || e.to;
-        const toDesc    = STATUS_DESC[e.to]    || '';
-        return `
-          <div class="history-item" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
-            <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
-              <span style="font-family:'Courier New',monospace;color:var(--accent);font-size:11px;">●</span>
-              <span style="color:var(--ink-soft);">${escapeHtml(fromLabel)}</span>
-              <span style="color:var(--muted);">→</span>
-              <strong style="color:var(--ink);">${escapeHtml(toLabel)}</strong>
-            </div>
-            ${toDesc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;padding-left:18px;">${escapeHtml(toDesc)}</div>` : ''}
-            <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:18px;">${formatDate(e.when)} · status change by ${escapeHtml(authorName)}</div>
+    const sorted = comments.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return sorted.map(c => {
+      const authorEmail = c.author_id && adminsById.get(c.author_id)?.email;
+      const authorName = authorEmail ? authorEmail.split('@')[0] : 'lead submission';
+      const isMine = c.author_id === myUserId;
+      const edited = c.updated_at && c.updated_at !== c.created_at;
+      return `
+        <div class="history-item" data-comment-id="${escapeHtml(c.id)}" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
+          <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
+            <span style="font-family:'Courier New',monospace;color:var(--accent-deep);font-size:11px;">▸</span>
+            <strong style="color:var(--ink);">${escapeHtml(authorName)}</strong>
+            <span style="color:var(--muted);font-size:11px;">${formatDate(c.created_at)}${edited ? ' · edited' : ''}</span>
           </div>
-        `;
-      } else {
-        const c = e.comment;
-        const isMine = c.author_id === myUserId;
-        const edited = c.updated_at && c.updated_at !== c.created_at;
-        return `
-          <div class="history-item" data-comment-id="${escapeHtml(c.id)}" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
-            <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
-              <span style="font-family:'Courier New',monospace;color:var(--accent-deep);font-size:11px;">▸</span>
-              <strong style="color:var(--ink);">${escapeHtml(authorName)}</strong>
-              <span style="color:var(--muted);font-size:11px;">${formatDate(e.when)}${edited ? ' · edited' : ''}</span>
+          <div class="comment-body" style="font-size:14px;color:var(--ink);line-height:1.55;margin-top:6px;padding-left:18px;white-space:pre-wrap;">${escapeHtml(c.comment)}</div>
+          ${isMine ? `
+            <div style="margin-top:6px;padding-left:18px;display:flex;gap:14px;">
+              <a href="#" class="comment-edit-btn" data-comment-id="${escapeHtml(c.id)}" style="font-size:11px;color:var(--accent);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">Edit</a>
+              <a href="#" class="comment-delete-btn" data-comment-id="${escapeHtml(c.id)}" style="font-size:11px;color:var(--warn);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">Delete</a>
             </div>
-            <div class="comment-body" style="font-size:14px;color:var(--ink);line-height:1.55;margin-top:6px;padding-left:18px;white-space:pre-wrap;">${escapeHtml(c.comment)}</div>
-            ${isMine ? `
-              <div style="margin-top:6px;padding-left:18px;display:flex;gap:14px;">
-                <a href="#" class="comment-edit-btn" data-comment-id="${escapeHtml(c.id)}" style="font-size:11px;color:var(--accent);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">Edit</a>
-                <a href="#" class="comment-delete-btn" data-comment-id="${escapeHtml(c.id)}" style="font-size:11px;color:var(--warn);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">Delete</a>
-              </div>
-            ` : ''}
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============================================================
+  // Status activity — system-recorded status changes only.
+  // ============================================================
+  function renderStatusActivity(history, adminsById) {
+    if (!history || history.length === 0) {
+      return '<p style="color:var(--muted);font-size:13px;">No status changes yet.</p>';
+    }
+    const sorted = history.slice().sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at));
+    return sorted.map(h => {
+      const fromLabel = STATUS_LABEL[h.from_status] || (h.from_status ? h.from_status : 'New');
+      const toLabel   = STATUS_LABEL[h.to_status]   || h.to_status;
+      const toDesc    = STATUS_DESC[h.to_status]    || '';
+      const byEmail = h.changed_by && adminsById.get(h.changed_by)?.email;
+      const byName = byEmail ? byEmail.split('@')[0] : 'system';
+      return `
+        <div class="history-item" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
+          <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
+            <span style="font-family:'Courier New',monospace;color:var(--accent);font-size:11px;">●</span>
+            <span style="color:var(--ink-soft);">${escapeHtml(fromLabel)}</span>
+            <span style="color:var(--muted);">→</span>
+            <strong style="color:var(--ink);">${escapeHtml(toLabel)}</strong>
           </div>
-        `;
-      }
+          ${toDesc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;padding-left:18px;">${escapeHtml(toDesc)}</div>` : ''}
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:18px;">${formatDate(h.changed_at)} · by ${escapeHtml(byName)}</div>
+        </div>
+      `;
     }).join('');
   }
 
@@ -2026,16 +1988,7 @@
           .update({ comment: newText.trim(), updated_at: new Date().toISOString() })
           .eq('id', id);
         if (error) { alert('Edit failed: ' + error.message); return; }
-        // Reload feed
-        const { data: freshComments } = await supabase
-          .from('lead_comments')
-          .select('*')
-          .eq('lead_id', leadId)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false });
-        document.getElementById('activityFeed').innerHTML =
-          renderActivityFeed(history, freshComments || [], adminsById, myUserId);
-        wireCommentActions(leadId, history, adminsById, myUserId);
+        await refreshComments(leadId, history, adminsById, myUserId);
       });
     });
     document.querySelectorAll('.comment-delete-btn').forEach(btn => {
@@ -2048,17 +2001,21 @@
           .update({ deleted_at: new Date().toISOString() })
           .eq('id', id);
         if (error) { alert('Delete failed: ' + error.message); return; }
-        const { data: freshComments } = await supabase
-          .from('lead_comments')
-          .select('*')
-          .eq('lead_id', leadId)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false });
-        document.getElementById('activityFeed').innerHTML =
-          renderActivityFeed(history, freshComments || [], adminsById, myUserId);
-        wireCommentActions(leadId, history, adminsById, myUserId);
+        await refreshComments(leadId, history, adminsById, myUserId);
       });
     });
+  }
+
+  async function refreshComments(leadId, history, adminsById, myUserId) {
+    const { data: freshComments } = await supabase
+      .from('lead_comments')
+      .select('*')
+      .eq('lead_id', leadId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+    document.getElementById('commentsFeed').innerHTML =
+      renderCommentsFeed(freshComments || [], adminsById, myUserId);
+    wireCommentActions(leadId, history, adminsById, myUserId);
   }
 
   function statusRank(status) {
