@@ -746,14 +746,18 @@
             <input type="number" id="totalCommission" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.estimated_total_commission || ''}" placeholder="auto-calculates from value">
           </div>
         </div>
-        <button class="save-btn" id="saveEconomics">Save</button>
+        <div style="margin-top:12px;font-size:12px;color:var(--muted);min-height:18px;">
+          <span id="autosaveStatus" style="font-style:italic;"></span>
+        </div>
       </div>
 
       ${isOwner ? `
       <div class="modal-section">
         <h3>Notes (private — admins only)</h3>
         <textarea class="notes-input" id="leadNotes" placeholder="Conversation history, agreed next steps, anything to remember…">${escapeHtml(lead.notes || '')}</textarea>
-        <button class="save-btn" id="saveNotes">Save notes</button>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted);min-height:18px;">
+          <span id="leadNotesStatus" style="font-style:italic;"></span>
+        </div>
       </div>
       ` : ''}
 
@@ -797,43 +801,55 @@
       if (!isNaN(v) && v > 0) commissionInput.value = Math.round(v * 0.021);
     });
 
-    document.getElementById('saveEconomics').addEventListener('click', async () => {
-      const value = parseFloat(valueInput.value) || null;
-      const commission = parseFloat(commissionInput.value) || null;
-      const company = (document.getElementById('leadCompany')?.value || '').trim() || null;
-      const firstName = (document.getElementById('leadFirstName')?.value || '').trim() || null;
-      const lastName  = (document.getElementById('leadLastName')?.value  || '').trim() || null;
-      const emailVal  = (document.getElementById('leadEmail')?.value     || '').trim().toLowerCase() || null;
-      const phoneVal  = (document.getElementById('leadPhone')?.value     || '').trim() || null;
+    // Autosave: each field writes its own column on blur (change event).
+    // No save button, no batched submit — every change persists immediately.
+    const statusEl = document.getElementById('autosaveStatus');
+    function showStatus(msg, isError) {
+      statusEl.textContent = msg;
+      statusEl.style.color = isError ? 'var(--warn)' : 'var(--success)';
+      if (!isError) {
+        setTimeout(() => {
+          if (statusEl.textContent === msg) statusEl.textContent = '';
+        }, 2000);
+      }
+    }
 
+    async function autosaveField(column, rawValue) {
+      // Normalize: empty string → null. Lowercase emails. Parse numbers.
+      let value = rawValue;
+      if (typeof value === 'string') {
+        value = value.trim();
+        if (column === 'email') value = value.toLowerCase();
+        if (value === '') value = null;
+      }
+      if (column === 'estimated_equipment_value' || column === 'estimated_total_commission') {
+        value = (rawValue === '' || rawValue == null) ? null : parseFloat(rawValue);
+        if (isNaN(value)) value = null;
+      }
+      // Skip no-op writes
+      if (lead[column] === value) return;
+
+      showStatus('Saving…', false);
       const { error } = await supabase
         .from('leads')
-        .update({
-          first_name: firstName,
-          last_name: lastName,
-          email: emailVal,
-          phone: phoneVal,
-          company,
-          estimated_equipment_value: value,
-          estimated_total_commission: commission
-        })
+        .update({ [column]: value })
         .eq('id', leadId);
       if (error) {
-        alert('Save failed: ' + error.message);
-      } else {
-        lead.first_name = firstName;
-        lead.last_name = lastName;
-        lead.email = emailVal;
-        lead.phone = phoneVal;
-        lead.company = company;
-        lead.estimated_equipment_value = value;
-        lead.estimated_total_commission = commission;
-        document.getElementById('saveEconomics').textContent = 'Saved ✓';
-        setTimeout(() => { document.getElementById('saveEconomics').textContent = 'Save'; }, 1500);
-        // Refresh the table to show the column updates
-        renderTable();
+        showStatus('Save failed: ' + error.message, true);
+        return;
       }
-    });
+      lead[column] = value;
+      showStatus('Saved ✓', false);
+      renderTable();
+    }
+
+    document.getElementById('leadFirstName').addEventListener('change', e => autosaveField('first_name', e.target.value));
+    document.getElementById('leadLastName').addEventListener('change',  e => autosaveField('last_name',  e.target.value));
+    document.getElementById('leadEmail').addEventListener('change',     e => autosaveField('email',      e.target.value));
+    document.getElementById('leadPhone').addEventListener('change',     e => autosaveField('phone',      e.target.value));
+    document.getElementById('leadCompany').addEventListener('change',   e => autosaveField('company',    e.target.value));
+    valueInput.addEventListener('change',     e => autosaveField('estimated_equipment_value', e.target.value));
+    commissionInput.addEventListener('change', e => autosaveField('estimated_total_commission', e.target.value));
 
     // Comment posting
     const postBtn = document.getElementById('postCommentBtn');
@@ -1003,15 +1019,25 @@
     });
 
     if (isOwner) {
-      document.getElementById('saveNotes').addEventListener('click', async () => {
-        const notes = document.getElementById('leadNotes').value;
+      // Autosave notes on blur — same pattern as the deal-economics fields above.
+      const notesEl = document.getElementById('leadNotes');
+      const notesStatus = document.getElementById('leadNotesStatus');
+      notesEl.addEventListener('change', async () => {
+        const notes = notesEl.value.trim() || null;
+        if (lead.notes === notes) return;  // no-op
+        notesStatus.textContent = 'Saving…';
+        notesStatus.style.color = 'var(--success)';
         const { error } = await supabase.from('leads').update({ notes }).eq('id', leadId);
-        if (error) alert('Save failed: ' + error.message);
-        else {
-          lead.notes = notes;
-          document.getElementById('saveNotes').textContent = 'Saved ✓';
-          setTimeout(() => { document.getElementById('saveNotes').textContent = 'Save notes'; }, 1500);
+        if (error) {
+          notesStatus.textContent = 'Save failed: ' + error.message;
+          notesStatus.style.color = 'var(--warn)';
+          return;
         }
+        lead.notes = notes;
+        notesStatus.textContent = 'Saved ✓';
+        setTimeout(() => {
+          if (notesStatus.textContent === 'Saved ✓') notesStatus.textContent = '';
+        }, 2000);
       });
 
       // Danger-zone: permanently delete this lead
