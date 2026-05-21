@@ -185,7 +185,7 @@
   <div class="filters" id="filterBar">
     <span class="filter-label">Filter by status</span>
     <select class="filter-select" id="statusFilter">
-      <option value="all" selected>All in bucket</option>
+      <option value="all" id="filterAllOption" selected>All Active</option>
       <option value="inbox" id="inboxOption" style="display:none;">Operator inbox</option>
       <option value="submitted_homepage">Submitted on Homepage</option>
       <option value="booked_call">Booked a Call</option>
@@ -592,15 +592,31 @@
   }
 
   // Bucket-tab clicks (top-level filter)
+  // "All [BucketName]" label per bucket, so the dropdown's default option
+  // tells the user exactly what they're seeing.
+  const BUCKET_DISPLAY = {
+    active:   'All Active',
+    clients:  'All Clients',
+    not_now:  'All Not now',
+    archived: 'All Archived',
+    all:      'All Leads'
+  };
+  function updateAllOptionLabel() {
+    const opt = document.getElementById('filterAllOption');
+    if (opt) opt.textContent = BUCKET_DISPLAY[currentBucket] || 'All in bucket';
+  }
+  updateAllOptionLabel();
+
   document.querySelectorAll('.bucket-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.bucket-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentBucket = btn.dataset.bucket;
-      // Reset sub-filter to "all in bucket" when changing buckets
+      // Reset sub-filter when changing buckets, and refresh the "All X" label.
       currentFilter = 'all';
       const sel = document.getElementById('statusFilter');
       if (sel) sel.value = 'all';
+      updateAllOptionLabel();
       renderTable();
     });
   });
