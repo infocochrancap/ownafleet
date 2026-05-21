@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Homepage mockup v3 — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724;
+    --ink-soft: #2A3647;
+    --muted: #6B7280;
+    --line: #D9DDE3;
+    --line-soft: #EEF0F3;
+    --paper: #F8F7F4;
+    --paper-warm: #F2F0EA;
+    --accent: #8B6F3F;
+    --accent-deep: #6B5430;
+    --success: #2F5D3D;
+    --warn: #B85C3A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .container-wide { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+  /* Preview chrome */
+  .preview-label {
+    background: var(--accent);
+    color: white;
+    padding: 12px 32px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .preview-note {
+    background: var(--paper-warm);
+    padding: 18px 32px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    border-bottom: 1px solid var(--line);
+  }
+  .preview-note strong { color: var(--ink); }
+
+  /* Brand */
+  nav {
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); }
+  h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 300; letter-spacing: -0.02em; line-height: 1.05; }
+  h1 { font-size: clamp(48px, 7vw, 84px); }
+  h2 { font-size: clamp(32px, 4.5vw, 56px); }
+  em { font-style: italic; color: var(--accent); font-weight: 300; }
+
+  /* Hero */
+  .hero {
+    padding-top: 100px;
+    padding-bottom: 100px;
+    position: relative;
+  }
+  .hero h1 { margin-bottom: 28px; max-width: 1100px; }
+  .hero-sub {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin-bottom: 36px;
+    max-width: 820px;
+  }
+  .hero-cta-wrap { margin-top: 40px; }
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 18px 36px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    font-weight: 500;
+    display: inline-block;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--ink); color: white; }
+  .btn-primary:hover { background: var(--accent); }
+  .hero-disclaim {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 28px;
+  }
+
+  /* What happens next — 3-step process */
+  .next {
+    background: var(--paper);
+    padding: 100px 0;
+    border-top: 1px solid var(--line);
+  }
+  .next .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 56px;
+    max-width: 720px;
+    font-weight: 300;
+  }
+  .next-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    counter-reset: nextstep;
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 760px) { .next-steps { grid-template-columns: 1fr; } }
+  .next-step {
+    background: white;
+    padding: 36px 32px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+  .next-step:last-child { border-right: none; }
+  @media (max-width: 760px) {
+    .next-step { border-right: none; border-bottom: 1px solid var(--line); }
+    .next-step:last-child { border-bottom: none; }
+  }
+  .next-step-num {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    color: var(--accent);
+    font-weight: 400;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .next-step-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .next-step-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
+  /* Benefit tiles */
+  .benefits-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+  }
+  @media (max-width: 760px) {
+    .benefits-row { grid-template-columns: 1fr; gap: 12px; }
+  }
+  .benefit-tile {
+    background: white;
+    border-top: 3px solid var(--accent);
+    padding: 24px 26px;
+  }
+  .benefit-check {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .benefit-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .benefit-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  /* Punchy comparison callout below the benefit tiles */
+  .hero-stat {
+    margin-top: 32px;
+    padding: 22px 28px;
+    background: white;
+    border-left: 3px solid var(--accent);
+    max-width: 720px;
+  }
+  .hero-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .hero-stat-text {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .hero-stat-text strong {
+    color: var(--accent);
+    font-weight: 500;
+    font-style: italic;
+  }
+
+  /* What it is — light frame */
+  .how {
+    background: white;
+    border-top: 1px solid var(--line);
+    padding: 100px 0;
+  }
+  .how .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 48px;
+    max-width: 720px;
+    font-weight: 300;
+  }
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 56px;
+  }
+  @media (max-width: 760px) { .pillars { grid-template-columns: 1fr; gap: 40px; } }
+  .pillar-num {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .pillar-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--ink);
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+  .pillar-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
+  /* Single CTA: form at bottom */
+  .cta-section {
+    background: var(--ink);
+    color: white;
+    padding: 100px 0;
+  }
+  .cta-section h2 { color: white; margin-bottom: 16px; max-width: 720px; }
+  .cta-section h2 em { color: var(--accent); }
+  .cta-section .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+    margin-bottom: 56px;
+    max-width: 640px;
+    font-weight: 300;
+  }
+  .form-card {
+    background: white;
+    color: var(--ink);
+    padding: 48px;
+    max-width: 760px;
+    border-top: 3px solid var(--accent);
+  }
+  @media (max-width: 600px) { .form-card { padding: 32px 24px; } }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-field { display: flex; flex-direction: column; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .form-field label .req { color: var(--warn); margin-left: 2px; }
+  .form-field input, .form-field select, .form-field textarea {
+    padding: 13px 16px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    border-radius: 0;
+  }
+  .form-field textarea { min-height: 90px; resize: vertical; }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: white;
+  }
+  .checkbox-row {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 16px 18px;
+    background: var(--paper);
+    border-left: 2px solid var(--accent);
+    margin-bottom: 24px;
+  }
+  .checkbox-row input[type="checkbox"] { margin-top: 3px; cursor: pointer; }
+  .checkbox-row label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    cursor: pointer;
+  }
+  .submit-btn {
+    width: 100%;
+    background: var(--ink);
+    color: white;
+    border: none;
+    padding: 18px 32px;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: var(--accent); }
+  .form-footnote {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 18px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* Who it's for */
+  .qualifier { background: var(--paper); border-top: 1px solid var(--line); padding: 100px 0; }
+  .qualifier .lede { font-family: 'Fraunces', serif; font-size: clamp(18px, 2vw, 22px); color: var(--ink-soft); line-height: 1.5; margin-bottom: 56px; max-width: 720px; font-weight: 300; }
+  .qual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 720px) { .qual-grid { grid-template-columns: 1fr; } }
+  .qual-col { background: white; padding: 36px 32px; border-top: 3px solid var(--success); }
+  .qual-col h3 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; color: var(--ink); margin-bottom: 22px; }
+  .qual-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .qual-list li { font-size: 14px; color: var(--ink-soft); line-height: 1.55; display: flex; align-items: flex-start; gap: 12px; }
+  .qual-list li::before { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--success); flex-shrink: 0; margin-top: 5px; }
+  .qual-notfit { margin-top: 40px; padding: 22px 26px; background: var(--paper-warm); border-left: 3px solid var(--warn); font-size: 14px; color: var(--ink-soft); line-height: 1.7; }
+  .qual-notfit strong { color: var(--ink); font-weight: 500; }
+
+  /* Why people trust it */
+  .why { background: var(--paper-warm); border-top: 1px solid var(--line); padding: 100px 0; }
+  .why .lede { font-family: 'Fraunces', serif; font-size: clamp(18px, 2vw, 22px); color: var(--ink-soft); line-height: 1.5; margin-bottom: 56px; max-width: 720px; font-weight: 300; }
+  .cred-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  @media (max-width: 720px) { .cred-grid { grid-template-columns: 1fr; } }
+  .cred-item { background: white; padding: 32px; border-top: 3px solid var(--accent); }
+  .cred-h { font-family: 'Fraunces', serif; font-weight: 400; font-size: 20px; color: var(--ink); margin-bottom: 12px; }
+  .cred-desc { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink-soft); line-height: 1.65; }
+  .why-callout { margin-top: 40px; background: white; padding: 32px 40px; border-left: 3px solid var(--accent); display: grid; grid-template-columns: 180px 1fr; gap: 32px; align-items: center; }
+  @media (max-width: 720px) { .why-callout { grid-template-columns: 1fr; gap: 14px; padding: 24px; } }
+  .why-callout-label { font-family: 'Fraunces', serif; font-size: 17px; color: var(--accent); font-style: italic; }
+  .why-callout-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 300; line-height: 1.5; color: var(--ink-soft); }
+
+  /* Testimonial */
+  .testimonial { background: var(--paper); padding: 100px 0; border-top: 1px solid var(--line-soft); }
+  .testimonial-inner { max-width: 920px; margin: 0 auto; padding: 0 32px; text-align: center; }
+  .testimonial-mark { font-family: 'Fraunces', serif; font-size: 80px; color: var(--accent); line-height: 0.6; margin-bottom: 8px; }
+  .testimonial-quote { font-family: 'Fraunces', serif; font-size: clamp(22px, 2.8vw, 32px); font-weight: 300; line-height: 1.4; color: var(--ink); margin-bottom: 28px; }
+  .testimonial-attr { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; line-height: 1.6; }
+  .testimonial-attr strong { color: var(--ink); font-weight: 500; display: block; margin-bottom: 2px; }
+
+  /* About Josh */
+  .about { background: var(--ink); color: white; padding: 0; overflow: hidden; position: relative; }
+  .about::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 20%, rgba(139,111,63,0.18) 0%, transparent 55%); pointer-events: none; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1.2fr; min-height: 560px; position: relative; z-index: 1; }
+  @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } }
+  .about-photo { background-size: cover; background-position: center top; min-height: 400px; }
+  .about-content { padding: 80px 64px; display: flex; flex-direction: column; justify-content: center; }
+  @media (max-width: 720px) { .about-content { padding: 48px 28px; } }
+  .about-content .eyebrow { color: rgba(255,255,255,0.65); }
+  .about-content .eyebrow::before { background: rgba(255,255,255,0.4); }
+  .about-name { font-family: 'Fraunces', serif; font-weight: 300; font-size: clamp(44px, 5vw, 64px); line-height: 0.95; margin-bottom: 14px; color: white; letter-spacing: -0.02em; }
+  .about-role { font-size: 12px; letter-spacing: 0.22em; color: rgba(255,255,255,0.55); text-transform: uppercase; margin-bottom: 30px; }
+  .about-bio { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 300; line-height: 1.55; color: rgba(255,255,255,0.88); margin-bottom: 22px; }
+  .about-disclosure { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.65; font-style: italic; margin-top: 8px; }
+
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.5);
+    padding: 32px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.7;
+    font-style: italic;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  footer .disc { max-width: 880px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<div class="preview-label">MOCKUP V4 — Tightened tiles · "Managed fleet" · Who's-it-for + Trust + Testimonial + About Josh restored</div>
+
+<div class="preview-note">
+  <strong>What's new in v4:</strong>
+  (1) Hero benefit tiles are tighter — one sentence each.
+  "Year-1 tax depreciation" → "<strong>100% Year-1 depreciation</strong>";
+  "No business to run" → "<strong>Managed fleet</strong>".
+  (2) Eyebrow condensed — dropped the "7- and 8-figure" specificity.
+  (3) Sections restored between How-it-works and the form: <strong>Who it's for</strong>,
+  <strong>Why people trust it</strong>, <strong>Testimonial</strong>, <strong>About Josh</strong> —
+  faithful copies of what's currently on the live site.
+  (4) Single CTA at the bottom + 3-step path forward (unchanged from v3).
+</div>
+
+<nav>
+  <a href="#" class="nav-brand">OWNAFLEET</a>
+</nav>
+
+<!-- ============ NEW HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">For high-income years · windfalls · capital events</div>
+    <h1>Offset this year's tax bill with <em>your own managed heavy equipment fleet.</em></h1>
+    <p class="hero-sub">If you're staring at a major tax bill this year — from a strong income year, a business sale, or a capital event — owning heavy equipment in a managed rental fleet is a structured way to convert that exposure into a real, depreciating asset on your balance sheet.</p>
+
+    <div class="benefits-row">
+      <div class="benefit-tile">
+        <div class="benefit-check">✓</div>
+        <div class="benefit-title">100% Year-1 depreciation</div>
+        <div class="benefit-desc">Against ordinary income, on qualifying equipment. Your CPA confirms scope.</div>
+      </div>
+      <div class="benefit-tile">
+        <div class="benefit-check">✓</div>
+        <div class="benefit-title">Monthly cash distributions</div>
+        <div class="benefit-desc">Your equipment runs in a national fleet. Net rental income comes back monthly to your LLC.</div>
+      </div>
+      <div class="benefit-tile">
+        <div class="benefit-check">✓</div>
+        <div class="benefit-title">Managed fleet</div>
+        <div class="benefit-desc">A publicly-traded U.S. operator runs the fleet business. You take a strategic-oversight role.</div>
+      </div>
+    </div>
+
+    <div class="hero-stat">
+      <div class="hero-stat-label">vs. the alternatives</div>
+      <p class="hero-stat-text">Up to <strong>8x</strong> more Year-1 depreciation than oil &amp; gas, per dollar invested.</p>
+    </div>
+
+    <div class="hero-cta-wrap">
+      <a href="#form" class="btn btn-primary">See if this fits →</a>
+    </div>
+
+    <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
+  </div>
+</section>
+
+<!-- ============ WHAT IT IS (kept, condensed) ============ -->
+<section class="how">
+  <div class="container">
+    <div class="eyebrow">The structure</div>
+    <h2>A real business with a real <em>business purpose.</em></h2>
+    <p class="lede">For accelerated depreciation to apply, you need genuine ownership of a real, income-producing asset. The structure below is what makes that defensible — to your CPA, your lender, and the IRS.</p>
+
+    <div class="pillars">
+      <div>
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">You own real equipment</div>
+        <div class="pillar-desc">Specific, serialized fleet equipment titled to your LLC. Not a fund interest, not pooled, not a security — a real asset you can identify, track, and sell.</div>
+      </div>
+      <div>
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">It produces real income</div>
+        <div class="pillar-desc">Your equipment is deployed in a national rental fleet run by a publicly-traded U.S. operating partner. Net fleet rental income is distributed to your LLC monthly.</div>
+      </div>
+      <div>
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">The tax treatment follows</div>
+        <div class="pillar-desc">Genuine ownership of real income-producing equipment is what allows the federal tax code's accelerated-depreciation elections to apply. Your CPA confirms scope.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHO IT'S FOR ============ -->
+<section class="qualifier">
+  <div class="container">
+    <div class="eyebrow">Who it's for</div>
+    <h2>Is this <em>for you?</em></h2>
+    <p class="lede">Most participants come through one of two doors. Either is a fit — specifics get worked out on a call.</p>
+
+    <div class="qual-grid">
+      <div class="qual-col">
+        <h3>Diversifying a windfall</h3>
+        <ul class="qual-list">
+          <li>A recent capital gain, business sale, or strong investment year</li>
+          <li>Looking for something real — uncorrelated to public markets</li>
+          <li>Want cash flow without operating a business yourself</li>
+          <li>Comfortable holding through the program's contract horizon</li>
+        </ul>
+      </div>
+      <div class="qual-col">
+        <h3>Offsetting a high-income year</h3>
+        <ul class="qual-list">
+          <li>Active business, equity comp, or K-1 generating meaningful taxable income</li>
+          <li>Your CPA has flagged accelerated-depreciation strategies as relevant</li>
+          <li>Open to a multi-year horizon, not a one-off transaction</li>
+          <li>Comfortable with a personal guarantee on financed equipment</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qual-notfit">
+      <strong>This program likely isn't a fit if:</strong> you need full liquidity inside a 6-year window · you don't have an income or tax profile that benefits from accelerated depreciation · you'd want investor-style governance rights (this is direct ownership, not a fund interest) · you'd prefer a pooled-vehicle or fund-style structure.
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY PEOPLE TRUST IT ============ -->
+<section class="why">
+  <div class="container">
+    <div class="eyebrow">Why people trust it</div>
+    <h2>Built on <em>real fleet scale.</em></h2>
+    <p class="lede">The economics work because the program sits on top of a publicly-traded U.S. rental operator running a national fleet of equipment. Underlying documents — operator identity, audited financials, and program-specific independent reports — are shared during your intro call so you can verify independently.</p>
+
+    <div class="cred-grid">
+      <div class="cred-item">
+        <div class="cred-h">Publicly-traded operator</div>
+        <div class="cred-desc">SEC-registered, audited financials, public regulatory filings. The operator's name and ticker are shared on your intro call so you can run independent diligence.</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-h">Direct title to your equipment</div>
+        <div class="cred-desc">Specific, serialized equipment held by your own LLC. Not a fund interest, not pooled, not a security. You can verify ownership on the operator's platform.</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-h">Independent diligence kit</div>
+        <div class="cred-desc">Program-specific independent accountant reports and pro-forma documents are available on request — the same materials shared with institutional participants.</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-h">Established, not a pilot</div>
+        <div class="cred-desc">A mature managed-fleet program with many years of operating history and a substantial existing participant base. References available during evaluation.</div>
+      </div>
+    </div>
+
+    <div class="why-callout">
+      <div class="why-callout-label">Not a security</div>
+      <div class="why-callout-text">OwnaFleet does not offer or sell securities. Participation is a direct purchase of specific equipment by your own LLC. The operating partner's identity, underlying documents, and diligence materials are shared during your intro call.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIAL ============ -->
+<section class="testimonial">
+  <div class="testimonial-inner">
+    <div class="testimonial-mark">&ldquo;</div>
+    <p class="testimonial-quote">The numbers were straightforward, the process was clean, and the year-one tax impact <em>made a real difference</em> for us — the kind of outcome you actually feel.</p>
+    <div class="testimonial-attr">
+      <strong>Dr. Jeremiah Sturgill</strong>
+      Orthodontist · Tennessee · Program Participant
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT JOSH ============ -->
+<section class="about">
+  <div class="about-grid">
+    <div class="about-photo" style="background-image: url('/assets/josh-about.jpg');"></div>
+    <div class="about-content">
+      <div class="eyebrow">About Josh</div>
+      <h2 class="about-name">Josh Cochran</h2>
+      <div class="about-role">Founder · Cochran Capital · Dover, DE</div>
+      <p class="about-bio">Josh is the founder of Cochran Capital, an investment firm focused on real estate, infrastructure, and asset-backed yield. He works directly with the program's partner team to bring qualified participants into the managed fleet ownership program.</p>
+      <p class="about-bio">Working with Josh means a single point of contact through closing, flexibility on minimums based on his partner relationships, and an advocate for your interests through the lifecycle of the deal.</p>
+      <p class="about-disclosure">Disclosure: Josh is not a financial, tax, or legal advisor. He is a participant in the program himself and earns a referral fee from the program's partner team on completed deals. This relationship does not affect your terms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT HAPPENS NEXT — 3 sequential steps ============ -->
+<section class="next">
+  <div class="container">
+    <div class="eyebrow">What happens next</div>
+    <h2>A three-step <em>path forward.</em></h2>
+    <p class="lede">No commitments, no fees, no pressure at any step. The path is designed so you can step in at any point and step out at any point — until you actually sign.</p>
+
+    <div class="next-steps">
+      <div class="next-step">
+        <div class="next-step-num">01</div>
+        <div class="next-step-title">Fill out the form</div>
+        <div class="next-step-desc">Quick details on your tax year and financial picture so we can see if this is a fit. Takes about a minute.</div>
+      </div>
+      <div class="next-step">
+        <div class="next-step-num">02</div>
+        <div class="next-step-title">We review &amp; send the overview</div>
+        <div class="next-step-desc">Within one business day, we confirm fit and send you the detailed 21-slide overview — structure, economics, and the questions most people ask before a first call.</div>
+      </div>
+      <div class="next-step">
+        <div class="next-step-num">03</div>
+        <div class="next-step-title">Schedule a call with Josh</div>
+        <div class="next-step-desc">20-minute conversation, on your timeline. We work through your specific situation: income picture, tax position, what you're trying to accomplish.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- (Other sections — Who it's for, Why trust it, About Josh, FAQ — would live here, unchanged. Skipped in this mockup.) -->
+
+<!-- ============ SINGLE CTA — FORM AT BOTTOM ============ -->
+<section class="cta-section" id="form">
+  <div class="container">
+    <div class="eyebrow" style="color: var(--accent);">Get the overview</div>
+    <h2>Tell us about your <em>tax year.</em></h2>
+    <p class="lede">Drop your details and a brief on what you're trying to accomplish. You'll get the 21-slide overview deck, and Josh follows up personally to discuss whether this fits your situation.</p>
+
+    <form class="form-card">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="first">First name<span class="req">*</span></label>
+          <input type="text" id="first" required>
+        </div>
+        <div class="form-field">
+          <label for="last">Last name<span class="req">*</span></label>
+          <input type="text" id="last" required>
+        </div>
+        <div class="form-field">
+          <label for="email">Email<span class="req">*</span></label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-field">
+          <label for="phone">Phone<span class="req">*</span></label>
+          <input type="tel" id="phone" required>
+        </div>
+        <div class="form-field full">
+          <label for="income">Income to offset this year<span class="req">*</span></label>
+          <select id="income" required>
+            <option value="">Select a range</option>
+            <option>Under $250K</option>
+            <option>$250K – $500K</option>
+            <option>$500K – $1M</option>
+            <option>$1M – $2M</option>
+            <option>$2M – $5M</option>
+            <option>Over $5M</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="nw">Net worth<span class="req">*</span></label>
+          <select id="nw" required>
+            <option value="">Select a range</option>
+            <option>Under $1M</option>
+            <option>$1M – $3M</option>
+            <option>$3M – $10M</option>
+            <option>$10M – $30M</option>
+            <option>$30M – $75M</option>
+            <option>$75M – $150M</option>
+            <option>$150M+</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="liq">Liquid capital available<span class="req">*</span></label>
+          <select id="liq" required>
+            <option value="">Select a range</option>
+            <option>Under $200K</option>
+            <option>$200K – $1M</option>
+            <option>$1M – $3M</option>
+            <option>$3M – $10M</option>
+            <option>$10M – $25M</option>
+            <option>$25M+</option>
+          </select>
+        </div>
+        <div class="form-field full">
+          <label for="notes">What are you trying to accomplish? (optional)</label>
+          <textarea id="notes" placeholder="Strong income year, business sale, exit, capital event, planning for next year… whatever's relevant."></textarea>
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="disc">
+        <label for="disc">
+          I understand this material is provided for <strong>informational purposes only</strong> and is <strong>not an offer to sell or solicit any security</strong>. Participants take direct title to specific equipment through their own LLC. I am requesting this material to evaluate whether the program fits my situation.
+        </label>
+      </div>
+
+      <button type="submit" class="submit-btn">Send me the overview →</button>
+      <p class="form-footnote">Your information stays with Josh and his team. Not shared, not sold.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="disc">
+    OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. This material is informational only and does not constitute an offer to sell or solicit any security, nor financial, tax, legal, investment, or accounting advice. © 2026 Cochran Management LLC.
+  </div>
+</footer>
+
+</body>
+</html>
