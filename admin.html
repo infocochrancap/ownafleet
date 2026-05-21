@@ -776,7 +776,7 @@
           System-recorded events — status changes, automated transitions. Read-only.
         </p>
         <div id="statusActivity">
-          ${renderStatusActivity(history, adminsById)}
+          ${renderStatusActivity(history, comments, adminsById)}
         </div>
       </div>
 
@@ -1914,12 +1914,15 @@
 
   // ============================================================
   // Comments feed — team commentary, with attribution + edit/delete.
+  // Only human-authored comments (author_id != null) show here.
+  // System-generated comments (form submissions, etc.) go to Activity.
   // ============================================================
   function renderCommentsFeed(comments, adminsById, myUserId) {
-    if (!comments || comments.length === 0) {
+    const teamComments = (comments || []).filter(c => c.author_id !== null);
+    if (teamComments.length === 0) {
       return '<p style="color:var(--muted);font-size:13px;">No comments yet — be the first to add one.</p>';
     }
-    const sorted = comments.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const sorted = teamComments.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     return sorted.map(c => {
       const authorEmail = c.author_id && adminsById.get(c.author_id)?.email;
       const authorName = authorEmail ? authorEmail.split('@')[0] : 'lead submission';
@@ -1945,31 +1948,58 @@
   }
 
   // ============================================================
-  // Status activity — system-recorded status changes only.
+  // Activity — system-recorded events. Mixes status changes with
+  // system-generated comments (form submissions, etc.) chronologically.
+  // Read-only — no edit/delete affordances.
   // ============================================================
-  function renderStatusActivity(history, adminsById) {
-    if (!history || history.length === 0) {
-      return '<p style="color:var(--muted);font-size:13px;">No status changes yet.</p>';
+  function renderStatusActivity(history, comments, adminsById) {
+    const events = [];
+    for (const h of (history || [])) {
+      events.push({ type: 'status', when: h.changed_at, payload: h });
     }
-    const sorted = history.slice().sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at));
-    return sorted.map(h => {
-      const fromLabel = STATUS_LABEL[h.from_status] || (h.from_status ? h.from_status : 'New');
-      const toLabel   = STATUS_LABEL[h.to_status]   || h.to_status;
-      const toDesc    = STATUS_DESC[h.to_status]    || '';
-      const byEmail = h.changed_by && adminsById.get(h.changed_by)?.email;
-      const byName = byEmail ? byEmail.split('@')[0] : 'system';
-      return `
-        <div class="history-item" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
-          <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
-            <span style="font-family:'Courier New',monospace;color:var(--accent);font-size:11px;">●</span>
-            <span style="color:var(--ink-soft);">${escapeHtml(fromLabel)}</span>
-            <span style="color:var(--muted);">→</span>
-            <strong style="color:var(--ink);">${escapeHtml(toLabel)}</strong>
+    // Comments with NULL author = system-generated (form submissions, etc.)
+    for (const c of (comments || []).filter(c => c.author_id === null)) {
+      events.push({ type: 'system_comment', when: c.created_at, payload: c });
+    }
+    if (events.length === 0) {
+      return '<p style="color:var(--muted);font-size:13px;">No activity yet.</p>';
+    }
+    events.sort((a, b) => new Date(b.when) - new Date(a.when));
+
+    return events.map(e => {
+      if (e.type === 'status') {
+        const h = e.payload;
+        const fromLabel = STATUS_LABEL[h.from_status] || (h.from_status ? h.from_status : 'New');
+        const toLabel   = STATUS_LABEL[h.to_status]   || h.to_status;
+        const toDesc    = STATUS_DESC[h.to_status]    || '';
+        const byEmail = h.changed_by && adminsById.get(h.changed_by)?.email;
+        const byName = byEmail ? byEmail.split('@')[0] : 'system';
+        return `
+          <div class="history-item" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
+            <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
+              <span style="font-family:'Courier New',monospace;color:var(--accent);font-size:11px;">●</span>
+              <span style="color:var(--ink-soft);">${escapeHtml(fromLabel)}</span>
+              <span style="color:var(--muted);">→</span>
+              <strong style="color:var(--ink);">${escapeHtml(toLabel)}</strong>
+            </div>
+            ${toDesc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;padding-left:18px;">${escapeHtml(toDesc)}</div>` : ''}
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:18px;">${formatDate(h.changed_at)} · by ${escapeHtml(byName)}</div>
           </div>
-          ${toDesc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;padding-left:18px;">${escapeHtml(toDesc)}</div>` : ''}
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:18px;">${formatDate(h.changed_at)} · by ${escapeHtml(byName)}</div>
-        </div>
-      `;
+        `;
+      } else {
+        // system_comment
+        const c = e.payload;
+        return `
+          <div class="history-item" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
+            <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
+              <span style="font-family:'Courier New',monospace;color:var(--accent-deep);font-size:11px;">◆</span>
+              <strong style="color:var(--ink);">Lead submission</strong>
+              <span style="color:var(--muted);font-size:11px;">${formatDate(c.created_at)}</span>
+            </div>
+            <div style="font-size:14px;color:var(--ink);line-height:1.55;margin-top:6px;padding-left:18px;white-space:pre-wrap;">${escapeHtml(c.comment)}</div>
+          </div>
+        `;
+      }
     }).join('');
   }
 
