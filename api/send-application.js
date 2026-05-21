@@ -8,13 +8,12 @@ import { Resend } from 'resend';
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
 
-// The Bevel Financial application is the credit-application form leads fill out.
-// Bevel is the lending partner Armada works with; the same URL is used today for
-// all OwnaFleet-program applicants. Override via env var if the URL ever changes
-// without a deploy.
+// The Armada Commercial Credit Application now lives on ownafleet.com,
+// embedded inside an OwnaFleet-branded wrapper page that keeps the
+// applicant inside our experience while Bevel Financial processes
+// the underlying form. Override via env var if the URL ever moves.
 const ARMADA_APPLICATION_URL = process.env.ARMADA_APPLICATION_URL ||
-  'https://bevelfinancial.com/apply-now/';
-const WALKTHROUGH_PDF_URL = 'https://ownafleet.com/docs/bevel-walkthrough.pdf';
+  'https://ownafleet.com/apply';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -51,10 +50,10 @@ export default async function handler(req, res) {
 
   if (leadErr || !lead) return res.status(404).json({ error: 'Lead not found' });
 
-  // Bump status to 'application_sent' (the trigger logs to lead_status_history)
+  // Bump status to 'call_completed_app_sent' (the trigger logs to lead_status_history)
   const { error: updateErr } = await supabase
     .from('leads')
-    .update({ status: 'application_sent', status_updated_by: user.id })
+    .update({ status: 'call_completed_app_sent', status_updated_by: user.id })
     .eq('id', lead_id);
 
   if (updateErr) {
@@ -83,36 +82,26 @@ function applicationEmailHtml(lead) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
       <p>Hi ${escape(lead.first_name)},</p>
-      <p>Great talking. As promised, here's the credit application with our lending partner, Bevel Financial:</p>
+      <p>Great talking. As promised, here's the Armada Commercial Credit Application — powered by Bevel Financial, the program's lending partner:</p>
       <p style="margin: 24px 0;">
         <a href="${ARMADA_APPLICATION_URL}" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">Open the application →</a>
       </p>
 
-      <p><strong>A few things that trip people up — read these before you start:</strong></p>
+      <p><strong>A few things to know before you start:</strong></p>
       <ul style="line-height: 1.8;">
-        <li><strong>Program to select:</strong> "<em>Asset Management Program — Armada</em>" in the "How will you utilize this financed equipment?" dropdown.</li>
-        <li><strong>Don't have the invoice yet?</strong> Type "<em>Invoice pending from Vendor</em>" in the equipment description. We'll handle the invoice on the back end.</li>
-        <li><strong>Financing Type:</strong> select <strong>Loan</strong>.</li>
-        <li><strong>Equipment Cost:</strong> the dollar amount you're applying for (i.e., your target deal size).</li>
-        <li><strong>Down Payment:</strong> if unsure, calculate <strong>10%</strong> of the equipment cost.</li>
-        <li><strong>Home address:</strong> must be a street address — <strong>no PO Box</strong>.</li>
-        <li><strong>Bank & Lending References:</strong> not required. Skip if you'd rather.</li>
+        <li>Under <strong>"How will you utilize this financed equipment?"</strong>, select <strong>Asset Management Program — Armada</strong>.</li>
+        <li><strong>Purchase Amount</strong> is your target equipment dollar amount. If unsure on the final number, give your best estimate.</li>
+        <li><strong>Active business entity?</strong> Select <strong>Yes</strong> if you already have an LLC ready to take title. Select <strong>No</strong> if you'd like us to walk you through setting one up.</li>
+        <li><strong>Home Address</strong> must be a street address — no PO Boxes.</li>
+        <li><strong>Supporting documents</strong> are not required upfront. You'll get a secure portal link from Bevel after submission to upload tax returns, financial statement, and entity documents at your own pace.</li>
       </ul>
-
-      <p>If you want screenshots for each step, the full visual walk-through is here:</p>
-      <p style="margin: 16px 0;">
-        <a href="${WALKTHROUGH_PDF_URL}" style="color: #8B6F3F; border-bottom: 1px solid #8B6F3F; text-decoration: none; font-weight: 500;">Application walk-through (PDF) →</a>
-      </p>
 
       <p><strong>What to have on hand:</strong></p>
       <ul style="line-height: 1.8;">
-        <li>Last two years of personal tax returns</li>
-        <li>A current personal financial statement</li>
-        <li>Entity preference (existing LLC, or we can walk through setting one up)</li>
-        <li>SSN and home address (you'll be asked for these)</li>
+        <li>Last two years of personal tax returns (uploaded later, not at submission)</li>
+        <li>A current personal financial statement (also later)</li>
+        <li>SSN, home address, ownership %</li>
       </ul>
-
-      <p>You'll receive a secure portal link from Bevel right after you submit, where you can upload any supporting documents. <strong>You do <em>not</em> need to upload them with the initial application.</strong></p>
 
       <p>There's no fee to apply, and applying doesn't commit you to anything. The lender will confirm eligibility within a few business days; once that's back, we move to deal structure.</p>
 

@@ -182,18 +182,19 @@
   <div class="filters" id="filterBar">
     <button class="filter-btn" data-filter="inbox" id="inboxFilterBtn" style="display:none;">Inbox</button>
     <button class="filter-btn active" data-filter="all">All in bucket</button>
-    <button class="filter-btn" data-filter="new">New</button>
-    <button class="filter-btn" data-filter="contacted">Contacted</button>
-    <button class="filter-btn" data-filter="application_sent">App Sent</button>
-    <button class="filter-btn" data-filter="mini_app_submitted">Mini App</button>
-    <button class="filter-btn" data-filter="full_app_submitted">Full App</button>
-    <button class="filter-btn" data-filter="approved">Approved</button>
-    <button class="filter-btn" data-filter="terms_accepted">Terms</button>
-    <button class="filter-btn" data-filter="funded">Funded</button>
-    <button class="filter-btn" data-filter="operating">Operating</button>
-    <button class="filter-btn" data-filter="not_now">Not now</button>
+    <button class="filter-btn" data-filter="submitted_homepage">Submitted</button>
+    <button class="filter-btn" data-filter="booked_call">Booked Call</button>
+    <button class="filter-btn" data-filter="call_completed_app_sent">App Sent</button>
+    <button class="filter-btn" data-filter="application_submitted">App Submitted</button>
+    <button class="filter-btn" data-filter="incomplete_application">Incomplete</button>
+    <button class="filter-btn" data-filter="credit_review">Credit Review</button>
+    <button class="filter-btn" data-filter="in_progress">In Progress</button>
+    <button class="filter-btn" data-filter="prelim_approved">Prelim Approved</button>
+    <button class="filter-btn" data-filter="bank_approved">Bank Approved</button>
+    <button class="filter-btn" data-filter="closing">Closing</button>
+    <button class="filter-btn" data-filter="funded_enrolled">Funded</button>
+    <button class="filter-btn" data-filter="not_now">Not Now</button>
     <button class="filter-btn" data-filter="archived">Archived</button>
-    <button class="filter-btn" data-filter="dead">Dead (legacy)</button>
   </div>
 
   <div id="content"><div class="loading">Loading…</div></div>
@@ -209,31 +210,99 @@
 <script type="module">
   import { supabase, getUserRole } from '/shared/supabase.js';
 
-  const STATUSES = ['new','contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating','not_now','archived','dead'];
+  // Active pipeline statuses in display order (post-migration-013).
+  // Plus 'not_now', 'archived' as terminal states.
+  // Legacy values stay in STATUS_LABEL so historical rows still render but
+  // are excluded from the dropdown shown for editing new leads.
+  const STATUSES = [
+    'submitted_homepage',
+    'booked_call',
+    'call_completed_app_sent',
+    'application_submitted',
+    'incomplete_application',
+    'credit_review',
+    'in_progress',
+    'prelim_approved',
+    'bank_approved',
+    'closing',
+    'funded_enrolled',
+    'not_now',
+    'archived'
+  ];
   const STATUS_LABEL = {
-    new: 'New',
-    contacted: 'Contacted',
-    application_sent: 'Application Sent',
-    mini_app_submitted: 'Mini App Submitted',
-    full_app_submitted: 'Full App Submitted',
-    approved: 'Approved',
-    terms_accepted: 'Terms Accepted',
-    funded: 'Funded',
-    operating: 'Operating',
-    not_now: 'Not Now',
-    archived: 'Archived',
-    dead: 'Dead (legacy)',
-    // Pre-migration-006 values; should not appear in fresh data.
-    application_started: 'Application Started (legacy)',
-    documents_uploaded: 'Documents Uploaded (legacy)',
-    closed_won: 'Closed Won (legacy)'
+    submitted_homepage:      'Submitted on Homepage',
+    booked_call:             'Booked a Call with Josh',
+    call_completed_app_sent: 'Call Completed, Application Sent',
+    application_submitted:   'Application Submitted',
+    incomplete_application:  'Incomplete Application',
+    credit_review:           'Credit Review',
+    in_progress:             'In Progress',
+    prelim_approved:         'Prelim Approved',
+    bank_approved:           'Bank Approved',
+    closing:                 'Closing',
+    funded_enrolled:         'Funded / Enrolled',
+    not_now:                 'Not Now',
+    archived:                'Archived',
+    // Pre-013 legacy values; should not appear in newly-created data.
+    new:                     'New (legacy)',
+    contacted:               'Contacted (legacy)',
+    application_sent:        'Application Sent (legacy)',
+    mini_app_submitted:      'Mini App Submitted (legacy)',
+    full_app_submitted:      'Full App Submitted (legacy)',
+    approved:                'Approved (legacy)',
+    terms_accepted:          'Terms Accepted (legacy)',
+    funded:                  'Funded (legacy)',
+    operating:               'Operating (legacy)',
+    dead:                    'Dead (legacy)',
+    application_started:     'Application Started (legacy)',
+    documents_uploaded:      'Documents Uploaded (legacy)',
+    closed_won:              'Closed Won (legacy)'
+  };
+  // Tooltip / inline-description text per status — surfaces the meaning so
+  // everyone (Josh + operators + referrers) understands each step.
+  const STATUS_DESC = {
+    submitted_homepage:      'Form submitted via homepage (auto-set)',
+    booked_call:             'Booked Calendly call with Josh (auto-set when they book)',
+    call_completed_app_sent: 'Call completed; credit application link sent (auto-set when admin sends app)',
+    application_submitted:   "Received client's application for credit",
+    incomplete_application:  'Waiting for all documentation/financials to be submitted',
+    credit_review:           'With underwriting',
+    in_progress:             'Out with our lender marketplace',
+    prelim_approved:         'Has a preliminary term sheet, waiting for final approval',
+    bank_approved:           'Has final approval, terms not yet accepted',
+    closing:                 'Final approval and terms accepted, closing',
+    funded_enrolled:         'Equipment funded and enrolled on the Armada platform',
+    not_now:                 'Interested but timing isn\'t right; circle back later',
+    archived:                'Not pursuing further',
+    // Legacy fallbacks
+    new:                     'Legacy — equivalent to Submitted on Homepage',
+    contacted:               'Legacy — equivalent to Booked a Call',
+    application_sent:        'Legacy — equivalent to Call Completed, Application Sent',
+    mini_app_submitted:      'Legacy — equivalent to Application Submitted',
+    full_app_submitted:      'Legacy — equivalent to Credit Review',
+    approved:                'Legacy — equivalent to Bank Approved',
+    terms_accepted:          'Legacy — equivalent to Closing',
+    funded:                  'Legacy — equivalent to Funded / Enrolled',
+    operating:               'Legacy — equivalent to Funded / Enrolled',
+    dead:                    'Legacy — equivalent to Archived',
+    application_started:     'Pre-006 legacy',
+    documents_uploaded:      'Pre-006 legacy',
+    closed_won:              'Pre-006 legacy'
   };
   // 4-bucket grouping for the top tabs
   const BUCKETS = {
-    active:   new Set(['new','contacted','application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','application_started','documents_uploaded']),
-    clients:  new Set(['funded','operating','closed_won']),
+    active: new Set([
+      'submitted_homepage','booked_call','call_completed_app_sent',
+      'application_submitted','incomplete_application','credit_review',
+      'in_progress','prelim_approved','bank_approved','closing',
+      // legacy active equivalents
+      'new','contacted','application_sent','mini_app_submitted',
+      'full_app_submitted','approved','terms_accepted',
+      'application_started','documents_uploaded'
+    ]),
+    clients:  new Set(['funded_enrolled', 'funded', 'operating', 'closed_won']),
     not_now:  new Set(['not_now']),
-    archived: new Set(['archived','dead'])
+    archived: new Set(['archived', 'dead'])
   };
   function bucketFor(status) {
     for (const [b, set] of Object.entries(BUCKETS)) if (set.has(status)) return b;
@@ -292,27 +361,59 @@
   // Funnel constants — must be declared above the view switcher for the same
   // TDZ reason. `let` AND `const` are both in TDZ until their declaration is
   // hit during execution; an awaited render fn can't reach forward to them.
+  // Stage rank — for "max stage reached" computation. Higher = further along.
+  // incomplete_application sits at the same rank as application_submitted
+  // (it's a side-branch state, not a forward step).
   const STAGE_RANK = {
-    new: 0, contacted: 1, application_sent: 2, mini_app_submitted: 3,
-    full_app_submitted: 4, approved: 5, terms_accepted: 6, funded: 7, operating: 8,
-    // legacy aliases
-    application_started: 3, documents_uploaded: 4, closed_won: 7
+    submitted_homepage: 0,
+    booked_call: 1,
+    call_completed_app_sent: 2,
+    application_submitted: 3,
+    incomplete_application: 3,
+    credit_review: 4,
+    in_progress: 5,
+    prelim_approved: 6,
+    bank_approved: 7,
+    closing: 8,
+    funded_enrolled: 9,
+    // legacy aliases (pre-013)
+    new: 0,
+    contacted: 1,
+    application_sent: 2,
+    mini_app_submitted: 3,
+    full_app_submitted: 4,
+    approved: 7,
+    terms_accepted: 8,
+    funded: 9,
+    operating: 9,
+    // even older
+    application_started: 3,
+    documents_uploaded: 4,
+    closed_won: 9
   };
   const FUNNEL_STAGES = [
-    { key: 'submitted', label: 'Lead submitted', rank: 0 },
-    { key: 'contacted', label: 'Contacted', rank: 1 },
-    { key: 'application_sent', label: 'Application sent', rank: 2 },
-    { key: 'mini_app_submitted', label: 'Mini app submitted', rank: 3 },
-    { key: 'full_app_submitted', label: 'Full app submitted', rank: 4 },
-    { key: 'approved', label: 'Approved', rank: 5 },
-    { key: 'terms_accepted', label: 'Terms accepted', rank: 6 },
-    { key: 'funded', label: 'Funded', rank: 7 },
-    { key: 'operating', label: 'Operating', rank: 8 }
+    { key: 'submitted_homepage',      label: 'Submitted on Homepage', rank: 0 },
+    { key: 'booked_call',             label: 'Booked a Call',         rank: 1 },
+    { key: 'call_completed_app_sent', label: 'Call + App Sent',       rank: 2 },
+    { key: 'application_submitted',   label: 'Application Submitted', rank: 3 },
+    { key: 'credit_review',           label: 'Credit Review',         rank: 4 },
+    { key: 'in_progress',             label: 'In Progress (lenders)', rank: 5 },
+    { key: 'prelim_approved',         label: 'Prelim Approved',       rank: 6 },
+    { key: 'bank_approved',           label: 'Bank Approved',         rank: 7 },
+    { key: 'closing',                 label: 'Closing',               rank: 8 },
+    { key: 'funded_enrolled',         label: 'Funded / Enrolled',     rank: 9 }
   ];
 
   // "Inbox" = stages the operator typically actions next. Anything
   // outside this range is either pre-app (Josh's lane) or post-funding.
-  const INBOX_STATUSES = new Set(['full_app_submitted', 'approved', 'terms_accepted']);
+  // The statuses that are "operator's daily work" — what Brian/Allondra/Kendra
+  // typically need to action. Includes legacy equivalents for unmigrated rows.
+  const INBOX_STATUSES = new Set([
+    'application_submitted', 'incomplete_application', 'credit_review',
+    'in_progress', 'prelim_approved', 'bank_approved', 'closing',
+    // legacy
+    'full_app_submitted', 'approved', 'terms_accepted'
+  ]);
 
   // Sync filter-button active state with whatever currentFilter starts as.
   document.querySelectorAll('.filter-btn').forEach(b => {
@@ -512,11 +613,26 @@
     const lead = allLeads.find(l => l.id === leadId);
     if (!lead) return;
 
-    const { data: history } = await supabase
-      .from('lead_status_history')
-      .select('*')
-      .eq('lead_id', leadId)
-      .order('changed_at', { ascending: false });
+    // Load status history + comments in parallel
+    const [historyRes, commentsRes, adminsRes] = await Promise.all([
+      supabase
+        .from('lead_status_history')
+        .select('*')
+        .eq('lead_id', leadId)
+        .order('changed_at', { ascending: false }),
+      supabase
+        .from('lead_comments')
+        .select('*')
+        .eq('lead_id', leadId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false }),
+      // Pull admin email lookup so we can attribute comments + status changes by name
+      supabase.from('admins').select('user_id, email, role')
+    ]);
+    const history = historyRes.data || [];
+    const comments = commentsRes.data || [];
+    const adminsById = new Map((adminsRes.data || []).map(a => [a.user_id, a]));
+    const myUserId = session.user.id;
 
     const ref = lead.referral_partners
       ? `${escapeHtml(lead.referral_partners.first_name)} ${escapeHtml(lead.referral_partners.last_name)} (${escapeHtml(lead.referral_partners.email)})`
@@ -525,12 +641,21 @@
     const isArchivedLike = ['archived', 'dead'].includes(lead.status);
     const inActiveOrNotNow = !isArchivedLike;
 
+    const statusLabel = STATUS_LABEL[lead.status] || lead.status;
+    const statusDesc  = STATUS_DESC[lead.status]  || '';
+
     document.getElementById('modalBody').innerHTML = `
       <h2>${escapeHtml(lead.first_name || '')} ${escapeHtml(lead.last_name || '')}</h2>
       <div class="modal-sub">
         ${lead.company ? `<strong>${escapeHtml(lead.company)}</strong> · ` : ''}
         Created ${formatDate(lead.created_at)}
         ${lead.import_source ? ` · <span style="font-size:11px;color:var(--muted);">imported (${escapeHtml(lead.import_source)})</span>` : ''}
+      </div>
+
+      <div style="margin-top:18px;margin-bottom:18px;padding:14px 18px;background:var(--paper);border-left:3px solid var(--accent);">
+        <div style="font-size:11px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">Current status</div>
+        <div style="font-family:'Fraunces',serif;font-size:17px;color:var(--ink);">${escapeHtml(statusLabel)}</div>
+        ${statusDesc ? `<div style="font-size:13px;color:var(--ink-soft);margin-top:6px;font-style:italic;">${escapeHtml(statusDesc)}</div>` : ''}
       </div>
       <div class="detail-grid">
         ${lead.email   ? `<div class="detail-label">Email</div><div class="detail-value">${escapeHtml(lead.email)}</div>` : ''}
@@ -549,10 +674,11 @@
         </p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <button class="save-btn" id="sendNudgeBtn" ${isArchivedLike || !lead.email ? 'disabled' : ''} style="background: var(--paper); color: var(--ink); border: 1px solid var(--ink);" title="${!lead.email ? 'No email on file' : ''}">
-            ${lead.status === 'contacted' ? 'Re-send nudge' : 'Send 24-hour nudge'}
+            Send 24-hour nudge
           </button>
           <button class="save-btn" id="sendApplicationBtn" ${isArchivedLike || !lead.email ? 'disabled' : ''} title="${!lead.email ? 'No email on file' : ''}">
-            ${['application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating'].includes(lead.status)
+            ${['call_completed_app_sent','application_submitted','incomplete_application','credit_review','in_progress','prelim_approved','bank_approved','closing','funded_enrolled',
+                'application_sent','mini_app_submitted','full_app_submitted','approved','terms_accepted','funded','operating'].includes(lead.status)
               ? 'Re-send application link'
               : 'Send Armada application →'}
           </button>
@@ -594,15 +720,22 @@
       ` : ''}
 
       <div class="modal-section">
-        <h3>Status history</h3>
-        ${(history || []).length === 0 ? '<p style="color:var(--muted);font-size:13px;">No changes yet.</p>' :
-          (history || []).map(h => `
-            <div class="history-item">
-              <div>${STATUS_LABEL[h.from_status] || 'New'} → <strong>${STATUS_LABEL[h.to_status]}</strong></div>
-              <div class="when">${formatDate(h.changed_at)}</div>
-            </div>
-          `).join('')
-        }
+        <h3>Activity &amp; comments</h3>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
+          Everyone with admin access can read this feed. Add a comment about a conversation, a follow-up, anything you want everyone to see.
+        </p>
+
+        <div style="margin-bottom:24px;">
+          <textarea class="notes-input" id="newCommentInput" placeholder="Add a comment — visible to Josh and the underwriting team…" style="min-height:80px;"></textarea>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+            <button class="save-btn" id="postCommentBtn">Post comment</button>
+            <span id="commentMsg" style="font-size:12px;color:var(--muted);"></span>
+          </div>
+        </div>
+
+        <div id="activityFeed">
+          ${renderActivityFeed(history, comments, adminsById, myUserId)}
+        </div>
       </div>
 
       ${isOwner ? `
@@ -650,6 +783,47 @@
         renderTable();
       }
     });
+
+    // Comment posting
+    const postBtn = document.getElementById('postCommentBtn');
+    if (postBtn) {
+      postBtn.addEventListener('click', async () => {
+        const textarea = document.getElementById('newCommentInput');
+        const msg = document.getElementById('commentMsg');
+        const text = (textarea.value || '').trim();
+        if (!text) { msg.textContent = 'Comment is empty.'; return; }
+        postBtn.disabled = true;
+        postBtn.textContent = 'Posting…';
+        msg.textContent = '';
+        const { error } = await supabase.from('lead_comments').insert({
+          lead_id: leadId,
+          author_id: session.user.id,
+          comment: text
+        });
+        postBtn.disabled = false;
+        postBtn.textContent = 'Post comment';
+        if (error) {
+          msg.textContent = 'Failed: ' + error.message;
+          msg.style.color = 'var(--warn)';
+          return;
+        }
+        textarea.value = '';
+        msg.textContent = '';
+        // Refresh the activity feed
+        const { data: freshComments } = await supabase
+          .from('lead_comments')
+          .select('*')
+          .eq('lead_id', leadId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false });
+        document.getElementById('activityFeed').innerHTML =
+          renderActivityFeed(history, freshComments || [], adminsById, myUserId);
+        wireCommentActions(leadId, history, adminsById, myUserId);
+      });
+    }
+
+    // Wire edit/delete on existing comments
+    wireCommentActions(leadId, history, adminsById, myUserId);
 
     // Archive button — one-click "they said no"
     const archiveBtn = document.getElementById('archiveBtn');
@@ -727,14 +901,11 @@
 
         if (!result.ok) throw new Error('Unexpected response');
 
-        btn.textContent = 'Sent ✓ — bumped to Contacted';
-        lead.status = 'contacted';
+        btn.textContent = 'Sent ✓';
         renderStats();
-        const tableSelect = document.querySelector(`select.status-select[data-id="${leadId}"]`);
-        if (tableSelect) tableSelect.value = 'contacted';
         setTimeout(() => {
           btn.disabled = false;
-          btn.textContent = 'Re-send nudge';
+          btn.textContent = 'Send 24-hour nudge';
         }, 2500);
       } catch (e) {
         alert('Failed: ' + e.message);
@@ -763,12 +934,12 @@
           const data = await res.json().catch(() => ({}));
           throw new Error(data.error || 'Failed to send');
         }
-        btn.textContent = 'Sent ✓ — status bumped to Application Sent';
+        btn.textContent = 'Sent ✓ — bumped to Call Completed, App Sent';
         // Refresh local state + status select on the table
-        lead.status = 'application_sent';
+        lead.status = 'call_completed_app_sent';
         renderStats();
         const tableSelect = document.querySelector(`select.status-select[data-id="${leadId}"]`);
-        if (tableSelect) tableSelect.value = 'application_sent';
+        if (tableSelect) tableSelect.value = 'call_completed_app_sent';
         setTimeout(() => {
           btn.disabled = false;
           btn.textContent = 'Re-send application link';
@@ -1689,6 +1860,128 @@
   function formatDate(iso) {
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  // ============================================================
+  // Activity feed (status changes + comments, interleaved chronologically)
+  // ============================================================
+  function renderActivityFeed(history, comments, adminsById, myUserId) {
+    const events = [];
+    for (const h of (history || [])) {
+      events.push({
+        type: 'status',
+        when: h.changed_at,
+        from: h.from_status,
+        to: h.to_status,
+        by: h.changed_by
+      });
+    }
+    for (const c of (comments || [])) {
+      events.push({
+        type: 'comment',
+        when: c.created_at,
+        comment: c,
+        by: c.author_id
+      });
+    }
+    events.sort((a, b) => new Date(b.when) - new Date(a.when));
+
+    if (events.length === 0) {
+      return '<p style="color:var(--muted);font-size:13px;">No activity yet — be the first to add a comment above.</p>';
+    }
+
+    return events.map(e => {
+      const authorEmail = e.by && adminsById.get(e.by)?.email;
+      const authorName = authorEmail ? authorEmail.split('@')[0] : (e.by ? 'system' : 'system');
+
+      if (e.type === 'status') {
+        const fromLabel = STATUS_LABEL[e.from] || (e.from ? e.from : 'New');
+        const toLabel   = STATUS_LABEL[e.to]   || e.to;
+        const toDesc    = STATUS_DESC[e.to]    || '';
+        return `
+          <div class="history-item" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
+            <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
+              <span style="font-family:'Courier New',monospace;color:var(--accent);font-size:11px;">●</span>
+              <span style="color:var(--ink-soft);">${escapeHtml(fromLabel)}</span>
+              <span style="color:var(--muted);">→</span>
+              <strong style="color:var(--ink);">${escapeHtml(toLabel)}</strong>
+            </div>
+            ${toDesc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;padding-left:18px;">${escapeHtml(toDesc)}</div>` : ''}
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;padding-left:18px;">${formatDate(e.when)} · status change by ${escapeHtml(authorName)}</div>
+          </div>
+        `;
+      } else {
+        const c = e.comment;
+        const isMine = c.author_id === myUserId;
+        const edited = c.updated_at && c.updated_at !== c.created_at;
+        return `
+          <div class="history-item" data-comment-id="${escapeHtml(c.id)}" style="padding:14px 0;border-bottom:1px solid var(--line-soft);">
+            <div style="display:flex;align-items:baseline;gap:8px;font-size:13px;">
+              <span style="font-family:'Courier New',monospace;color:var(--accent-deep);font-size:11px;">▸</span>
+              <strong style="color:var(--ink);">${escapeHtml(authorName)}</strong>
+              <span style="color:var(--muted);font-size:11px;">${formatDate(e.when)}${edited ? ' · edited' : ''}</span>
+            </div>
+            <div class="comment-body" style="font-size:14px;color:var(--ink);line-height:1.55;margin-top:6px;padding-left:18px;white-space:pre-wrap;">${escapeHtml(c.comment)}</div>
+            ${isMine ? `
+              <div style="margin-top:6px;padding-left:18px;display:flex;gap:14px;">
+                <a href="#" class="comment-edit-btn" data-comment-id="${escapeHtml(c.id)}" style="font-size:11px;color:var(--accent);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">Edit</a>
+                <a href="#" class="comment-delete-btn" data-comment-id="${escapeHtml(c.id)}" style="font-size:11px;color:var(--warn);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">Delete</a>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+    }).join('');
+  }
+
+  function wireCommentActions(leadId, history, adminsById, myUserId) {
+    document.querySelectorAll('.comment-edit-btn').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const id = btn.dataset.commentId;
+        const row = document.querySelector(`[data-comment-id="${id}"]`);
+        const body = row.querySelector('.comment-body');
+        const original = body.innerText;
+        const newText = prompt('Edit comment:', original);
+        if (newText == null || newText.trim() === original.trim()) return;
+        const { error } = await supabase
+          .from('lead_comments')
+          .update({ comment: newText.trim(), updated_at: new Date().toISOString() })
+          .eq('id', id);
+        if (error) { alert('Edit failed: ' + error.message); return; }
+        // Reload feed
+        const { data: freshComments } = await supabase
+          .from('lead_comments')
+          .select('*')
+          .eq('lead_id', leadId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false });
+        document.getElementById('activityFeed').innerHTML =
+          renderActivityFeed(history, freshComments || [], adminsById, myUserId);
+        wireCommentActions(leadId, history, adminsById, myUserId);
+      });
+    });
+    document.querySelectorAll('.comment-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const id = btn.dataset.commentId;
+        if (!confirm('Delete this comment? Can be restored from the database but not from the UI.')) return;
+        const { error } = await supabase
+          .from('lead_comments')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', id);
+        if (error) { alert('Delete failed: ' + error.message); return; }
+        const { data: freshComments } = await supabase
+          .from('lead_comments')
+          .select('*')
+          .eq('lead_id', leadId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false });
+        document.getElementById('activityFeed').innerHTML =
+          renderActivityFeed(history, freshComments || [], adminsById, myUserId);
+        wireCommentActions(leadId, history, adminsById, myUserId);
+      });
+    });
   }
 
   function statusRank(status) {

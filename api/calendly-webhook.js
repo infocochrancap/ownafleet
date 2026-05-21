@@ -158,6 +158,26 @@ export default async function handler(req, res) {
     console.warn('prospect_interactions threw:', e);
   }
 
+  // 4c. If a lead exists for this email and they're still on the
+  //     first step ('submitted_homepage'), auto-bump them to 'booked_call'.
+  //     We only advance from the earliest stage — never roll back a lead
+  //     that's already further down the pipeline.
+  try {
+    const { data: existingLead } = await supabase
+      .from('leads')
+      .select('id, status')
+      .ilike('email', inviteeEmail)
+      .maybeSingle();
+    if (existingLead && existingLead.status === 'submitted_homepage') {
+      await supabase
+        .from('leads')
+        .update({ status: 'booked_call' })
+        .eq('id', existingLead.id);
+    }
+  } catch (e) {
+    console.warn('lead status auto-bump failed:', e);
+  }
+
   if (existing) {
     // Already had the deck — just record that they booked (or re-booked).
     // Don't re-send the prep email; they have it already.

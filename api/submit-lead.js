@@ -63,7 +63,10 @@ export default async function handler(req, res) {
     }
   }
 
-  // Insert the lead
+  // Insert the lead. Status starts at 'submitted_homepage' — the first
+  // step in the new pipeline. Auto-bumps to 'booked_call' when the
+  // Calendly webhook fires, then 'call_completed_app_sent' when the
+  // admin clicks "Send Armada application".
   const { data: lead, error } = await supabase
     .from('leads')
     .insert({
@@ -77,7 +80,8 @@ export default async function handler(req, res) {
       liquidity: body.liquidity,
       notes: (body.notes || '').trim() || null,
       referral_partner_id,
-      import_source: 'website_form'
+      import_source: 'website_form',
+      status: 'submitted_homepage'
     })
     .select()
     .single();

@@ -23,10 +23,17 @@ const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-own
 
 // Statuses that mean the lead has already moved past the deck/booking
 // phase — i.e., they shouldn't get the NO_BOOK or NO_APP nudges.
+// Covers the post-migration-013 statuses + their legacy equivalents in case
+// any unmigrated rows exist.
 const PAST_APP_STATUSES = new Set([
+  // current
+  'call_completed_app_sent', 'application_submitted', 'incomplete_application',
+  'credit_review', 'in_progress', 'prelim_approved', 'bank_approved',
+  'closing', 'funded_enrolled',
+  // legacy (pre-013)
   'application_sent', 'mini_app_submitted', 'full_app_submitted',
   'approved', 'terms_accepted', 'funded', 'operating',
-  // legacy
+  // even older
   'application_started', 'documents_uploaded', 'closed_won'
 ]);
 
@@ -165,16 +172,16 @@ export default async function handler(req, res) {
 
   // ============================================================
   // NUDGE 3 — STALLED
-  //   Lead at mini_app_submitted for 5+ days (no progress to full
-  //   app). Uses status_updated_at, which the trigger refreshes on
-  //   every status change.
+  //   Lead at application_submitted (or legacy mini_app_submitted) for
+  //   5+ days. status_updated_at is refreshed by the trigger on every
+  //   status change.
   // ============================================================
   {
     const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
     const { data: candidates, error } = await supabase
       .from('leads')
-      .select('id, email, first_name')
-      .eq('status', 'mini_app_submitted')
+      .select('id, email, first_name, status')
+      .in('status', ['application_submitted', 'mini_app_submitted'])
       .lt('status_updated_at', cutoff)
       .is('nudge_stalled_sent_at', null);
 

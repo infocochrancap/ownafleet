@@ -67,16 +67,10 @@ export default async function handler(req, res) {
     }
   }
 
-  // Bump status to 'contacted' (the SECURITY DEFINER trigger logs to history)
-  const { error: updateErr } = await supabase
-    .from('leads')
-    .update({ status: 'contacted', status_updated_by: user.id })
-    .eq('id', lead_id);
-
-  if (updateErr) {
-    console.error('Status update error:', updateErr);
-    return res.status(500).json({ error: 'Failed to update lead status' });
-  }
+  // Note: post-migration-013, the manual nudge no longer bumps lead status.
+  // Status changes happen only on real actions: Calendly booking
+  // (→ booked_call) and admin clicking "Send application" (→ call_completed_app_sent).
+  // The nudge is just an email reminder; no state change.
 
   // Send nudge email
   try {
@@ -89,7 +83,7 @@ export default async function handler(req, res) {
     });
   } catch (emailErr) {
     console.error('Email send error:', emailErr);
-    return res.status(500).json({ error: 'Status updated but email failed to send' });
+    return res.status(500).json({ error: 'Email failed to send' });
   }
 
   return res.status(200).json({ ok: true });
