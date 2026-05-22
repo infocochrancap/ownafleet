@@ -250,9 +250,10 @@
 <!-- Calendly embed -->
 <section class="calendly-block">
   <div class="container">
-    <div class="calendly-frame">
-      [ Calendly iframe embeds here — drjoshcochran/connect-about-fleet-ownership ]
-    </div>
+    <div class="calendly-inline-widget"
+         data-url="https://calendly.com/drjoshcochran/connect-about-fleet-ownership?hide_event_type_details=0&hide_gdpr_banner=1&primary_color=8B6F3F"
+         style="min-width:320px;height:720px;"></div>
+    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
   </div>
 </section>
 
@@ -310,6 +311,20 @@
 <script>
   document.getElementById('toggleBtn').addEventListener('click', () => {
     document.body.classList.toggle('unlocked');
+  });
+
+  // Listen for Calendly's event_scheduled postMessage and unlock the deck
+  // when a booking is confirmed in the embedded iframe.
+  window.addEventListener('message', (e) => {
+    if (e.origin !== 'https://calendly.com') return;
+    if (e.data && e.data.event === 'calendly.event_scheduled') {
+      document.body.classList.add('unlocked');
+      // Scroll the unlocked deck into view after a beat so the user sees it.
+      setTimeout(() => {
+        const deck = document.querySelector('.deck-unlocked-state');
+        if (deck) deck.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 400);
+    }
   });
 </script>
 
