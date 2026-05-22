@@ -262,6 +262,53 @@
   .pillar-title { font-family: 'Fraunces', serif; font-size: 20px; color: var(--ink); margin-bottom: 12px; font-weight: 400; }
   .pillar-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
 
+  /* ============ THE MATH (slider calculator, simplified) ============ */
+  .math { background: white; border-top: 1px solid var(--line); }
+  .math-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: start;
+    margin-top: 32px;
+  }
+  @media (max-width: 760px) { .math-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .math-label { display: block; font-size: 11px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
+  .math-amount { font-family: 'Fraunces', serif; font-size: clamp(36px, 4vw, 48px); color: var(--ink); font-weight: 400; margin-bottom: 14px; letter-spacing: -0.02em; }
+  .math-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; background: var(--line); outline: none; margin: 0; }
+  .math-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--accent); border-radius: 50%; cursor: pointer; }
+  .math-slider::-moz-range-thumb { width: 22px; height: 22px; background: var(--accent); border-radius: 50%; cursor: pointer; border: none; }
+  .math-range { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 8px; letter-spacing: 0.1em; }
+  .math-select { width: 100%; padding: 12px 16px; border: 1px solid var(--line); background: var(--paper); font-family: inherit; font-size: 15px; color: var(--ink); border-radius: 0; }
+  .math-select:focus { outline: none; border-color: var(--accent); }
+  .math-output { background: var(--paper); padding: 26px 30px; margin-bottom: 14px; border-left: 3px solid var(--line); }
+  .math-output.highlight { border-left-color: var(--accent); background: var(--paper-warm); }
+  .math-output-label { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .math-output-value { font-family: 'Fraunces', serif; font-size: clamp(30px, 3.4vw, 42px); color: var(--ink); font-weight: 400; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .math-output.highlight .math-output-value { color: var(--accent); }
+  .math-output-sub { font-size: 12px; color: var(--muted); font-style: italic; }
+  .math-footnote { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 32px; max-width: 760px; line-height: 1.6; }
+
+  /* ============ FORM-STEP WIDGET (above form fields) ============ */
+  .form-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--line);
+    margin: 24px 0 36px;
+  }
+  @media (max-width: 720px) { .form-steps { grid-template-columns: 1fr; } }
+  .form-step { padding: 20px 24px; background: white; border-right: 1px solid var(--line); }
+  .form-step:last-child { border-right: none; }
+  @media (max-width: 720px) {
+    .form-step { border-right: none; border-bottom: 1px solid var(--line); }
+    .form-step:last-child { border-bottom: none; }
+  }
+  .form-step-num { font-family: 'Fraunces', serif; font-size: 22px; color: var(--accent); font-weight: 400; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .form-step-text { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .form-step.current { background: var(--paper-warm); }
+  .form-step.current .form-step-text { color: var(--ink); }
+  .form-step.current .form-step-text strong { color: var(--accent); display: block; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+
   /* ============ OPERATOR / SCALE ============ */
   .operator { background: var(--paper); }
   .operator-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: center; }
@@ -508,6 +555,51 @@
   </div>
 </section>
 
+<!-- ============ THE MATH (simplified calculator) ============ -->
+<section class="math" id="math">
+  <div class="container">
+    <div class="eyebrow">The math</div>
+    <h2>Run your own <em>numbers.</em></h2>
+    <p class="lede">Move the slider to see how much cash deploys upfront and what the Year-1 tax shelter looks like at your tax rate.</p>
+
+    <div class="math-grid">
+      <div>
+        <label class="math-label" for="mathSlider">Equipment purchase</label>
+        <div class="math-amount" id="mathAmount">$1,000,000</div>
+        <input type="range" id="mathSlider" min="250000" max="5000000" step="250000" value="1000000" class="math-slider">
+        <div class="math-range">
+          <span>$250K</span>
+          <span>$5M</span>
+        </div>
+
+        <label class="math-label" for="mathRate" style="margin-top: 32px;">Your combined marginal tax rate</label>
+        <select class="math-select" id="mathRate">
+          <option value="0.32">32% — federal mid bracket</option>
+          <option value="0.37">37% — federal top bracket only</option>
+          <option value="0.40" selected>40% — federal top + low state</option>
+          <option value="0.44">44% — federal top + ~7% state</option>
+          <option value="0.50">50% — federal top + CA / NY top state</option>
+        </select>
+      </div>
+
+      <div>
+        <div class="math-output">
+          <div class="math-output-label">Initial cash to deploy</div>
+          <div class="math-output-value" id="mathCash">$130,000</div>
+          <div class="math-output-sub">10% down + 3% aggregation fee</div>
+        </div>
+        <div class="math-output highlight">
+          <div class="math-output-label">Estimated Year-1 tax shelter</div>
+          <div class="math-output-value" id="mathShelter">$400,000</div>
+          <div class="math-output-sub">100% bonus depreciation × your tax rate</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="math-footnote">100% bonus depreciation was restored under the One Big Beautiful Bill Act for qualifying property placed in service after Jan 19, 2025. Whether and how it applies depends on your income, participation, basis, and entity structure. Your CPA confirms scope before you sign. <em>This is not tax advice.</em></p>
+  </div>
+</section>
+
 <!-- ============ 5. OPERATOR / WHO RUNS THE FLEET ============ -->
 <section class="operator" id="fit">
   <div class="container">
@@ -574,6 +666,21 @@
       <p class="lede" style="margin-bottom: 4px;">A few quick details so we can see if this is a fit. Once you submit, you'll get a booking link with Josh and the full 21-slide overview.</p>
       <p class="form-fit-line">Best fit: <strong>$500K+ annual income</strong> · doctors, business owners, executives, high-earning professionals</p>
 
+      <div class="form-steps">
+        <div class="form-step current">
+          <div class="form-step-num">01</div>
+          <div class="form-step-text"><strong>You are here</strong>Fill out the form below.</div>
+        </div>
+        <div class="form-step">
+          <div class="form-step-num">02</div>
+          <div class="form-step-text">Right after you submit — book your call with Josh, and review the 21-slide overview deck. Both on the next page.</div>
+        </div>
+        <div class="form-step">
+          <div class="form-step-num">03</div>
+          <div class="form-step-text">After the call — if it's a fit, we send you the credit application link to complete on your time.</div>
+        </div>
+      </div>
+
       <form class="form-card" action="#" method="post">
         <div class="form-row">
           <div class="form-field">
@@ -638,6 +745,28 @@
     OwnaFleet is operated by Cochran Management LLC, a Wyoming limited liability company. This material is informational only and does not constitute an offer to sell or solicit any security, nor financial, tax, legal, investment, or accounting advice. © 2026 Cochran Management LLC.
   </div>
 </footer>
+
+<script>
+  // Calculator — equipment slider × tax rate → cash to deploy + Yr-1 tax shelter
+  (function() {
+    const slider = document.getElementById('mathSlider');
+    const rate   = document.getElementById('mathRate');
+    const amt    = document.getElementById('mathAmount');
+    const cash   = document.getElementById('mathCash');
+    const shel   = document.getElementById('mathShelter');
+    if (!slider) return;
+    function update() {
+      const eq = +slider.value;
+      const r  = +rate.value;
+      amt.textContent  = '$' + eq.toLocaleString();
+      cash.textContent = '$' + Math.round(eq * 0.13).toLocaleString();
+      shel.textContent = '$' + Math.round(eq * r).toLocaleString();
+    }
+    slider.addEventListener('input', update);
+    rate.addEventListener('change', update);
+    update();
+  })();
+</script>
 
 </body>
 </html>
