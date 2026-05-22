@@ -159,15 +159,12 @@
   .hero {
     position: relative;
     padding-top: 140px;
-    padding-bottom: 40px;
-    min-height: 80vh;
+    padding-bottom: 120px;
     background-image: url('/assets/hero-bg.jpg');
     background-size: cover;
     background-position: center;
     color: white;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
   }
   .hero::before {
     content: '';
@@ -176,19 +173,8 @@
     background: linear-gradient(135deg, rgba(11,23,36,0.78) 0%, rgba(11,23,36,0.55) 50%, rgba(11,23,36,0.45) 100%);
     pointer-events: none;
   }
-  .hero > .container {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .hero-inner {
-    max-width: 880px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
+  .hero .container { position: relative; z-index: 1; }
+  .hero-inner { max-width: 880px; }
   .hero .eyebrow { color: #D6BC8A; }
   .hero .eyebrow::before { background: #D6BC8A; }
   .hero h1 {
@@ -213,8 +199,7 @@
     font-size: 11px;
     letter-spacing: 0.01em;
     color: rgba(255,255,255,0.45);
-    margin-top: auto;
-    padding-top: 80px;
+    margin-top: 96px;
     font-weight: 400;
     font-style: italic;
   }
