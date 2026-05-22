@@ -99,6 +99,27 @@
     padding: 80px 0 100px;
     position: relative;
   }
+
+  /* Inline deck embed — the deck is built for ~1600px viewports.
+     We render the iframe at its native size and use transform: scale()
+     to shrink it down to fit the welcome page's container. JS sets
+     --deck-scale and the height-correction based on actual container width. */
+  .deck-embed-wrap {
+    position: relative;
+    width: 100%;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    overflow: hidden;
+  }
+  .deck-embed-iframe {
+    width: 1600px;
+    height: 1000px;
+    border: 0;
+    display: block;
+    transform-origin: top left;
+    transform: scale(var(--deck-scale, 1));
+  }
   .deck-locked {
     text-align: center;
     max-width: 720px;
@@ -294,12 +315,15 @@
       <h2 style="font-family:'Fraunces',serif;font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-0.02em;color:var(--ink);margin-bottom:14px;line-height:1.1;">The 21-slide <em>overview.</em></h2>
       <p class="lede" style="margin-bottom:32px;">Take your time — this exists so the call can be focused on you, not on the basics.</p>
 
-      <div style="background:white;border:1px solid var(--line);border-top:3px solid var(--accent);overflow:hidden;">
+      <div class="deck-embed-wrap">
         <iframe src="/deck/view"
                 title="OwnaFleet — 21-slide overview"
-                style="width:100%;height:min(900px,calc(100vw * 9 / 16));border:0;display:block;"
+                class="deck-embed-iframe"
                 loading="lazy"></iframe>
       </div>
+      <p style="margin-top:14px;font-size:12px;color:var(--muted);text-align:right;">
+        <a href="/deck/view" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent);">Open the overview in a new tab ↗</a>
+      </p>
     </div>
 
   </div>
@@ -315,6 +339,23 @@
   document.getElementById('toggleBtn').addEventListener('click', () => {
     document.body.classList.toggle('unlocked');
   });
+
+  // Scale the inline deck iframe to fit its container while preserving
+  // the deck's native 1600×1000 layout. Run on load + resize + when the
+  // deck section becomes visible (it's hidden in the locked state).
+  function rescaleDeck() {
+    const wrap = document.querySelector('.deck-embed-wrap');
+    if (!wrap || !wrap.offsetWidth) return;
+    const NATIVE_W = 1600;
+    const NATIVE_H = 1000;
+    const scale = wrap.clientWidth / NATIVE_W;
+    wrap.style.setProperty('--deck-scale', scale);
+    wrap.style.height = (NATIVE_H * scale) + 'px';
+  }
+  window.addEventListener('load', rescaleDeck);
+  window.addEventListener('resize', rescaleDeck);
+  // Also rescale when the deck becomes visible (after unlock)
+  new MutationObserver(() => rescaleDeck()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Listen for Calendly's event_scheduled postMessage and unlock the deck
   // when a booking is confirmed in the embedded iframe.
