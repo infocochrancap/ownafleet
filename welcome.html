@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>/welcome mockup — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724; --ink-soft: #2A3647; --muted: #6B7280;
+    --line: #D9DDE3; --line-soft: #EEF0F3; --paper: #F8F7F4; --paper-warm: #F2F0EA;
+    --accent: #8B6F3F; --accent-deep: #6B5430; --success: #2F5D3D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); font-family: 'Inter', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .container { padding: 0 20px; } }
+
+  .preview-label { background: var(--accent); color: white; padding: 12px 32px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
+  .preview-note { background: var(--paper-warm); padding: 18px 32px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; border-bottom: 1px solid var(--line); }
+  .preview-note strong { color: var(--ink); }
+
+  nav { background: white; border-bottom: 1px solid var(--line-soft); padding: 18px 32px; }
+  .nav-brand { font-family: 'Fraunces', serif; font-weight: 400; font-size: 14px; letter-spacing: 0.4em; color: var(--ink); text-decoration: none; }
+
+  /* Step indicator */
+  .steps {
+    padding: 48px 0 0;
+    text-align: center;
+  }
+  .steps-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .steps-row .step { display: inline-flex; align-items: center; gap: 8px; }
+  .steps-row .step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); font-family: 'Fraunces', serif; font-size: 12px; color: var(--muted); font-style: italic; }
+  .steps-row .step.done .step-num { background: var(--success); color: white; border-color: var(--success); }
+  .steps-row .step.active .step-num { background: var(--ink); color: white; border-color: var(--ink); }
+  .steps-row .step.active { color: var(--ink); }
+  .steps-row .sep { width: 36px; height: 1px; background: var(--line); }
+
+  /* Page header */
+  .page-header { padding: 48px 0 32px; }
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 500;
+  }
+  .eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: clamp(36px, 5vw, 56px); letter-spacing: -0.02em; line-height: 1.05; margin-bottom: 16px; }
+  h1 em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(17px, 1.9vw, 20px);
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    max-width: 720px;
+  }
+
+  /* Calendly block */
+  .calendly-block { padding: 24px 0 56px; }
+  .calendly-frame {
+    background: white;
+    border-top: 3px solid var(--accent);
+    border: 1px solid var(--line);
+    min-height: 720px;
+    padding: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    text-align: center;
+  }
+
+  /* Deck block — locked state */
+  .deck-block {
+    background: white;
+    border-top: 1px solid var(--line);
+    padding: 80px 0 100px;
+    position: relative;
+  }
+
+  /* Inline deck embed — the deck is built for ~1600px viewports.
+     We render the iframe at its native size and use transform: scale()
+     to shrink it down to fit the welcome page's container. JS sets
+     --deck-scale and the height-correction based on actual container width. */
+  .deck-embed-wrap {
+    position: relative;
+    width: 100%;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    overflow: hidden;
+  }
+  .deck-embed-iframe {
+    width: 1600px;
+    height: 1000px;
+    border: 0;
+    display: block;
+    transform-origin: top left;
+    transform: scale(var(--deck-scale, 1));
+  }
+  .deck-locked {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .deck-locked .lock-icon {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .deck-locked h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(28px, 3.8vw, 40px);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 14px;
+    line-height: 1.1;
+  }
+  .deck-locked h2 em { font-style: italic; color: var(--accent); font-weight: 300; }
+  .deck-locked .lede {
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .deck-preview {
+    margin-top: 24px;
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    padding: 60px 40px;
+    text-align: left;
+    overflow: hidden;
+  }
+  .deck-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(248,247,244,0) 0%, rgba(248,247,244,0.7) 60%, rgba(248,247,244,0.98) 100%);
+    pointer-events: none;
+  }
+  .deck-preview-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 32px;
+    color: var(--ink);
+    margin-bottom: 12px;
+    filter: blur(3px);
+    opacity: 0.5;
+  }
+  .deck-preview-body {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    filter: blur(2px);
+    opacity: 0.4;
+  }
+  .deck-preview-body p { margin-bottom: 14px; }
+
+  .unlock-callout {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-top: -120px;
+    padding-bottom: 40px;
+  }
+  .unlock-callout .unlock-arrow { font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+  .unlock-callout .unlock-text { font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink); font-style: italic; }
+
+  /* Unlocked state preview */
+  .unlocked-banner {
+    background: var(--paper-warm);
+    border-left: 3px solid var(--success);
+    padding: 16px 24px;
+    margin-bottom: 32px;
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .unlocked-banner strong { color: var(--success); font-style: normal; font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px; }
+
+  /* Mode toggle for preview */
+  .preview-toggle {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--ink); color: white; padding: 12px 18px;
+    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;
+    border: none; cursor: pointer; z-index: 1000;
+    box-shadow: 0 8px 24px rgba(11,23,36,0.25);
+    border-radius: 0;
+    font-family: inherit;
+  }
+  .preview-toggle:hover { background: var(--accent); }
+
+  /* unlocked deck stays normal */
+  body.unlocked .deck-preview::after { background: transparent; }
+  body.unlocked .deck-preview-title { filter: none; opacity: 1; }
+  body.unlocked .deck-preview-body { filter: none; opacity: 1; }
+  body.unlocked .unlock-callout { display: none; }
+  body.unlocked .deck-locked-state { display: none; }
+  body:not(.unlocked) .deck-unlocked-state { display: none; }
+
+  footer { background: var(--ink); color: rgba(255,255,255,0.5); padding: 28px 32px; text-align: center; font-size: 11px; line-height: 1.7; font-style: italic; }
+</style>
+</head>
+<body>
+
+
+<nav>
+  <a href="#" class="nav-brand">OWNAFLEET</a>
+</nav>
+
+<!-- Step indicator -->
+<div class="steps">
+  <div class="container">
+    <div class="steps-row">
+      <span class="step done"><span class="step-num">1</span>Form submitted</span>
+      <span class="sep"></span>
+      <span class="step active"><span class="step-num">2</span>Book your call</span>
+      <span class="sep"></span>
+      <span class="step"><span class="step-num">3</span>Review the overview</span>
+    </div>
+  </div>
+</div>
+
+<!-- Page header -->
+<section class="page-header">
+  <div class="container">
+    <div class="eyebrow">Step 2 of 3 — Book your call</div>
+    <h1>Pick a 20-minute window <em>with Josh.</em></h1>
+    <p class="lede">Walk through your specific tax year, income picture, and what you're trying to accomplish. No script, no hard pitch — just a conversation about whether this fits your situation.</p>
+  </div>
+</section>
+
+<!-- Calendly embed -->
+<section class="calendly-block">
+  <div class="container">
+    <div class="calendly-inline-widget"
+         data-url="https://calendly.com/ownafleet/intro?hide_event_type_details=0&hide_gdpr_banner=1&primary_color=8B6F3F"
+         style="min-width:320px;height:720px;"></div>
+    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  </div>
+</section>
+
+<!-- Deck block — locked or unlocked depending on body class -->
+<section class="deck-block">
+  <div class="container">
+
+    <!-- LOCKED STATE (default) -->
+    <div class="deck-locked-state">
+      <div class="deck-locked">
+        <div class="eyebrow" style="justify-content: center;"><span style="margin: 0 12px;">Step 3 of 3 — The 21-slide overview</span></div>
+        <h2>Available <em>after you book.</em></h2>
+        <p class="lede">The full overview unlocks below once you've scheduled your call. Structure, year-by-year economics on a representative deal, the questions most people ask before a first call — designed so the conversation can focus on your situation, not on the basics.</p>
+      </div>
+
+      <div class="deck-preview">
+        <div class="deck-preview-title">Heavy equipment that pays you.</div>
+        <div class="deck-preview-body">
+          <p>For high-income years and capital events. Direct ownership of titled heavy equipment in a managed national rental fleet — Year-1 depreciation against ordinary income, monthly cash distributions, hands-off operations.</p>
+          <p>The 21-slide overview walks through structure, year-by-year economics on a representative deal, the Year-1 tax overlay, and the questions most participants ask before their first call.</p>
+          <p>Designed so the intro call can focus on your specific situation — income picture, tax position, what you're trying to accomplish — rather than on the standard explainer material.</p>
+        </div>
+      </div>
+
+      <div class="unlock-callout">
+        <div class="unlock-arrow">↑ Book your call above to unlock</div>
+        <div class="unlock-text">The full deck appears here the moment Calendly confirms your booking.</div>
+      </div>
+    </div>
+
+    <!-- UNLOCKED STATE (shown when body.unlocked) -->
+    <div class="deck-unlocked-state">
+      <div class="unlocked-banner">
+        <strong>✓ Booking confirmed</strong>
+        Your call is scheduled. Below is the 21-slide overview — feel free to read through before we talk.
+      </div>
+      <div class="eyebrow"><span>Step 3 of 3 — The full overview</span></div>
+      <h2 style="font-family:'Fraunces',serif;font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-0.02em;color:var(--ink);margin-bottom:14px;line-height:1.1;">The 21-slide <em>overview.</em></h2>
+      <p class="lede" style="margin-bottom:32px;">Take your time — this exists so the call can be focused on you, not on the basics.</p>
+
+      <div class="deck-embed-wrap">
+        <iframe src="/deck/view"
+                title="OwnaFleet — 21-slide overview"
+                class="deck-embed-iframe"
+                loading="lazy"></iframe>
+      </div>
+      <p style="margin-top:14px;font-size:12px;color:var(--muted);text-align:right;">
+        <a href="/deck/view" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent);">View full size in a new tab ↗</a>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  OwnaFleet · Cochran Management LLC · Informational only · Not financial, tax, legal, investment, or accounting advice
+</footer>
+
+<script>
+  // Scale the inline deck iframe to fit its container while preserving
+  // the deck's native 1600×1000 layout. Run on load + resize + when the
+  // deck section becomes visible (it's hidden in the locked state).
+  function rescaleDeck() {
+    const wrap = document.querySelector('.deck-embed-wrap');
+    if (!wrap || !wrap.offsetWidth) return;
+    const NATIVE_W = 1600;
+    const NATIVE_H = 1000;
+    const scale = wrap.clientWidth / NATIVE_W;
+    wrap.style.setProperty('--deck-scale', scale);
+    wrap.style.height = (NATIVE_H * scale) + 'px';
+  }
+  window.addEventListener('load', rescaleDeck);
+  window.addEventListener('resize', rescaleDeck);
+  // Also rescale when the deck becomes visible (after unlock)
+  new MutationObserver(() => rescaleDeck()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  // Listen for Calendly's event_scheduled postMessage and unlock the deck
+  // when a booking is confirmed in the embedded iframe.
+  window.addEventListener('message', (e) => {
+    if (e.origin !== 'https://calendly.com') return;
+    if (e.data && e.data.event === 'calendly.event_scheduled') {
+      document.body.classList.add('unlocked');
+      // Scroll the unlocked deck into view after a beat so the user sees it.
+      setTimeout(() => {
+        const deck = document.querySelector('.deck-unlocked-state');
+        if (deck) deck.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 400);
+    }
+  });
+</script>
+
+</body>
+</html>
