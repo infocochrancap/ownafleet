@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OwnaFleet wordmark generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724;
+    --accent: #8B6F3F;
+    --paper: #F8F7F4;
+    --paper-warm: #F2F0EA;
+    --line: #E5E3DE;
+    --muted: #6B7280;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); }
+  .page { max-width: 1200px; margin: 0 auto; padding: 48px 32px 80px; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 28px; letter-spacing: -0.01em; margin: 0 0 8px; }
+  .sub { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 0 32px; max-width: 720px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 20px 24px; background: white; border: 1px solid var(--line); margin-bottom: 24px; }
+  .control { display: flex; flex-direction: column; gap: 4px; }
+  .control label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  .control select, .control input[type="text"] { font-family: 'Inter', sans-serif; font-size: 13px; padding: 8px 12px; border: 1px solid var(--line); background: white; min-width: 140px; }
+  .control input[type="range"] { width: 160px; }
+  .btn { font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; padding: 12px 22px; border: 1px solid var(--ink); background: var(--ink); color: white; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+  .btn:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--ink); color: white; border-color: var(--ink); }
+  .stage-wrap { background: white; border: 1px solid var(--line); padding: 64px 48px; display: flex; align-items: center; justify-content: center; min-height: 280px; position: relative; overflow: hidden; }
+  .stage-wrap.checker { background-image:
+    linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 24px 24px; background-position: 0 0, 0 12px, 12px -12px, -12px 0px; }
+  .stage-wrap.dark { background: var(--ink); }
+  .stage-wrap.dark.checker { background-color: var(--ink); background-image:
+    linear-gradient(45deg, #14202d 25%, transparent 25%),
+    linear-gradient(-45deg, #14202d 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #14202d 75%),
+    linear-gradient(-45deg, transparent 75%, #14202d 75%); }
+  #wordmark { display: block; max-width: 100%; height: auto; }
+  .info { font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.7; }
+  .info code { background: var(--paper-warm); padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 11px; }
+  .swatch { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin-right: 6px; border: 1px solid rgba(0,0,0,0.1); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>OwnaFleet wordmark generator</h1>
+  <p class="sub">Live SVG render in your brand font (Fraunces). Tweak the controls, then hit <strong>Download PNG</strong> — exports at high resolution with a transparent background, ready to upload to Calendly (or anywhere).</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Text</label>
+      <input type="text" id="text" value="OWNAFLEET" />
+    </div>
+    <div class="control">
+      <label>Color</label>
+      <select id="color">
+        <option value="#0B1724">Ink (#0B1724)</option>
+        <option value="#FFFFFF">White</option>
+        <option value="#8B6F3F">Accent gold (#8B6F3F)</option>
+        <option value="#D6BC8A">Light gold (#D6BC8A)</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Weight</label>
+      <select id="weight">
+        <option value="300">300 — light</option>
+        <option value="400" selected>400 — regular</option>
+        <option value="500">500 — medium</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Tracking <span id="trackingVal">0.3em</span></label>
+      <input type="range" id="tracking" min="0" max="0.6" step="0.01" value="0.3" />
+    </div>
+    <div class="control">
+      <label>Background preview</label>
+      <select id="bg">
+        <option value="white">White</option>
+        <option value="checker">Transparent (checker)</option>
+        <option value="dark">Dark ink</option>
+        <option value="dark-checker">Dark transparent</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Export size</label>
+      <select id="size">
+        <option value="1200">1200px wide</option>
+        <option value="2400" selected>2400px wide</option>
+        <option value="4800">4800px wide (huge)</option>
+      </select>
+    </div>
+    <div style="flex: 1;"></div>
+    <button class="btn" id="downloadBtn">Download PNG ↓</button>
+  </div>
+
+  <div class="stage-wrap" id="stage">
+    <!-- SVG is the source of truth. ViewBox set on render. -->
+    <svg id="wordmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200" preserveAspectRatio="xMidYMid meet">
+      <text id="wordmark-text" x="500" y="120" text-anchor="middle"
+            font-family="Fraunces, serif"
+            font-size="120"
+            font-weight="400"
+            letter-spacing="36"
+            fill="#0B1724">OWNAFLEET</text>
+    </svg>
+  </div>
+
+  <p class="info">
+    <span class="swatch" style="background:#0B1724;"></span><code>#0B1724</code> ink &nbsp;·&nbsp;
+    <span class="swatch" style="background:#8B6F3F;"></span><code>#8B6F3F</code> accent &nbsp;·&nbsp;
+    Font: Fraunces (Google Fonts) &nbsp;·&nbsp;
+    Exports as transparent PNG regardless of preview background.
+  </p>
+
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const svg = $('wordmark');
+  const txt = $('wordmark-text');
+
+  function render() {
+    const text = $('text').value || 'OWNAFLEET';
+    const color = $('color').value;
+    const weight = $('weight').value;
+    const tracking = parseFloat($('tracking').value);
+
+    $('trackingVal').textContent = tracking.toFixed(2) + 'em';
+
+    txt.textContent = text;
+    txt.setAttribute('fill', color);
+    txt.setAttribute('font-weight', weight);
+    // letter-spacing in SVG is in user units (px-equivalent). At font-size 120, 0.3em = 36.
+    txt.setAttribute('letter-spacing', Math.round(120 * tracking));
+
+    // Auto-fit the viewBox to the text bounds with a small margin.
+    // Defer to next frame so the font has applied.
+    requestAnimationFrame(() => {
+      try {
+        const bbox = txt.getBBox();
+        const padX = bbox.height * 0.3;
+        const padY = bbox.height * 0.25;
+        const vbX = bbox.x - padX;
+        const vbY = bbox.y - padY;
+        const vbW = bbox.width + padX * 2;
+        const vbH = bbox.height + padY * 2;
+        svg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', 'auto');
+        // Store natural aspect ratio for export
+        svg.dataset.aspect = vbW / vbH;
+      } catch (e) { /* getBBox can fail before font loads, ignore */ }
+    });
+
+    // Stage background
+    const stage = $('stage');
+    stage.className = 'stage-wrap';
+    const bg = $('bg').value;
+    if (bg === 'checker') stage.classList.add('checker');
+    else if (bg === 'dark') stage.classList.add('dark');
+    else if (bg === 'dark-checker') stage.classList.add('dark', 'checker');
+  }
+
+  ['text', 'color', 'weight', 'tracking', 'bg'].forEach(id => {
+    $(id).addEventListener('input', render);
+    $(id).addEventListener('change', render);
+  });
+
+  // Wait for Fraunces to load, then render
+  document.fonts.ready.then(() => {
+    render();
+    setTimeout(render, 100); // re-fit viewBox after font is fully rendered
+  });
+  render();
+
+  // ---------- Download as transparent PNG ----------
+  $('downloadBtn').addEventListener('click', async () => {
+    await document.fonts.ready;
+    render();
+    // Small delay to ensure viewBox is updated post-render
+    await new Promise(r => setTimeout(r, 50));
+
+    const targetWidth = parseInt($('size').value, 10);
+    const aspect = parseFloat(svg.dataset.aspect) || 5;
+    const targetHeight = Math.round(targetWidth / aspect);
+
+    // Inline the SVG, including a <style> with the Fraunces @import so the
+    // rasterized image uses the real font (not the system fallback).
+    const cloned = svg.cloneNode(true);
+    cloned.setAttribute('width', targetWidth);
+    cloned.setAttribute('height', targetHeight);
+
+    // Embed font via <style> with @import — required because <img> from data URL
+    // is isolated and won't inherit the parent document's stylesheets.
+    const styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    styleEl.textContent = `@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap');`;
+    cloned.insertBefore(styleEl, cloned.firstChild);
+
+    const svgString = new XMLSerializer().serializeToString(cloned);
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      // Transparent background — do not fill
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        const dlUrl = URL.createObjectURL(blob);
+        a.href = dlUrl;
+        a.download = `ownafleet-wordmark-${targetWidth}px.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(dlUrl), 1000);
+      }, 'image/png');
+    };
+    img.onerror = (e) => {
+      alert('Export failed — try again. (The font may still be loading.)');
+      console.error(e);
+    };
+    img.src = url;
+  });
+</script>
+
+</body>
+</html>
