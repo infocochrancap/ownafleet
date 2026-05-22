@@ -7,7 +7,7 @@
 <title>Homepage mockup v6 — OwnaFleet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,300;9..144,1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #0B1724;
@@ -319,8 +319,8 @@
   .form-step-text { font-size: 14px; color: rgba(255,255,255,0.78); line-height: 1.6; }
   .form-step-row.current .form-step-text { color: white; }
 
-  /* ============ WHO THIS IS FOR (two-column buyer profile) ============ */
-  .whois { background: white; border-top: 1px solid var(--line); }
+  /* ============ WHO THIS IS FOR (two-column buyer profile, deck beige) ============ */
+  .whois { background: #E5E3DE; border-top: 1px solid var(--line); }
   .whois-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 40px; }
   @media (max-width: 760px) { .whois-grid { grid-template-columns: 1fr; gap: 40px; } }
   .whois-h { font-family: 'Fraunces', serif; font-size: clamp(22px, 2.4vw, 28px); font-weight: 400; color: var(--ink); margin-bottom: 6px; letter-spacing: -0.01em; line-height: 1.2; }
@@ -469,6 +469,7 @@
   <div class="nav-inner">
     <a href="#top" class="nav-brand">OWNAFLEET</a>
     <div class="nav-links">
+      <a href="#math">The Math</a>
       <a href="#fit">Is It For Me?</a>
       <a href="#about">About</a>
       <a href="#form" class="nav-cta">Get In Touch</a>
@@ -505,6 +506,9 @@
           <span>$250K</span>
           <span>$5M</span>
         </div>
+        <p style="margin-top: 16px; font-size: 12px; color: var(--ink-soft); line-height: 1.6;">
+          <span style="color: var(--accent); font-weight: 500;">Average fleet purchase is $1.2M.</span> Typical minimum is $500K.
+        </p>
 
         <label class="math-label" for="mathRate" style="margin-top: 32px;">Your combined marginal tax rate</label>
         <select class="math-select" id="mathRate">
@@ -567,7 +571,7 @@
   <div class="container">
     <div class="eyebrow">What you'll actually own</div>
     <h2>Three categories. <em>One platform.</em></h2>
-    <p class="lede">Participant-owned equipment sits inside a national rental network — same fleet, same software, same demand. Not the giant earthmovers you might picture — practical, workhorse equipment you can identify by serial number.</p>
+    <p class="lede">Participant-owned equipment sits inside a national rental network — same fleet, same software, same demand. Every piece is GPS-tracked with real-time telematics, so utilization, hours, and condition are reported continuously — you always know where your equipment is and how it's performing.</p>
 
     <div class="cats-photo" style="background-image: url('/assets/three-categories.png'); background-size: cover; background-position: center;"></div>
 
@@ -688,7 +692,7 @@
 <section class="testimonial">
   <div class="testimonial-inner">
     <div class="testimonial-mark">&ldquo;</div>
-    <p class="testimonial-quote">The numbers were straightforward, the process was clean, and the year-one tax impact <em>made a real difference</em> for us — the kind of outcome you actually feel.</p>
+    <p class="testimonial-quote">OwnaFleet helped me keep roughly <em>$350,000</em> that otherwise would have gone to taxes.</p>
     <div class="testimonial-attr">
       <strong>Dr. Jeremiah Sturgill</strong>
       Orthodontist · Tennessee · Program Participant
@@ -701,7 +705,7 @@
   <div class="container">
     <div class="eyebrow">Tell us about your tax year</div>
     <h2>Drop your <em>details below.</em></h2>
-    <p class="lede" style="margin-bottom: 4px;">A few quick details so we can see if this is a fit. Once you submit, you'll get a booking link with Josh and the full 21-slide overview.</p>
+    <p class="lede" style="margin-bottom: 4px;">Once you submit, you'll get a booking link with Josh and the full 21-slide overview.</p>
     <p class="form-fit-line">Best fit: <strong>$500K+ annual income</strong></p>
 
     <div class="form-layout">
