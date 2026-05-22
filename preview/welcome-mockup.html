@@ -294,8 +294,11 @@
       <h2 style="font-family:'Fraunces',serif;font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-0.02em;color:var(--ink);margin-bottom:14px;line-height:1.1;">The 21-slide <em>overview.</em></h2>
       <p class="lede" style="margin-bottom:32px;">Take your time — this exists so the call can be focused on you, not on the basics.</p>
 
-      <div style="background:white;border:1px solid var(--line);border-top:3px solid var(--accent);min-height:600px;padding:40px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:'Fraunces',serif;font-style:italic;font-size:15px;text-align:center;">
-        [ Deck embeds here — iframe of /deck/view ]
+      <div style="background:white;border:1px solid var(--line);border-top:3px solid var(--accent);overflow:hidden;">
+        <iframe src="/deck/view"
+                title="OwnaFleet — 21-slide overview"
+                style="width:100%;height:min(900px,calc(100vw * 9 / 16));border:0;display:block;"
+                loading="lazy"></iframe>
       </div>
     </div>
 
