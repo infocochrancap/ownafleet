@@ -155,33 +155,54 @@
   .btn-primary { background: var(--ink); color: white; }
   .btn-primary:hover { background: var(--accent); }
 
-  /* ============ HERO ============ */
-  .hero { padding-top: 80px; padding-bottom: 80px; }
-  .hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
-  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
-  .hero h1 { font-size: clamp(40px, 6vw, 72px); margin-bottom: 24px; }
+  /* ============ HERO (full-bleed background) ============ */
+  .hero {
+    position: relative;
+    padding-top: 140px;
+    padding-bottom: 120px;
+    background-image: url('/assets/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(11,23,36,0.78) 0%, rgba(11,23,36,0.55) 50%, rgba(11,23,36,0.45) 100%);
+    pointer-events: none;
+  }
+  .hero .container { position: relative; z-index: 1; }
+  .hero-inner { max-width: 880px; }
+  .hero .eyebrow { color: #D6BC8A; }
+  .hero .eyebrow::before { background: #D6BC8A; }
+  .hero h1 {
+    color: white;
+    font-size: clamp(40px, 6vw, 72px);
+    margin-bottom: 28px;
+    line-height: 1.05;
+  }
+  .hero h1 em { color: #D6BC8A; font-style: italic; font-weight: 300; }
   .hero-sub {
     font-family: 'Fraunces', serif;
     font-size: clamp(18px, 2vw, 22px);
     font-weight: 300;
-    color: var(--ink-soft);
-    line-height: 1.45;
-    margin-bottom: 32px;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.5;
+    margin-bottom: 36px;
+    max-width: 760px;
   }
+  .hero .btn-primary { background: white; color: var(--ink); }
+  .hero .btn-primary:hover { background: #D6BC8A; color: var(--ink); }
   .hero-disclaim {
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.65);
     margin-top: 28px;
     font-weight: 500;
   }
-  .hero-photo {
-    aspect-ratio: 4/5;
-    background: var(--paper-warm);
-    border-top: 3px solid var(--accent);
-  }
-  .hero-photo .ph-prompt { max-width: 320px; }
 
   /* ============ EQUIPMENT CATEGORIES ============ */
   .cats { background: white; border-top: 1px solid var(--line); }
@@ -363,15 +384,12 @@
 <!-- ============ 1. HERO ============ -->
 <section class="hero" id="top">
   <div class="container">
-    <div class="hero-grid">
-      <div class="hero-text">
-        <div class="eyebrow">For high earners with a tax year ahead</div>
-        <h1>Offset this year's tax bill with <em>your own managed equipment fleet.</em></h1>
-        <p class="hero-sub">A real-asset deployment for high-income professionals — direct ownership of heavy equipment in a national managed rental fleet.</p>
-        <a href="#form" class="btn btn-primary">See if this fits →</a>
-        <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
-      </div>
-      <div class="hero-photo" style="background-image: url('/assets/hero-equipment.png'); background-size: cover; background-position: center;"></div>
+    <div class="hero-inner">
+      <div class="eyebrow">For financial windfalls &amp; high-income earners</div>
+      <h1>Offset your next tax bill with <em>your own managed equipment fleet.</em></h1>
+      <p class="hero-sub">A turnkey solution for windfall recipients and high-income earners to own a real, cash-flowing fleet, take 100% bonus depreciation in year 1 — fully managed by a major publicly-traded U.S. rental operator.</p>
+      <a href="#form" class="btn btn-primary">See if this fits →</a>
+      <p class="hero-disclaim">Not a security · Not tax advice · Personal guarantee required</p>
     </div>
   </div>
 </section>
