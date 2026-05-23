@@ -1,144 +1,265 @@
 # OwnaFleet
 
-Marketing site, lead capture, admin dashboard, and partner referral system for the equipment ownership program with Armada Fleet Management / EquipmentShare.
+Marketing site, lead capture, admin dashboard, partner referral system, and
+deck delivery for the equipment ownership program with Armada Fleet Management
+/ EquipmentShare.
 
 ## Architecture
 
 - **Static HTML pages** — no build step, no framework. Edit and refresh.
-- **Vercel serverless functions** (`/api/*.js`) — for form submissions, email, and admin notifications.
-- **Supabase** — database, auth (magic links), row-level security.
-- **Resend** — transactional email.
-- **Cloudflare** — domain registration + DNS.
+- **Vercel serverless functions** (`/api/*.js`) — for form submissions, email,
+  admin notifications, and the Calendly booking webhook.
+- **Supabase** — Postgres database, auth (magic links), row-level security.
+- **Resend** — transactional email (`leads@ownafleet.com` sender).
+- **Cloudflare** — domain registration, DNS, and Email Routing (forwards
+  `josh@ownafleet.com` → personal inbox; pipes `log@ownafleet.com` to a
+  Worker that logs inbound BCC mail into Supabase as interactions).
+- **Calendly** — booking widget on `/welcome`, plus `invitee.created` webhook
+  that auto-promotes lead status on book.
+- **Meta Pixel + Vercel Analytics** — scaffolded; Pixel needs the real ID
+  before ads can fire `Lead` / `Schedule` conversion events.
 
-## Local file structure
+## File structure
 
 ```
 web/
-├── index.html              Public marketing site + lead form
-├── partners.html           Public partner program pitch + application
+├── index.html              Public marketing site (hero, math calculator, form)
+├── welcome.html            Step 2/3 booking page (Calendly embed + deck unlock)
+├── partners.html           Public partner-program pitch + application form
+├── apply.html              Standalone Jotform-embed application page
 ├── login.html              Magic-link sign-in (admin + partners)
-├── thank-you.html          Lead form confirmation
+├── thank-you.html          Lead-form confirmation
 ├── admin.html              Lead + partner management (admin only)
 ├── dashboard.html          Partner's view of their referrals
+├── deck/
+│   ├── index.html          Deck index / entry redirect
+│   ├── view.html           21-slide HTML overview (also iframe-embedded in /welcome)
+│   └── assets/             cover.jpg, categories.jpg, closing.jpg, josh.jpg
 ├── api/
-│   ├── submit-lead.js          POST — main lead form
-│   ├── apply-partner.js        POST — partner application
-│   └── notify-status-change.js POST — admin → partner email on status change
+│   ├── _lib/
+│   │   └── abuse-check.js          Honeypot + per-IP rate limit (shared)
+│   ├── submit-lead.js              POST — main lead form (→ Supabase + emails)
+│   ├── apply-partner.js            POST — partner application
+│   ├── request-deck.js             POST — public deck request (legacy/fallback path)
+│   ├── calendly-webhook.js         POST — invitee.created webhook (HMAC-verified)
+│   ├── log-interaction.js          POST — Cloudflare Email Worker → log@ownafleet.com
+│   ├── send-application.js         POST — admin sends Armada credit-app link
+│   ├── send-nudge.js               POST — admin sends manual drip nudge
+│   ├── cron-nudges.js              GET  — daily 16:00 UTC drip nudges (Vercel cron)
+│   ├── notify-status-change.js     POST — admin status change → partner email
+│   ├── notify-partner-approved.js  POST — partner approval email
+│   ├── admin-add-partner.js        POST — admin tool: whitelist a partner
+│   └── link-partner.js             POST — link a partner record to a lead
+├── assets/
+│   ├── favicon.svg                 Gold serif "O" on ink square
+│   ├── og-image.jpg                1200×630 social card matching current hero
+│   ├── hero-bg.jpg                 Golden-hour excavator + boom + forklift
+│   ├── wordmark.html               Wordmark generator (transparent PNG export)
+│   └── og-image-gen.html           OG card generator (regenerate when hero changes)
+├── preview/
+│   ├── hero-mockup.html            Working preview of /
+│   └── welcome-mockup.html         Working preview of /welcome
+├── cloudflare/
+│   └── email-worker.js             Worker for log@ownafleet.com BCC capture
+├── scripts/
+│   ├── setup-calendly-webhook.js   One-time webhook registration
+│   └── import-spreadsheet-leads.py Lead-import utility (legacy / one-off)
+├── sql/
+│   ├── schema.sql                  Initial schema
+│   └── migration_001..015.sql      Sequential migrations (run in Supabase SQL Editor)
 ├── shared/
-│   └── supabase.js         Browser Supabase client + role helper
-├── public/assets/          Static images
-├── sql/schema.sql          Database schema (run once in Supabase SQL Editor)
-├── package.json            Declares Resend + Supabase deps for Vercel build
-├── vercel.json             Deploy config + security headers
+│   └── supabase.js                 Browser Supabase client + role helper
+├── public/assets/                  Static images (mirror of /assets in some paths)
+├── package.json                    Resend + Supabase deps for Vercel build
+├── vercel.json                     Deploy config, cleanUrls, security headers, cron
+├── .env.example                    All env vars with descriptions
 └── .gitignore
 ```
 
 ## Environment variables
 
-These are set in Vercel project settings (and locally in `.env.local` if running `vercel dev`).
+See `.env.example` for the canonical list with descriptions. The short table:
 
-| Variable | Where it's used | Example |
-|----------|-----------------|---------|
-| `SUPABASE_URL` | API routes | `https://xxxx.supabase.co` |
-| `SUPABASE_SECRET_KEY` | API routes | `sb_secret_xxxxx` |
-| `RESEND_API_KEY` | API routes (email) | `re_xxxxx` |
-| `LEAD_NOTIFY_EMAILS` | submit-lead — who gets new lead emails | `brian@..., alondra@..., josh@...` |
-| `ADMIN_NOTIFY_EMAILS` | apply-partner — who gets new partner application emails | `josh@ownafleet.com` |
+| Variable | Used by | Notes |
+|----------|---------|-------|
+| `SUPABASE_URL` | All API routes | `https://lkfaemhhdxjaqggvlotv.supabase.co` |
+| `SUPABASE_SECRET_KEY` | All API routes | Full DB access — server-side only |
+| `RESEND_API_KEY` | All email-sending APIs | From Resend dashboard |
+| `ADMIN_NOTIFY_EMAILS` | `apply-partner` | New partner-application emails |
+| `CALENDLY_WEBHOOK_SIGNING_KEY` | `calendly-webhook` | HMAC verification — generated by `scripts/setup-calendly-webhook.js` |
+| `CRON_SECRET` | `cron-nudges` | Bearer token for Vercel cron auth |
+| `INTERACTION_LOG_API_KEY` | `log-interaction` | Bearer token paired with Cloudflare Worker |
+| `ARMADA_APPLICATION_URL` | `send-application` | The current credit-app link from operations |
 
-The browser-side Supabase URL and **publishable key** are hardcoded in `shared/supabase.js` (safe to expose — RLS enforces access).
+`LEAD_NOTIFY_EMAILS` is **deprecated** — `/api/submit-lead` hardcodes Josh as the sole notification recipient. Brian + Alondra get engaged later in the funnel.
+
+Browser-side Supabase URL + **publishable** key are hardcoded in `shared/supabase.js` (safe to expose — RLS enforces access).
 
 ## First-time setup
 
-### 1. Run the database schema
+### 1. Run the database migrations
 
-In Supabase Dashboard → SQL Editor → paste the contents of `sql/schema.sql` → Run.
+In Supabase Dashboard → SQL Editor → paste `sql/schema.sql` → Run, then run each migration in `sql/migration_001..015.sql` **in order**. Some migrations (notably 013, the status overhaul) require splitting into two batches — read the SQL comments before running.
 
-This creates: `leads`, `referral_partners`, `lead_status_history`, `admins` tables, plus all RLS policies and triggers.
+This creates: `leads`, `referral_partners`, `lead_status_history`, `lead_comments`, `deck_requests`, `prospect_interactions`, `drip_nudges`, `admins`, and all RLS policies + triggers.
 
 ### 2. Bootstrap admin accounts
 
 After deploying the site (see below), each admin needs to:
 1. Visit `/login` on the deployed site
 2. Enter their email (e.g., `josh@ownafleet.com`)
-3. Click the magic link in their email — this creates an `auth.users` row
+3. Click the magic link in email — this creates an `auth.users` row
 
-Then, in Supabase SQL Editor, run **once per admin**:
+Then, in Supabase SQL Editor, run **once per admin** with the appropriate role:
+
 ```sql
-insert into admins (user_id, email)
-select id, email from auth.users where email = 'josh@ownafleet.com';
+-- Josh (owner — full access):
+insert into admins (user_id, email, role)
+select id, email, 'owner'
+from auth.users where email = 'josh@ownafleet.com';
+
+-- Brian (operator — view all + update status/values; no internal notes; no partner mgmt):
+insert into admins (user_id, email, role)
+select id, email, 'operator'
+from auth.users where email = 'brian@armadaequipment.com';
 ```
-
-Repeat for `brian.duncan@bevelfinancial.com` and `alondra@bevelfinancial.com`.
-
-After this, those users will be redirected to `/admin` when they sign in. Until then, the login page shows "account pending" for them.
 
 ### 3. Configure Supabase Auth
 
-In Supabase Dashboard → Authentication → URL Configuration:
 - **Site URL**: `https://ownafleet.com`
-- **Redirect URLs**: add `https://ownafleet.com/login`
-
-In Authentication → Email Templates, optionally customize the "Magic Link" template to match brand.
+- **Redirect URLs**: add `https://ownafleet.com/login` and the wildcard
+  `https://ownafleet-*-cochran-capitals-projects.vercel.app/**` so magic
+  links work on Vercel preview deployments
 
 ### 4. Configure Resend
 
-In Resend Dashboard → Domains → Add Domain → enter `ownafleet.com`.
+In Resend Dashboard → Domains → Add Domain → enter `ownafleet.com`. Add the SPF + DKIM records in Cloudflare DNS. Verify in Resend. Emails sending `from: leads@ownafleet.com` will deliver.
 
-Resend will provide DNS records (SPF, DKIM) — add them in Cloudflare:
-- Cloudflare → ownafleet.com → DNS → add the TXT/CNAME records Resend specifies
-- Wait for propagation (usually < 10 min), then click "Verify" in Resend
-
-Once verified, emails sending `from: leads@ownafleet.com` will be delivered properly.
-
-## Deployment to Vercel
-
-### Option A: Connect to GitHub (recommended)
-
-1. Push this repo to GitHub (see git instructions below)
-2. In Vercel Dashboard → Add New → Project → Import the GitHub repo
-3. Vercel auto-detects the project. **Framework Preset**: "Other"
-4. Add environment variables (see table above) under "Environment Variables"
-5. Click Deploy
-6. After first deploy, go to Project Settings → Domains → add `ownafleet.com` and `www.ownafleet.com`
-7. Vercel shows DNS records to add at Cloudflare. Add them in Cloudflare → ownafleet.com → DNS
-
-### Option B: Vercel CLI (if Node is installed)
+### 5. Register the Calendly webhook (one-time)
 
 ```bash
 cd web
-npm install -g vercel
-vercel login
-vercel --prod
-# Then add env vars in dashboard, link domain, etc.
+CALENDLY_API_TOKEN=<personal-access-token> node scripts/setup-calendly-webhook.js
 ```
 
-## Day-to-day
+The script prints a `CALENDLY_WEBHOOK_SIGNING_KEY` — add it to Vercel env vars, then revoke the API token in Calendly (you only need it once).
 
-- **Code edits**: push to GitHub. Vercel auto-deploys on push.
-- **View leads**: log in at `/login` → redirected to `/admin`.
-- **Approve partners**: `/admin?view=partners` → change status from "pending" to "active". Partner gets email notification (TODO — add separate "approve" email).
-- **Update lead status**: from `/admin`, change the dropdown next to a lead. Partner is auto-emailed if attached.
+## Deployment
 
-## Status flow
+### Preview-first workflow (default)
+
+Never go straight to `--prod` unless it's a trivial fix (typo, single-word swap).
+
+```bash
+cd web
+
+# 1. Make all your edits for the cycle
+# 2. Commit + push
+git add . && git commit -m "..." && git push
+
+# 3. Preview deploy (unique URL, doesn't touch ownafleet.com)
+npx vercel
+# → outputs https://ownafleet-xxxxx-cochran-capitals-projects.vercel.app
+
+# 4. After review, promote to production
+npx vercel --prod --yes
+```
+
+GitHub auto-deploy to Vercel is **NOT wired up** (team-account vs personal-GitHub mismatch). All deploys go through the CLI above.
+
+## Day-to-day operations
+
+- **View leads**: log in at `/login` → `/admin`. The pipeline view shows all leads grouped by status with the activity feed (status history + comments) per lead.
+- **Update lead status**: dropdown in `/admin`. If the lead has a referral partner attached, that partner is auto-emailed on the change.
+- **Approve partners**: `/admin?view=partners` → change status from "pending" to "active". Partner receives an approval email with a sign-in link.
+- **View interactions**: `/admin?view=interactions` shows all logged interactions (Calendly bookings, BCC'd emails to `log@ownafleet.com`, manual entries).
+- **Send credit-app link**: from `/admin` lead detail view, click "Send application" — uses `ARMADA_APPLICATION_URL` env var.
+
+## Lead status flow (post-migration 013)
 
 ```
-new → contacted → application_started → documents_uploaded → approved → funded → closed_won
-                                                                          ↓
-                                                                        dead (any time)
+submitted_homepage      Form submitted via homepage
+  ↓
+booked_call             Booked Calendly call (auto via webhook)
+  ↓
+call_completed_app_sent Call completed; Armada credit-app link sent
+  ↓
+application_submitted   Received client's application
+  ↓
+incomplete_application  Waiting on docs/financials  (can loop back)
+  ↓
+credit_review           With underwriting
+  ↓
+in_progress             Out with lender marketplace
+  ↓
+prelim_approved         Preliminary term sheet, awaiting final
+  ↓
+bank_approved           Final approval, terms not yet accepted
+  ↓
+closing                 Approval + terms accepted, closing in progress
+  ↓
+funded_enrolled         Funded + enrolled on Armada platform (terminal)
+
+(any stage → not_now / archived for stalled or dropped leads)
 ```
 
-## Auto-classification
+The Calendly webhook auto-promotes `submitted_homepage → booked_call` only when matching by email — it never moves a lead backward.
 
-Leads are tagged on insert:
-- **hot** — meets all three lender criteria (equipment ≥ $500K, net worth ≥ $3M tier, liquidity ≥ $300K tier)
-- **warm** — meets 2 of 3
-- **needs_review** — has "Not sure" / "Under" values that need follow-up
-- **unqualified** — clearly doesn't meet criteria
+## Anti-bypass content rules
 
-Edit the `classify_lead_qualification()` function in `sql/schema.sql` to tune thresholds.
+Customer-facing surfaces (`index.html`, `welcome.html`, `partners.html`, `apply.html`, `thank-you.html`, `deck/view.html`, lead/prep emails) **must not name** Armada, EquipmentShare, Bevel, or Brian Duncan. Use generic descriptors:
 
-## Compliance + content edits
+| Don't say | Say instead |
+|-----------|-------------|
+| EquipmentShare | "the operating partner" / "our operating partner" / "the rental network" |
+| Armada / Armada Fleet Management | "our fleet management partner" / "the partner team" |
+| Bevel / Bevel Financial | "our lending partner" |
+| Brian Duncan | "the partner team" (or drop entirely) |
 
-All marketing copy is in `index.html` and `partners.html` — search for the section, edit, push. Brand styles use CSS custom properties at the top of each file (`--ink`, `--accent`, etc.) — change them in one place to retheme.
+**Strategy**: if visitors can't Google our partner names, the only path is through Josh's form. Internal pages (`admin.html`, `dashboard.html`), code comments, and SQL files can still use the real names.
 
-The disclaimer footer block is duplicated across pages — when updating, search for `Cochran Management LLC, a Wyoming limited liability` and update everywhere.
+## Compliance disclosure
+
+Synced across `index.html`, `preview/hero-mockup.html`, and `deck/view.html`:
+
+> *Disclosure: Josh is not a financial, tax, or legal advisor. He participates in the program himself and works directly with the operations team, helping refine the participant experience. He is compensated on completed deals — at no additional cost to you.*
+
+If you edit one, edit all three. Voice consistency matters and the legal substance (FTC material-connection disclosure under 16 CFR Part 255) must remain intact.
+
+## Funnel attribution
+
+`/api/submit-lead` accepts a client-supplied `import_source` field. The homepage captures `utm_source/medium/campaign/content/term` and `ref` from the URL on landing, stores in sessionStorage, and ships with the form payload:
+
+- Partner referrals: `?ref=<partner-code>` → matches `referral_partners.referral_code`
+- Channel attribution: `?utm_source=linkedin&utm_campaign=dental-jun26` → stamped on `leads.import_source` as `utm:linkedin/cpc/dental-jun26`
+
+Internal lead-notification email shows the SOURCE row at lead-creation time.
+
+## Abuse protection
+
+All public-form APIs (`submit-lead`, `request-deck`, `apply-partner`) use `api/_lib/abuse-check.js` for two layers:
+
+1. **Honeypot field** (`name="website"`) — hidden from humans, auto-filled by bots. Server returns silent 200 on hit so bots don't retry.
+2. **Per-IP rate limit** — 5 requests / 10-minute window. In-memory (best-effort against single-source bursts; not bulletproof against distributed attacks).
+
+For distributed-attack protection, layer Cloudflare WAF rate-limit rules at the CDN edge (free tier supports basic rules).
+
+## Useful one-liners
+
+```bash
+# Regenerate OG image when hero copy changes
+open "https://ownafleet.com/assets/og-image-gen"
+# Then download PNG, optimize, replace:
+sips -s format jpeg -s formatOptions 85 -Z 1200 ~/Downloads/og-image.png \
+  --out assets/og-image.jpg
+
+# Bust social-image cache after replacing og-image.jpg
+open "https://developers.facebook.com/tools/debug/?q=https://ownafleet.com"
+open "https://www.linkedin.com/post-inspector/inspect/https%3A%2F%2Fownafleet.com"
+
+# Check Vercel env vars
+npx vercel env ls
+
+# View recent deployments
+npx vercel ls
+```
