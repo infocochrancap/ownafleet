@@ -3,8 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<title>Homepage mockup v6 — OwnaFleet</title>
+
+<title>OwnaFleet — Offset your tax bill with a managed equipment fleet</title>
+<meta name="description" content="A turnkey solution for high-income earners and windfall recipients to own a real, cash-flowing fleet — take 100% bonus depreciation in year 1, fully managed by a major U.S. rental operator.">
+
+<!-- Favicon (SVG works in Chrome/Firefox/Safari; iOS falls back gracefully) -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/favicon.svg">
+
+<!-- Open Graph (Facebook, LinkedIn, iMessage, Slack) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ownafleet.com/">
+<meta property="og:site_name" content="OwnaFleet">
+<meta property="og:title" content="OwnaFleet — Offset your tax bill with a managed equipment fleet">
+<meta property="og:description" content="A turnkey solution for high-income earners and windfall recipients to own a real, cash-flowing fleet — take 100% bonus depreciation in year 1, fully managed by a major U.S. rental operator.">
+<meta property="og:image" content="https://ownafleet.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter / X card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OwnaFleet — Offset your tax bill with a managed equipment fleet">
+<meta name="twitter:description" content="A turnkey solution for high-income earners and windfall recipients to own a real, cash-flowing fleet — take 100% bonus depreciation in year 1.">
+<meta name="twitter:image" content="https://ownafleet.com/assets/og-image.jpg">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://ownafleet.com/">
+
+<!-- Vercel Analytics (privacy-friendly first-party traffic data) -->
+<script defer src="/_vercel/insights/script.js"></script>
+
+<!-- Meta Pixel (Facebook/Instagram ads). Gated on META_PIXEL_ID — replace
+     'PIXEL_ID_PLACEHOLDER' with the real ID from Meta Business Manager
+     when ads are ready to launch. Until then, the pixel is a no-op. -->
+<script>
+(function() {
+  var PIXEL_ID = 'PIXEL_ID_PLACEHOLDER';
+  if (!PIXEL_ID || PIXEL_ID === 'PIXEL_ID_PLACEHOLDER') return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', PIXEL_ID);
+  fbq('track', 'PageView');
+  window._OF_PIXEL_READY = true;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,300;9..144,1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -830,6 +875,18 @@
           submitBtn.disabled = false;
           submitBtn.textContent = originalLabel;
           return;
+        }
+
+        // Fire Meta Pixel `Lead` event for FB ad attribution. No-op if the
+        // pixel hasn't been configured yet (PIXEL_ID still placeholder).
+        if (window.fbq && window._OF_PIXEL_READY) {
+          try {
+            window.fbq('track', 'Lead', {
+              content_name: 'OwnaFleet homepage form',
+              value: 0,
+              currency: 'USD'
+            });
+          } catch (e) { /* swallow */ }
         }
 
         // Hand off to /welcome with prefill params for the Calendly widget.

@@ -3,8 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Transactional page — keep out of Google index, but social previews
+     still work because OG crawlers ignore robots tags. -->
 <meta name="robots" content="noindex, nofollow">
-<title>/welcome mockup — OwnaFleet</title>
+
+<title>Book your call — OwnaFleet</title>
+<meta name="description" content="Pick a 20-minute window with Josh. Walk through your tax year, income picture, and whether the managed fleet program fits your situation.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/favicon.svg">
+
+<!-- Open Graph (in case someone shares the booking link directly) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ownafleet.com/welcome">
+<meta property="og:site_name" content="OwnaFleet">
+<meta property="og:title" content="Book your call — OwnaFleet">
+<meta property="og:description" content="Pick a 20-minute window with Josh. Walk through your tax year, income picture, and whether the program fits your situation.">
+<meta property="og:image" content="https://ownafleet.com/assets/og-image.jpg">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Book your call — OwnaFleet">
+<meta name="twitter:image" content="https://ownafleet.com/assets/og-image.jpg">
+
+<!-- Vercel Analytics -->
+<script defer src="/_vercel/insights/script.js"></script>
+
+<!-- Meta Pixel (same scaffold as homepage; placeholder until ID is set) -->
+<script>
+(function() {
+  var PIXEL_ID = 'PIXEL_ID_PLACEHOLDER';
+  if (!PIXEL_ID || PIXEL_ID === 'PIXEL_ID_PLACEHOLDER') return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', PIXEL_ID);
+  fbq('track', 'PageView');
+  window._OF_PIXEL_READY = true;
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -379,6 +418,18 @@
     if (e.origin !== 'https://calendly.com') return;
     if (e.data && e.data.event === 'calendly.event_scheduled') {
       document.body.classList.add('unlocked');
+
+      // Fire Meta Pixel `Schedule` event — Facebook's standard conversion
+      // event for bookings. Stronger optimization signal than `Lead`.
+      // No-op if the pixel hasn't been configured yet.
+      if (window.fbq && window._OF_PIXEL_READY) {
+        try {
+          window.fbq('track', 'Schedule', {
+            content_name: 'OwnaFleet intro call booked'
+          });
+        } catch (err) { /* swallow */ }
+      }
+
       // Scroll the unlocked deck into view after a beat so the user sees it.
       setTimeout(() => {
         const deck = document.querySelector('.deck-unlocked-state');

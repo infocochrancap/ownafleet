@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- OwnaFleet favicon — ink square w/ gold serif O. Modern browsers
+       (Chrome/Firefox/Safari 12+) support SVG favicons directly. iOS
+       falls back to this if no apple-touch-icon is provided. -->
+  <rect width="64" height="64" rx="8" fill="#0B1724"/>
+  <text x="32" y="48"
+        font-family="ui-serif, Georgia, 'Times New Roman', serif"
+        font-size="46"
+        font-weight="400"
+        fill="#D6BC8A"
+        text-anchor="middle"
+        letter-spacing="-0.02em">O</text>
+</svg>
