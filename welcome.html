@@ -263,6 +263,37 @@
     <div class="calendly-inline-widget"
          data-url="https://calendly.com/ownafleet/intro?hide_event_type_details=0&hide_gdpr_banner=1&primary_color=8B6F3F"
          style="min-width:320px;height:720px;"></div>
+    <script>
+      // Prefill the Calendly widget from query params handed off by the
+      // homepage form (name, email, phone, lead_id). Runs synchronously
+      // BEFORE Calendly's async widget.js loads, so the widget reads our
+      // modified data-url when it initializes.
+      //
+      // Calendly prefill query keys:
+      //   name  — full name displayed in the booking form
+      //   email — invitee email
+      //   a1    — answer to invitee question #1 (we set this = phone)
+      //   utm_source — non-prefill, just carries lead_id for our webhook
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const widget = document.querySelector('.calendly-inline-widget');
+        if (!widget) return;
+        try {
+          const url = new URL(widget.getAttribute('data-url'));
+          const name    = params.get('name');
+          const email   = params.get('email');
+          const phone   = params.get('phone');
+          const leadId  = params.get('lead_id');
+          if (name)   url.searchParams.set('name', name);
+          if (email)  url.searchParams.set('email', email);
+          if (phone)  url.searchParams.set('a1', phone);
+          if (leadId) url.searchParams.set('utm_source', leadId);
+          widget.setAttribute('data-url', url.toString());
+        } catch (e) {
+          console.warn('Calendly prefill skipped:', e);
+        }
+      })();
+    </script>
     <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
   </div>
 </section>

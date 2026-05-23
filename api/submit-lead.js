@@ -6,17 +6,20 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-const REQUIRED = ['first_name', 'last_name', 'email', 'phone', 'state', 'equipment_range', 'net_worth', 'liquidity'];
+// Required fields after the homepage form was simplified (no state/liquidity).
+// state and liquidity remain in the schema (nullable per migration 012) and
+// are still validated against the enum when present — they're just optional.
+const REQUIRED = ['first_name', 'last_name', 'email', 'phone', 'equipment_range', 'net_worth'];
 
 const ALLOWED = {
   equipment_range: ['$250K – $500K','$500K – $1M','$1M – $2M','$2M – $5M','Over $5M — consultation','Not sure yet'],
-  net_worth: ['Under $1M','$1M – $3M','$3M – $10M','$10M – $30M','$30M – $75M','$75M – $150M','$150M+'],
+  net_worth: ['Under $1M','$1M – $3M','$3M – $10M','$10M – $30M','$30M+','$30M – $75M','$75M – $150M','$150M+'],
   liquidity: ['Under $200K','$200K – $1M','$1M – $3M','$3M – $10M','$10M – $25M','$25M+']
 };
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
 const DECK_URL = 'https://ownafleet.com/deck/view';
-const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-ownership';
+const CALENDLY_URL = 'https://calendly.com/ownafleet/intro';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -32,9 +35,13 @@ export default async function handler(req, res) {
     }
   }
 
-  // Validate enum fields
+  // Validate enum fields — but only if a value was provided (state/liquidity
+  // are now optional, so we accept missing values; we just won't auto-decline
+  // below threshold without complete picture).
   for (const [field, allowed] of Object.entries(ALLOWED)) {
-    if (!allowed.includes(body[field])) {
+    const v = body[field];
+    if (v == null || v === '') continue; // optional
+    if (!allowed.includes(v)) {
       return res.status(400).json({ error: `Invalid value for ${field}` });
     }
   }
@@ -75,10 +82,10 @@ export default async function handler(req, res) {
       last_name: body.last_name.trim(),
       email: body.email.trim().toLowerCase(),
       phone: body.phone.trim(),
-      state: body.state.trim(),
+      state: (body.state || '').trim() || null,
       equipment_range: body.equipment_range,
       net_worth: body.net_worth,
-      liquidity: body.liquidity,
+      liquidity: body.liquidity || null,
       referral_partner_id,
       import_source: 'website_form',
       status: 'submitted_homepage'
@@ -110,8 +117,13 @@ export default async function handler(req, res) {
   // deal won't pencil out. Per Josh: anyone above this floor can still be
   // worth a conversation, because they can adjust their equipment purchase
   // down to fit their financial picture.
+  //
+  // When liquidity isn't collected (simplified homepage form), we can't run
+  // the full check — fall back to "qualified for review" so Josh can decide
+  // manually. The hard auto-decline only fires when BOTH signals point down.
   const isBelowThreshold =
-    lead.net_worth === 'Under $1M' && lead.liquidity === 'Under $200K';
+    lead.net_worth === 'Under $1M' &&
+    lead.liquidity === 'Under $200K';
 
   // Send notification + lead-facing email — don't fail the request if email fails
   try {
@@ -168,10 +180,10 @@ function internalNotifyHtml(lead, isBelowThreshold, submissionText) {
       <table style="border-collapse: collapse; width: 100%; margin-top: 16px;">
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280; width: 40%;">EMAIL</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.email)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">PHONE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.phone)}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">STATE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.state)}</td></tr>
+        ${lead.state ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">STATE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.state)}</td></tr>` : ''}
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">EQUIPMENT TARGET</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.equipment_range)}</td></tr>
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">NET WORTH</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.net_worth)}</td></tr>
-        <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">LIQUIDITY</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.liquidity)}</td></tr>
+        ${lead.liquidity ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">LIQUIDITY</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.liquidity)}</td></tr>` : ''}
         ${submissionText ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280; vertical-align: top;">THEY SAID</td><td style="padding: 8px 0; border-bottom: 1px solid #eee; white-space: pre-wrap;">${escape(submissionText)}</td></tr>` : ''}
       </table>
       <p style="margin-top: 24px; font-size: 13px; color: #6B7280;">View in admin: <a href="https://ownafleet.com/admin">ownafleet.com/admin</a></p>

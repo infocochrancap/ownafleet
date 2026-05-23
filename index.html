@@ -664,7 +664,7 @@
     <p class="form-fit-line">Best fits: <strong>$1M+ windfall</strong> or <strong>$500K+ annual income</strong></p>
 
     <div class="form-layout">
-      <form class="form-card" action="#" method="post">
+      <form class="form-card" id="leadForm" novalidate>
         <div class="form-row">
           <div class="form-field">
             <label for="first">First name<span class="req">*</span></label>
@@ -716,8 +716,8 @@
             <textarea id="notes" placeholder="Strong income year, business sale, exit, capital event, planning for next year — whatever's relevant."></textarea>
           </div>
         </div>
-        <button type="submit" class="submit-btn">Submit & see your next step →</button>
-        <p class="form-fineprint">By submitting, you consent to be contacted by Josh and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
+        <button type="submit" class="submit-btn" id="leadFormSubmit">Submit & see your next step →</button>
+        <p class="form-fineprint" id="leadFormStatus">By submitting, you consent to be contacted by Josh and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
       </form>
 
       <aside class="form-sidebar">
@@ -763,6 +763,90 @@
     slider.addEventListener('input', update);
     rate.addEventListener('change', update);
     update();
+  })();
+
+  // ============== Lead form submission ==============
+  // POSTs to /api/submit-lead (Supabase insert + internal/lead emails),
+  // then redirects to /welcome?name=&email=&phone=&lead_id= so the
+  // Calendly widget on the next page can prefill the booker's info.
+  (function() {
+    const form = document.getElementById('leadForm');
+    if (!form) return;
+    const submitBtn = document.getElementById('leadFormSubmit');
+    const statusEl = document.getElementById('leadFormStatus');
+    const defaultStatusText = statusEl ? statusEl.textContent : '';
+
+    function setStatus(msg, isError) {
+      if (!statusEl) return;
+      statusEl.textContent = msg;
+      statusEl.style.color = isError ? '#B85C3A' : '';
+    }
+    function resetStatus() {
+      if (!statusEl) return;
+      statusEl.textContent = defaultStatusText;
+      statusEl.style.color = '';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Lightweight client-side validation
+      const required = ['first', 'last', 'email', 'phone', 'income', 'nw'];
+      for (const id of required) {
+        const el = document.getElementById(id);
+        if (!el || !el.value || !String(el.value).trim()) {
+          setStatus('Please fill in all required fields before submitting.', true);
+          if (el) el.focus();
+          return;
+        }
+      }
+
+      // Build payload — map hero-form field IDs to API field names.
+      const payload = {
+        first_name:      document.getElementById('first').value.trim(),
+        last_name:       document.getElementById('last').value.trim(),
+        email:           document.getElementById('email').value.trim(),
+        phone:           document.getElementById('phone').value.trim(),
+        equipment_range: document.getElementById('income').value,
+        net_worth:       document.getElementById('nw').value,
+        notes:           (document.getElementById('notes')?.value || '').trim()
+      };
+
+      submitBtn.disabled = true;
+      const originalLabel = submitBtn.textContent;
+      submitBtn.textContent = 'Submitting…';
+      setStatus('Saving your info — one moment…', false);
+
+      try {
+        const resp = await fetch('/api/submit-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok || !data.ok) {
+          setStatus(data.error || 'Something went wrong saving your info. Please try again, or email josh@ownafleet.com.', true);
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+          return;
+        }
+
+        // Hand off to /welcome with prefill params for the Calendly widget.
+        const params = new URLSearchParams({
+          name:    `${payload.first_name} ${payload.last_name}`.trim(),
+          email:   payload.email,
+          phone:   payload.phone,
+          lead_id: data.lead_id || ''
+        });
+        window.location.href = '/welcome?' + params.toString();
+      } catch (err) {
+        console.error('Lead submit error:', err);
+        setStatus('Network error — please try again, or email josh@ownafleet.com.', true);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+      }
+    });
   })();
 </script>
 
