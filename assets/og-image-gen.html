@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OG image generator — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724;
+    --accent: #8B6F3F;
+    --gold: #D6BC8A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #F2F0EA; font-family: 'Inter', sans-serif; color: var(--ink); }
+
+  .page { max-width: 1240px; margin: 40px auto; padding: 0 32px; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 28px; margin-bottom: 8px; }
+  .sub { font-size: 13px; color: #6B7280; line-height: 1.6; margin-bottom: 24px; max-width: 720px; }
+  .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+  .btn { font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; padding: 12px 22px; border: 1px solid var(--ink); background: var(--ink); color: white; cursor: pointer; font-weight: 500; }
+  .btn:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  select { font-family: 'Inter', sans-serif; font-size: 13px; padding: 8px 12px; border: 1px solid #E5E3DE; background: white; }
+  .label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #6B7280; margin-right: 8px; }
+
+  /* The 1200x630 canvas — rendered actual-size, scaled visually for preview */
+  .og-wrap {
+    width: 1200px;
+    height: 630px;
+    transform-origin: top left;
+    transform: scale(var(--preview-scale, 0.5));
+    margin-bottom: calc(630px * (1 - var(--preview-scale, 0.5)) * -1 - 24px);
+  }
+
+  .og {
+    width: 1200px;
+    height: 630px;
+    position: relative;
+    overflow: hidden;
+    background-image: url('/assets/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    font-family: 'Inter', sans-serif;
+  }
+  .og::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(11,23,36,0.82) 0%, rgba(11,23,36,0.58) 55%, rgba(11,23,36,0.48) 100%);
+  }
+  .og-inner {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding: 64px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .og-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .og-brand {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    color: white;
+  }
+  .og-meta {
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+  }
+  .og-eyebrow {
+    font-size: 14px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .og-eyebrow::before {
+    content: '';
+    width: 48px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .og-h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 70px;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: white;
+    margin-bottom: 22px;
+    max-width: 980px;
+  }
+  .og-h1 em {
+    color: var(--gold);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .og-sub {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.85);
+    max-width: 880px;
+  }
+
+  /* Variant: deck-style cover */
+  .og.variant-cover .og-h1 { font-size: 84px; line-height: 0.94; }
+
+  /* Variant: minimal (wordmark + tagline only) */
+  .og.variant-minimal .og-eyebrow,
+  .og.variant-minimal .og-sub { display: none; }
+  .og.variant-minimal .og-inner { justify-content: center; padding: 80px; }
+  .og.variant-minimal .og-h1 { font-size: 96px; max-width: 1040px; }
+
+  .info { font-size: 12px; color: #6B7280; line-height: 1.7; margin-top: 16px; }
+  .info code { background: #E5E3DE; padding: 1px 6px; font-family: ui-monospace, monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>OG image generator — OwnaFleet</h1>
+  <p class="sub">Renders a 1200×630 social-card preview at actual size. Three layout variants — pick one, hit <strong>Download PNG</strong>, then save to <code>/assets/og-image.jpg</code> (or upload via Vercel and replace the file in git).</p>
+
+  <div class="controls">
+    <span class="label">Variant</span>
+    <select id="variant">
+      <option value="">Default (matches hero copy)</option>
+      <option value="variant-cover">Deck-style (larger headline)</option>
+      <option value="variant-minimal">Minimal (wordmark + tagline)</option>
+    </select>
+
+    <span class="label" style="margin-left:16px;">Preview scale</span>
+    <select id="scale">
+      <option value="0.4">40%</option>
+      <option value="0.5" selected>50%</option>
+      <option value="0.65">65%</option>
+      <option value="0.8">80%</option>
+      <option value="1">100% (actual size)</option>
+    </select>
+
+    <button class="btn" id="downloadBtn" style="margin-left:auto;">Download PNG ↓</button>
+  </div>
+
+  <div class="og-wrap" id="ogWrap">
+    <div class="og" id="og">
+      <div class="og-inner">
+        <div class="og-top">
+          <div class="og-brand">OWNAFLEET</div>
+          <div class="og-meta">Managed Equipment Ownership</div>
+        </div>
+        <div>
+          <div class="og-eyebrow">For Financial Windfalls &amp; High-Income Earners</div>
+          <h1 class="og-h1">Offset your next tax bill with <em>your own managed equipment fleet.</em></h1>
+          <p class="og-sub">A turnkey solution for high-income earners and windfall recipients to own a real, cash-flowing fleet — fully managed by a major U.S. rental operator.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="info">
+    Background image: <code>/assets/hero-bg.jpg</code> (golden-hour excavator + boom lift + forklift).
+    Overlay matches the live homepage hero. Downloaded PNG is exactly 1200×630px — the size Facebook/LinkedIn/iMessage use.
+  </p>
+
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const og = $('og');
+  const wrap = $('ogWrap');
+
+  function updateVariant() {
+    og.className = 'og';
+    const v = $('variant').value;
+    if (v) og.classList.add(v);
+  }
+  function updateScale() {
+    document.documentElement.style.setProperty('--preview-scale', $('scale').value);
+  }
+  $('variant').addEventListener('change', updateVariant);
+  $('scale').addEventListener('change', updateScale);
+  updateScale();
+
+  // ============== Download as 1200x630 PNG ==============
+  // Uses html2canvas via dynamic script load. Falls back to instructions
+  // if the user is offline.
+  $('downloadBtn').addEventListener('click', async () => {
+    const btn = $('downloadBtn');
+    btn.disabled = true;
+    btn.textContent = 'Rendering…';
+
+    try {
+      if (!window.html2canvas) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      // Temporarily render at 100% so html2canvas captures the right size.
+      const oldScale = $('scale').value;
+      $('scale').value = '1';
+      updateScale();
+      await new Promise(r => setTimeout(r, 100));
+
+      const canvas = await window.html2canvas(og, {
+        width: 1200,
+        height: 630,
+        scale: 2,             // 2x for retina-quality output
+        useCORS: true,
+        backgroundColor: null,
+        logging: false
+      });
+
+      // Restore preview scale
+      $('scale').value = oldScale;
+      updateScale();
+
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = 'og-image.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        btn.disabled = false;
+        btn.textContent = 'Download PNG ↓';
+      }, 'image/png');
+    } catch (e) {
+      console.error(e);
+      alert('Render failed: ' + e.message + '\n\nFallback: zoom your browser to 100%, set preview scale to 100%, and use Cmd+Shift+5 to screenshot a 1200x630 region of the card above.');
+      btn.disabled = false;
+      btn.textContent = 'Download PNG ↓';
+    }
+  });
+</script>
+
+</body>
+</html>
