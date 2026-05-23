@@ -540,14 +540,30 @@
           <span style="color: var(--accent); font-weight: 500;">Average fleet purchase is $1.2M.</span> Typical minimum is $500K.
         </p>
 
-        <label class="math-label" for="mathRate" style="margin-top: 32px;">Your combined marginal tax rate</label>
+        <label class="math-label" for="mathRate" style="margin-top: 32px;">Tax rate on the income you're offsetting</label>
         <select class="math-select" id="mathRate">
-          <option value="0.32">32% — federal mid bracket</option>
-          <option value="0.37">37% — federal top bracket only</option>
-          <option value="0.40" selected>40% — federal top + low state</option>
-          <option value="0.44">44% — federal top + ~7% state</option>
-          <option value="0.50">50% — federal top + CA / NY top state</option>
+          <optgroup label="High-income year (W-2, K-1, ordinary income)">
+            <option value="0.32">32% — federal mid bracket</option>
+            <option value="0.37">37% — federal top bracket only</option>
+            <option value="0.40" selected>40% — federal top + low state</option>
+            <option value="0.44">44% — federal top + ~7% state</option>
+            <option value="0.50">50% — federal top + CA / NY top state</option>
+          </optgroup>
+          <optgroup label="Windfall — long-term capital gains (held > 1 yr)">
+            <option value="0.238">23.8% — federal only (20% LTCG + 3.8% NIIT)</option>
+            <option value="0.288">28.8% — federal + ~5% state</option>
+            <option value="0.318">31.8% — federal + ~8% state</option>
+            <option value="0.371">37.1% — federal + CA top (LTCG taxed as ordinary at state level)</option>
+          </optgroup>
+          <optgroup label="Windfall — short-term capital gains (held ≤ 1 yr)">
+            <option value="0.408">40.8% — federal top + 3.8% NIIT (no state)</option>
+            <option value="0.458">45.8% — federal + ~5% state + NIIT</option>
+            <option value="0.508">50.8% — federal + CA / NY top + NIIT</option>
+          </optgroup>
         </select>
+        <p style="margin-top: 10px; font-size: 12px; color: var(--ink-soft); line-height: 1.55;">
+          <strong>Why this matters:</strong> 100% bonus depreciation creates an ordinary business loss. With <em>material participation</em> in the equipment rental activity (which the program is structured to satisfy), that loss offsets <strong>all</strong> income types — W-2 wages, K-1 income, AND capital gains from a windfall. <span style="color: var(--accent); font-weight: 500;">~80% of participants come in with a windfall — practice sale, stock sale, business exit.</span>
+        </p>
       </div>
 
       <div>
