@@ -192,20 +192,33 @@ function internalNotifyHtml(lead, isBelowThreshold, submissionText) {
 }
 
 // ============== Deck delivery (qualifying lead) ==============
+// Sequencing: book first, then the overview unlocks. The /welcome page
+// embeds Calendly and only reveals the deck once a booking confirms,
+// so this email mirrors that flow rather than handing them the deck
+// up front (which would short-circuit the call).
+//
+// The /welcome link carries prefill params so the Calendly widget on
+// that page lands pre-filled — saves the lead from re-typing.
 function deckDeliveryEmailHtml(lead) {
+  const fullName = `${lead.first_name} ${lead.last_name}`.trim();
+  const welcomeUrl =
+    'https://ownafleet.com/welcome?' +
+    new URLSearchParams({
+      name: fullName,
+      email: lead.email,
+      phone: lead.phone || '',
+      lead_id: lead.id
+    }).toString();
+
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
       <p>Hi ${escape(lead.first_name)},</p>
       <p>Thanks for submitting your interest. Based on what you shared, this program looks like a potential fit — and I want to make sure you have everything to evaluate it carefully.</p>
-      <p>The 21-slide overview is here:</p>
+      <p><strong>How it works from here:</strong></p>
+      <p style="margin: 8px 0 4px;">→ Step 1: Pick a 20-minute window with me.</p>
+      <p style="margin: 0 0 4px;">→ Step 2: The full 21-slide overview unlocks on that same page the moment you book — designed so our call can focus on your situation, not on the basics.</p>
       <p style="margin: 24px 0;">
-        <a href="${DECK_URL}" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">View the overview →</a>
-      </p>
-      <p>It walks through structure, year-by-year economics on a representative $1M deal, what the Year-1 tax overlay can look like, and the questions I get most often before a first call.</p>
-      <p>It's designed to handle the standard questions in advance, so our intro call can focus on your situation: income picture, tax position, what you're trying to accomplish.</p>
-      <p>When you've had a chance to read through, grab a 20-minute window here:</p>
-      <p style="margin: 20px 0;">
-        <a href="${CALENDLY_URL}" style="color: #8B6F3F; border-bottom: 1px solid #8B6F3F; text-decoration: none;">${CALENDLY_URL}</a>
+        <a href="${welcomeUrl}" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">Book your call →</a>
       </p>
       <p>No obligation, no hard pitch. If you'd rather pick a time over text, I'm at <strong>(206) 755-6436</strong> — or just reply to this email with a few windows.</p>
       <p>Looking forward to it.</p>
