@@ -4,6 +4,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { checkAbuse } from './_lib/abuse-check.js';
 
 const REQUIRED = ['first_name', 'last_name', 'email', 'phone', 'notes'];
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
@@ -14,6 +15,16 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
+
+  // Honeypot + per-IP rate limit
+  const abuse = checkAbuse(req, body);
+  if (!abuse.ok) {
+    if (abuse.silent) {
+      console.warn('apply-partner abuse-check:', abuse.reason);
+      return res.status(abuse.status).json({ ok: true });
+    }
+    return res.status(abuse.status).json({ error: abuse.error });
+  }
 
   for (const f of REQUIRED) {
     if (!body[f] || typeof body[f] !== 'string' || !body[f].trim()) {

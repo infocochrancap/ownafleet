@@ -5,6 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { checkAbuse } from './_lib/abuse-check.js';
 
 // Required fields after the homepage form was simplified (no state/liquidity).
 // state and liquidity remain in the schema (nullable per migration 012) and
@@ -27,6 +28,17 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
+
+  // Honeypot + per-IP rate limit. Bots get a silent 200; rate-limited humans
+  // get a 429 with a clear message.
+  const abuse = checkAbuse(req, body);
+  if (!abuse.ok) {
+    if (abuse.silent) {
+      console.warn('submit-lead abuse-check:', abuse.reason);
+      return res.status(abuse.status).json({ ok: true });
+    }
+    return res.status(abuse.status).json({ error: abuse.error });
+  }
 
   // Validate required fields
   for (const f of REQUIRED) {

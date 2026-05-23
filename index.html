@@ -726,6 +726,12 @@
 
     <div class="form-layout">
       <form class="form-card" id="leadForm" novalidate>
+        <!-- Honeypot: real humans can't see this; bots auto-fill every input. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+          <label>Website (leave blank)
+            <input type="text" name="website" id="lf_website" tabindex="-1" autocomplete="off">
+          </label>
+        </div>
         <div class="form-row">
           <div class="form-field">
             <label for="first">First name<span class="req">*</span></label>
@@ -896,7 +902,9 @@
         phone:           document.getElementById('phone').value.trim(),
         equipment_range: document.getElementById('income').value,
         net_worth:       document.getElementById('nw').value,
-        notes:           (document.getElementById('notes')?.value || '').trim()
+        notes:           (document.getElementById('notes')?.value || '').trim(),
+        // Honeypot — humans never fill this, bots do. Server rejects non-empty.
+        website:         (document.getElementById('lf_website')?.value || '')
       };
 
       // Attach captured attribution. Partner referrals use the existing

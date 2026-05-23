@@ -19,7 +19,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
-const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-ownership';
+const CALENDLY_URL = 'https://calendly.com/ownafleet/intro';
 
 // Statuses that mean the lead has already moved past the deck/booking
 // phase — i.e., they shouldn't get the NO_BOOK or NO_APP nudges.

@@ -17,7 +17,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
-const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-ownership';
+const CALENDLY_URL = 'https://calendly.com/ownafleet/intro';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

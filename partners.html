@@ -161,6 +161,12 @@
     <p class="lede" style="text-align:center; margin-left:auto; margin-right:auto;">Tell us about you and your network. We'll review within 1–2 business days and email you when your account is active.</p>
 
     <form class="form-card" id="partnerForm">
+      <!-- Honeypot: hidden from humans, bots auto-fill it. -->
+      <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+        <label>Website (leave blank)
+          <input type="text" name="website" id="pf_website" tabindex="-1" autocomplete="off">
+        </label>
+      </div>
       <div class="form-row">
         <div class="form-field">
           <label for="fname">First name *</label>

@@ -5,10 +5,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { checkAbuse } from './_lib/abuse-check.js';
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
 const DECK_URL = 'https://ownafleet.com/deck/view';
-const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-ownership';
+const CALENDLY_URL = 'https://calendly.com/ownafleet/intro';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,6 +17,17 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
+
+  // Honeypot + per-IP rate limit
+  const abuse = checkAbuse(req, body);
+  if (!abuse.ok) {
+    if (abuse.silent) {
+      console.warn('request-deck abuse-check:', abuse.reason);
+      return res.status(abuse.status).json({ ok: true });
+    }
+    return res.status(abuse.status).json({ error: abuse.error });
+  }
+
   const first_name = (body.first_name || '').trim();
   const email = (body.email || '').trim().toLowerCase();
   const disclaimer_accepted = body.disclaimer_accepted === true;
