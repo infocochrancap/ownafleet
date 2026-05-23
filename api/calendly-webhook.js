@@ -19,7 +19,6 @@ import crypto from 'crypto';
 
 const FROM = 'OwnaFleet <leads@ownafleet.com>';
 const DECK_URL = 'https://ownafleet.com/deck/view';
-const CALENDLY_URL = 'https://calendly.com/drjoshcochran/connect-about-fleet-ownership';
 
 export const config = {
   api: {
