@@ -810,6 +810,32 @@
     update();
   })();
 
+  // ============== UTM + referral capture ==============
+  // On first landing, snapshot any utm_* or ref params from the URL into
+  // sessionStorage so they survive navigation to the form submit. Persists
+  // through scroll, page interactions, and any anchor jumps — the form
+  // submission below reads from sessionStorage so attribution is reliable
+  // even if the lead lands on /, browses, then submits later.
+  (function captureAttribution() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const fields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'];
+      let captured = false;
+      fields.forEach((k) => {
+        const v = params.get(k);
+        if (v) {
+          sessionStorage.setItem('of_attr_' + k, v.slice(0, 120)); // cap length, defensive
+          captured = true;
+        }
+      });
+      // Also capture document.referrer once per session (only if no UTM was present —
+      // a UTM-tagged URL is more reliable than referrer).
+      if (!captured && document.referrer && !sessionStorage.getItem('of_attr_referrer')) {
+        sessionStorage.setItem('of_attr_referrer', document.referrer.slice(0, 200));
+      }
+    } catch (e) { /* sessionStorage may throw in private mode — non-fatal */ }
+  })();
+
   // ============== Lead form submission ==============
   // POSTs to /api/submit-lead (Supabase insert + internal/lead emails),
   // then redirects to /welcome?name=&email=&phone=&lead_id= so the
@@ -856,6 +882,37 @@
         net_worth:       document.getElementById('nw').value,
         notes:           (document.getElementById('notes')?.value || '').trim()
       };
+
+      // Attach captured attribution. Partner referrals use the existing
+      // `referral_code` flow on the API (looks up referral_partners table).
+      // Other UTM channels get stamped on `import_source` so admin can
+      // see "where did this lead come from" at a glance.
+      try {
+        const get = (k) => sessionStorage.getItem('of_attr_' + k) || '';
+        const ref = get('ref');
+        if (ref) payload.referral_code = ref;
+        const utm = {
+          source: get('utm_source'),
+          medium: get('utm_medium'),
+          campaign: get('utm_campaign'),
+          content: get('utm_content'),
+          term: get('utm_term')
+        };
+        // Build a single attribution string for import_source.
+        // Format: "utm:source/medium/campaign[/content][/term]" or "referrer:<host>"
+        const utmParts = [utm.source, utm.medium, utm.campaign, utm.content, utm.term]
+          .filter(Boolean);
+        if (utmParts.length) {
+          payload.import_source = 'utm:' + utmParts.join('/');
+        } else {
+          const referrer = sessionStorage.getItem('of_attr_referrer');
+          if (referrer) {
+            try {
+              payload.import_source = 'referrer:' + new URL(referrer).hostname;
+            } catch (e) { /* malformed referrer, skip */ }
+          }
+        }
+      } catch (e) { /* attribution is best-effort, never block submit */ }
 
       submitBtn.disabled = true;
       const originalLabel = submitBtn.textContent;

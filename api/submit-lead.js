@@ -75,6 +75,14 @@ export default async function handler(req, res) {
   // Calendly webhook fires, then 'call_completed_app_sent' when the
   // admin clicks "Send Armada application".
   const submissionText = (body.notes || '').trim();
+  // Sanitize import_source if client provided one (UTM attribution string).
+  // Fall back to 'website_form' when nothing was supplied. Cap length to
+  // prevent abuse since this field is also exposed in admin views.
+  let importSource = 'website_form';
+  if (typeof body.import_source === 'string' && body.import_source.trim()) {
+    importSource = body.import_source.trim().slice(0, 200);
+  }
+
   const { data: lead, error } = await supabase
     .from('leads')
     .insert({
@@ -87,7 +95,7 @@ export default async function handler(req, res) {
       net_worth: body.net_worth,
       liquidity: body.liquidity || null,
       referral_partner_id,
-      import_source: 'website_form',
+      import_source: importSource,
       status: 'submitted_homepage'
     })
     .select()
@@ -185,6 +193,7 @@ function internalNotifyHtml(lead, isBelowThreshold, submissionText) {
         <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">NET WORTH</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.net_worth)}</td></tr>
         ${lead.liquidity ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">LIQUIDITY</td><td style="padding: 8px 0; border-bottom: 1px solid #eee;">${escape(lead.liquidity)}</td></tr>` : ''}
         ${submissionText ? `<tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280; vertical-align: top;">THEY SAID</td><td style="padding: 8px 0; border-bottom: 1px solid #eee; white-space: pre-wrap;">${escape(submissionText)}</td></tr>` : ''}
+        <tr><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #6B7280;">SOURCE</td><td style="padding: 8px 0; border-bottom: 1px solid #eee; font-family: ui-monospace, monospace; font-size: 12px;">${escape(lead.import_source || 'unknown')}</td></tr>
       </table>
       <p style="margin-top: 24px; font-size: 13px; color: #6B7280;">View in admin: <a href="https://ownafleet.com/admin">ownafleet.com/admin</a></p>
     </div>
