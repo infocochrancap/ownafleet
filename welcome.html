@@ -83,11 +83,24 @@
     font-weight: 500;
   }
   .steps-row .step { display: inline-flex; align-items: center; gap: 8px; }
-  .steps-row .step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); font-family: 'Fraunces', serif; font-size: 12px; color: var(--muted); font-style: italic; }
+  .steps-row .step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); font-family: 'Fraunces', serif; font-size: 12px; color: var(--muted); font-style: italic; flex-shrink: 0; }
   .steps-row .step.done .step-num { background: var(--success); color: white; border-color: var(--success); }
   .steps-row .step.active .step-num { background: var(--ink); color: white; border-color: var(--ink); }
   .steps-row .step.active { color: var(--ink); }
   .steps-row .sep { width: 36px; height: 1px; background: var(--line); }
+
+  /* Mobile: compact the step indicator so all 3 fit in a 375px viewport.
+     Hide the connecting separator lines, tighten gap, drop letter-spacing,
+     and let labels keep their inline-flex layout. */
+  @media (max-width: 520px) {
+    .steps-row {
+      gap: 10px;
+      letter-spacing: 0.05em;
+      font-size: 10px;
+    }
+    .steps-row .step { gap: 6px; }
+    .steps-row .sep { display: none; }
+  }
 
   /* Page header */
   .page-header { padding: 48px 0 32px; }
@@ -158,6 +171,38 @@
     display: block;
     transform-origin: top left;
     transform: scale(var(--deck-scale, 1));
+  }
+
+  /* Deck section header row: lede on left, "view full size" link on right */
+  .deck-row { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+  .deck-fullsize-link {
+    font-size: 12px; color: var(--accent); text-decoration: none;
+    border-bottom: 1px solid var(--accent);
+    white-space: nowrap;
+    padding: 8px 0;            /* tap-target padding */
+  }
+  .deck-mobile-cta { display: none; }
+
+  /* Mobile: the iframe at ~21% scale is unreadable. Hide it, surface a
+     prominent CTA that opens the deck full-screen in a new tab instead. */
+  @media (max-width: 700px) {
+    .deck-embed-wrap { display: none; }
+    .deck-row .deck-fullsize-link { display: none; }
+    .deck-mobile-cta {
+      display: block;
+      background: var(--ink);
+      color: white;
+      text-align: center;
+      padding: 20px 24px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 500;
+      border-top: 3px solid var(--accent);
+    }
+    .deck-mobile-cta:active { background: var(--accent); }
   }
   .deck-locked {
     text-align: center;
@@ -372,11 +417,9 @@
       </div>
       <div class="eyebrow"><span>Step 3 of 3 — The full overview</span></div>
       <h2 style="font-family:'Fraunces',serif;font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-0.02em;color:var(--ink);margin-bottom:14px;line-height:1.1;">The 21-slide <em>overview.</em></h2>
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:24px;flex-wrap:wrap;">
+      <div class="deck-row">
         <p class="lede" style="margin:0;">Take your time — this exists so the call can be focused on you, not on the basics.</p>
-        <p style="margin:0;font-size:12px;color:var(--muted);white-space:nowrap;">
-          <a href="/deck/view" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent);">View full size in a new tab ↗</a>
-        </p>
+        <a href="/deck/view" target="_blank" rel="noopener" class="deck-fullsize-link">View full size in a new tab ↗</a>
       </div>
 
       <div class="deck-embed-wrap">
@@ -385,6 +428,7 @@
                 class="deck-embed-iframe"
                 loading="lazy"></iframe>
       </div>
+      <a href="/deck/view" target="_blank" rel="noopener" class="deck-mobile-cta">Open the 21-slide overview ↗</a>
     </div>
 
   </div>
