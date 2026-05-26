@@ -130,7 +130,43 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.status(200).json({ ok: true, interaction: data });
+  // ----- AUTO-CREATE LEAD (when this is a new prospect) -----
+  // If the interaction has an email and no matching leads row exists, create
+  // a lead at the earliest funnel stage so the prospect surfaces on the
+  // Leads tab. Skip when source is anything other than 'manual' (Calendly
+  // webhook handles its own lead lookup/promotion; we don't want to create
+  // shadow lead rows for system-generated interactions).
+  let createdLead = null;
+  if (email && source === 'manual') {
+    try {
+      const { data: existingLead } = await supabase
+        .from('leads')
+        .select('id')
+        .ilike('email', email)
+        .maybeSingle();
+
+      if (!existingLead) {
+        const { data: newLead, error: leadErr } = await supabase
+          .from('leads')
+          .insert({
+            first_name: trimOrNull(body.first_name) || 'Unknown',
+            last_name:  trimOrNull(body.last_name)  || '',
+            email,
+            phone: phone || '',
+            import_source: 'manual_interaction',
+            status: 'submitted_homepage'
+          })
+          .select('id')
+          .single();
+        if (!leadErr) createdLead = newLead;
+        else console.warn('Auto-create lead failed (non-fatal):', leadErr);
+      }
+    } catch (e) {
+      console.warn('Lead auto-create threw (non-fatal):', e);
+    }
+  }
+
+  return res.status(200).json({ ok: true, interaction: data, created_lead: createdLead });
 }
 
 function trimOrNull(v, maxLen) {
