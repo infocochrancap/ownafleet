@@ -32,7 +32,7 @@ where pi.email is not null
   and lower(trim(pi.email)) not in (
     select lower(trim(email)) from leads where email is not null
   )
-order by lower(pi.email), pi.created_at asc;
+order by lower(pi.email), pi.logged_at asc;
 
 -- Verify
 select count(*) as new_leads_created
