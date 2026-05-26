@@ -33,13 +33,13 @@
 <!-- Cloudflare Web Analytics — privacy-friendly, no cookies, no build step. -->
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a12c8c840c51469f95ac47fe875d5176"}'></script>
 
-<!-- Meta Pixel (Facebook/Instagram ads). Gated on META_PIXEL_ID — replace
-     'PIXEL_ID_PLACEHOLDER' with the real ID from Meta Business Manager
-     when ads are ready to launch. Until then, the pixel is a no-op. -->
+<!-- Meta Pixel (Facebook/Instagram ads).
+     Pixel ID: 1542043940964149 (OwnaFleet dataset in Meta Business Manager,
+     under the OwnaFleet business portfolio, created 2026-05-23). -->
 <script>
 (function() {
-  var PIXEL_ID = 'PIXEL_ID_PLACEHOLDER';
-  if (!PIXEL_ID || PIXEL_ID === 'PIXEL_ID_PLACEHOLDER') return;
+  var PIXEL_ID = '1542043940964149';
+  if (!PIXEL_ID) return;
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
   n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
@@ -50,6 +50,8 @@
   window._OF_PIXEL_READY = true;
 })();
 </script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,300;9..144,1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
