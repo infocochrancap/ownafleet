@@ -447,6 +447,7 @@
     document.querySelector('.nav-tab[href="/admin"]').classList.remove('active');
     document.getElementById('filterBar').style.display = 'none';
     document.getElementById('statsRow').style.display = 'none';
+    document.getElementById('bucketBar').style.display = 'none';
     await renderPartners();
   } else if (view === 'funnel') {
     document.getElementById('pageTitle').textContent = 'Funnel';
@@ -454,6 +455,7 @@
     document.getElementById('funnelTab').classList.add('active');
     document.getElementById('filterBar').style.display = 'none';
     document.getElementById('statsRow').style.display = 'none';
+    document.getElementById('bucketBar').style.display = 'none';
     await renderFunnel();
   } else if (view === 'interactions') {
     document.getElementById('pageTitle').textContent = 'Interactions';
@@ -461,6 +463,7 @@
     document.getElementById('interactionsTab').classList.add('active');
     document.getElementById('filterBar').style.display = 'none';
     document.getElementById('statsRow').style.display = 'none';
+    document.getElementById('bucketBar').style.display = 'none';
     await renderInteractions();
   } else {
     await loadLeads();
