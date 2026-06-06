@@ -147,6 +147,30 @@
 
   .ix-method-pill { display: inline-block; padding: 2px 7px; font-size: 10px; color: var(--ink-soft); background: var(--paper-warm); margin-right: 4px; text-transform: capitalize; }
   .ix-dir-arrow { font-family: 'Courier New', monospace; font-size: 12px; color: var(--accent); margin-right: 6px; }
+
+  /* ---- Follow-ups view ---- */
+  .fu-section { margin-bottom: 40px; }
+  .fu-section > h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; margin: 0 0 6px; }
+  .fu-section > .fu-sub { color: var(--ink-soft); font-size: 13px; margin: 0 0 18px; }
+  .fu-modes { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+  .fu-mode { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--paper); border: 1px solid var(--line); font-size: 12px; }
+  .fu-mode .fu-mode-track { font-weight: 600; }
+  .fu-mode select { font-size: 12px; padding: 3px 6px; }
+  .fu-card { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 16px 18px; margin-bottom: 14px; }
+  .fu-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .fu-card-name { font-family: 'Fraunces', serif; font-size: 16px; }
+  .fu-track-pill { display: inline-block; padding: 2px 8px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; background: rgba(139,111,63,0.15); color: var(--accent-deep); }
+  .fu-due { font-size: 12px; color: var(--muted); }
+  .fu-due.overdue { color: var(--warn); font-weight: 600; }
+  .fu-draft-subject { width: 100%; font-size: 14px; padding: 8px 10px; margin: 10px 0 6px; border: 1px solid var(--line); font-family: inherit; }
+  .fu-draft-body { width: 100%; min-height: 200px; font-size: 12px; line-height: 1.5; padding: 10px; border: 1px solid var(--line); font-family: 'Courier New', monospace; }
+  .fu-draft-actions { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+  .fu-queue-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .fu-queue-actions a, .fu-contact-link { font-size: 12px; color: var(--accent-deep); text-decoration: none; border: 1px solid var(--line); padding: 5px 10px; background: var(--paper-warm); }
+  .fu-queue-actions a:hover, .fu-contact-link:hover { border-color: var(--accent); }
+  .fu-msg { font-size: 12px; color: var(--muted); }
+  .fu-empty { color: var(--muted); font-size: 14px; padding: 14px 0; }
+  .fu-preview { border: 1px solid var(--line); padding: 14px; margin-top: 8px; max-height: 280px; overflow: auto; background: white; }
 </style>
 </head>
 <body>
@@ -155,6 +179,7 @@
   <a href="/" class="nav-brand">OWNAFLEET · ADMIN</a>
   <div class="nav-right">
     <a href="/admin" class="nav-tab active">Leads</a>
+    <a href="/admin?view=followups" class="nav-tab" id="followupsTab">Follow-ups</a>
     <a href="/admin?view=interactions" class="nav-tab" id="interactionsTab">Interactions</a>
     <a href="/admin?view=funnel" class="nav-tab" id="funnelTab">Funnel</a>
     <a href="/admin?view=partners" class="nav-tab" id="partnersTab">Partners</a>
@@ -315,6 +340,43 @@
     return 'active';
   }
 
+  // ----- Follow-up tracks (the relationship/tickler layer, migration 016) -----
+  const FOLLOWUP_TRACKS = ['none', 'interested_no_app', 'with_accountant', 'too_early', 'past_customer'];
+  const TRACK_LABEL = {
+    none:              'No follow-up track',
+    interested_no_app: 'Interested · no application yet',
+    with_accountant:   'Checking with their accountant',
+    too_early:         'Too early in their year',
+    past_customer:     'Past customer · annual re-buy'
+  };
+  const TRACK_SHORT = {
+    interested_no_app: 'No app yet',
+    with_accountant:   'With CPA',
+    too_early:         'Too early',
+    past_customer:     'Past buyer'
+  };
+  // All 7 follow-up types (3 funnel-stage one-shots + 4 conversation tracks).
+  // Funnel types are auto-triggered; conversation tracks are Josh-set.
+  const FOLLOWUP_TYPES = ['no_book', 'no_app', 'stalled_app', 'interested_no_app', 'with_accountant', 'too_early', 'past_customer'];
+  const FU_SHORT = {
+    no_book:           'No booking',
+    no_app:            'No app',
+    stalled_app:       'App stalled',
+    interested_no_app: 'No app yet',
+    with_accountant:   'With CPA',
+    too_early:         'Too early',
+    past_customer:     'Past buyer'
+  };
+  const FU_LABEL = {
+    no_book:           'Got deck · never booked (auto)',
+    no_app:            'Booked · no application (auto)',
+    stalled_app:       'Application stalled (auto)',
+    interested_no_app: 'Interested · no application yet',
+    with_accountant:   'Checking with their accountant',
+    too_early:         'Too early in their year',
+    past_customer:     'Past customer · annual re-buy'
+  };
+
   // Auth gate
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = '/login'; throw new Error('redirect'); }
@@ -465,6 +527,14 @@
     document.getElementById('statsRow').style.display = 'none';
     document.getElementById('bucketBar').style.display = 'none';
     await renderInteractions();
+  } else if (view === 'followups') {
+    document.getElementById('pageTitle').textContent = 'Follow-ups';
+    document.querySelector('.nav-tab.active').classList.remove('active');
+    document.getElementById('followupsTab').classList.add('active');
+    document.getElementById('filterBar').style.display = 'none';
+    document.getElementById('statsRow').style.display = 'none';
+    document.getElementById('bucketBar').style.display = 'none';
+    await renderFollowups();
   } else {
     await loadLeads();
   }
@@ -718,6 +788,32 @@
       </div>
 
       <div class="modal-section">
+        <h3>Follow-up track</h3>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">
+          Put this person on a calendar-aware follow-up cadence. Leave the date blank to use the smart default for the track (anchored to closing before the Q4 rush). Appears on the <a href="/admin?view=followups" style="color:var(--accent-deep);">Follow-ups</a> queue.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;">
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Track</label>
+            <select id="fuTrackSelect" class="notes-input" style="min-height:auto;padding:10px 14px;">
+              ${FOLLOWUP_TRACKS.map(t => `<option value="${t}" ${t === (lead.followup_track || 'none') ? 'selected' : ''}>${escapeHtml(TRACK_LABEL[t])}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">Next follow-up (optional)</label>
+            <input type="date" id="fuDateInput" class="notes-input" style="min-height:auto;padding:10px 14px;" value="${lead.next_followup_at ? new Date(lead.next_followup_at).toISOString().slice(0,10) : ''}">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;">
+          <label style="font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="fuPause" ${lead.followup_paused ? 'checked' : ''}> Pause (keep track, hide from queue)
+          </label>
+          <button class="save-btn" id="fuSaveBtn">Save follow-up</button>
+          <span class="fu-msg" id="fuSaveMsg"></span>
+        </div>
+      </div>
+
+      <div class="modal-section">
         <h3>Lead details &amp; deal economics</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div>
@@ -803,6 +899,38 @@
       const v = parseFloat(valueInput.value);
       if (!isNaN(v) && v > 0) commissionInput.value = Math.round(v * 0.021);
     });
+
+    // Follow-up track save
+    const fuSaveBtn = document.getElementById('fuSaveBtn');
+    if (fuSaveBtn) {
+      fuSaveBtn.addEventListener('click', async () => {
+        const track = document.getElementById('fuTrackSelect').value;
+        const dateVal = document.getElementById('fuDateInput').value;
+        const paused = document.getElementById('fuPause').checked;
+        const msgEl = document.getElementById('fuSaveMsg');
+        const body = { lead_id: leadId, track, paused };
+        // Explicit date → send it; blank with a real track → let server compute default.
+        if (dateVal) body.next_followup_at = new Date(dateVal + 'T12:00:00').toISOString();
+        else if (track !== 'none') body.next_followup_at = undefined; // server computes
+        fuSaveBtn.disabled = true; msgEl.textContent = 'Saving…'; msgEl.style.color = 'var(--muted)';
+        const res = await fetch('/api/set-followup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+          body: JSON.stringify(body)
+        });
+        fuSaveBtn.disabled = false;
+        if (res.ok) {
+          const { lead: updated } = await res.json();
+          // Keep the in-memory lead fresh so reopening shows the new values.
+          if (updated) { lead.followup_track = updated.followup_track; lead.next_followup_at = updated.next_followup_at; lead.followup_paused = updated.followup_paused; }
+          if (updated && updated.next_followup_at) document.getElementById('fuDateInput').value = new Date(updated.next_followup_at).toISOString().slice(0,10);
+          msgEl.textContent = 'Saved ✓'; msgEl.style.color = 'var(--success)';
+        } else {
+          msgEl.textContent = 'Failed: ' + ((await res.json().catch(() => ({}))).error || res.status);
+          msgEl.style.color = 'var(--warn)';
+        }
+      });
+    }
 
     // Autosave: each field writes its own column on blur (change event).
     // No save button, no batched submit — every change persists immediately.
@@ -1571,6 +1699,275 @@
   // One row per touchpoint; we group by email in the UI so each
   // prospect shows up once with their latest activity. Engagement
   // status comes from cross-referencing deck_requests + leads.
+
+  // ============================================================
+  // FOLLOW-UPS VIEW (migration 016)
+  // Two halves: (1) the email Outbox — pending drafts Josh edits + sends or
+  // skips; (2) the manual call/text queue — who's due, with tap-to-call/text
+  // and a "log touch & reschedule" inline form. Plus per-track send-mode
+  // toggles (owners only).
+  // ============================================================
+  let fuDrafts = [];
+  let fuLeadCache = new Map();
+
+  async function fuApi(path, body) {
+    return fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(body)
+    });
+  }
+
+  async function renderFollowups() {
+    document.getElementById('content').innerHTML = '<div class="loading">Loading…</div>';
+
+    const [settingsRes, draftsRes, leadsRes] = await Promise.all([
+      supabase.from('followup_settings').select('*'),
+      supabase.from('followup_drafts')
+        .select('*, leads(first_name,last_name,phone,email)')
+        .eq('status', 'pending').order('created_at', { ascending: true }),
+      supabase.from('leads')
+        .select('id,first_name,last_name,email,phone,status,followup_track,next_followup_at,last_followup_at,followup_paused,followup_count')
+        .neq('followup_track', 'none').order('next_followup_at', { ascending: true, nullsFirst: false })
+    ]);
+
+    const sendMode = new Map((settingsRes.data || []).map(s => [s.followup_type, s.send_mode]));
+    fuDrafts = draftsRes.data || [];
+    const fuLeads = leadsRes.data || [];
+    fuLeadCache = new Map(fuLeads.map(l => [l.id, l]));
+    const now = Date.now();
+
+    // ---- Send-mode bar (all 7 types) ----
+    const modeBar = FOLLOWUP_TYPES.map(t => `
+      <div class="fu-mode">
+        <span class="fu-mode-track">${escapeHtml(FU_SHORT[t] || t)}</span>
+        <select class="fu-mode-select" data-type="${t}" ${isOwner ? '' : 'disabled'}>
+          <option value="draft" ${(sendMode.get(t) || 'draft') === 'draft' ? 'selected' : ''}>Draft for review</option>
+          <option value="auto"  ${sendMode.get(t) === 'auto' ? 'selected' : ''}>Auto-send</option>
+        </select>
+      </div>
+    `).join('');
+
+    // ---- Outbox (pending drafts) ----
+    const draftCards = fuDrafts.length ? fuDrafts.map(d => {
+      const lead = d.leads || {};
+      const who = `${escapeHtml(lead.first_name || '')} ${escapeHtml(lead.last_name || '')}`.trim() || escapeHtml(d.to_email);
+      return `
+        <div class="fu-card" data-draft="${d.id}">
+          <div class="fu-card-head">
+            <span class="fu-card-name">${who} <span class="fu-track-pill">${escapeHtml(FU_SHORT[d.followup_type] || d.followup_type)}</span></span>
+            <span class="fu-due">${escapeHtml(d.to_email)}${d.calendar_context ? ' · ' + escapeHtml(d.calendar_context) : ''}</span>
+          </div>
+          <input class="fu-draft-subject" data-draft-subject="${d.id}" />
+          <textarea class="fu-draft-body" data-draft-body="${d.id}"></textarea>
+          <details style="margin-top:8px;">
+            <summary style="cursor:pointer;font-size:12px;color:var(--accent-deep);">Preview rendered email</summary>
+            <div class="fu-preview" id="fu-preview-${d.id}"></div>
+          </details>
+          <div class="fu-draft-actions">
+            <button class="save-btn" data-send-draft="${d.id}">Send email →</button>
+            <button class="save-btn" data-skip-draft="${d.id}" style="background:var(--paper);color:var(--ink);border:1px solid var(--line);">Skip</button>
+            <span class="fu-msg" data-draft-msg="${d.id}"></span>
+          </div>
+        </div>`;
+    }).join('') : '<div class="fu-empty">No drafts waiting. The daily job builds these as follow-ups come due.</div>';
+
+    // ---- Queue (due now / upcoming) ----
+    const draftLeadIds = new Set(fuDrafts.map(d => d.lead_id));
+    const due = [], upcoming = [];
+    for (const l of fuLeads) {
+      if (l.followup_paused) continue;
+      const t = l.next_followup_at ? new Date(l.next_followup_at).getTime() : 0;
+      (t <= now ? due : upcoming).push(l);
+    }
+    const queueCard = (l) => {
+      const who = `${escapeHtml(l.first_name || '')} ${escapeHtml(l.last_name || '')}`.trim() || escapeHtml(l.email || 'Unknown');
+      const dueDate = l.next_followup_at ? new Date(l.next_followup_at) : null;
+      const overdue = dueDate && dueDate.getTime() <= now;
+      const daysLabel = !dueDate ? 'no date set'
+        : overdue ? `due ${Math.round((now - dueDate.getTime()) / 86400000)}d ago`
+        : `in ${Math.round((dueDate.getTime() - now) / 86400000)}d`;
+      const tel = l.phone ? `<a class="fu-contact-link" href="tel:${encodeURIComponent(l.phone)}">📞 Call</a>` : '';
+      const sms = l.phone ? `<a class="fu-contact-link" href="sms:${encodeURIComponent(l.phone)}">💬 Text</a>` : '';
+      const mail = l.email ? `<a class="fu-contact-link" href="mailto:${encodeURIComponent(l.email)}">✉ Email</a>` : '';
+      return `
+        <div class="fu-card" data-queue="${l.id}">
+          <div class="fu-card-head">
+            <span class="fu-card-name">${who} <span class="fu-track-pill">${escapeHtml(TRACK_SHORT[l.followup_track] || l.followup_track)}</span>${draftLeadIds.has(l.id) ? ' <span class="fu-track-pill" style="background:rgba(47,93,61,0.15);color:var(--success);">✉ draft in Outbox</span>' : ''}</span>
+            <span class="fu-due ${overdue ? 'overdue' : ''}">${daysLabel}${l.phone ? ' · ' + escapeHtml(l.phone) : ''}</span>
+          </div>
+          <div class="fu-queue-actions">
+            ${tel}${sms}${mail}
+            <button class="fu-contact-link" data-log-toggle="${l.id}" style="cursor:pointer;">＋ Log touch</button>
+            <button class="fu-contact-link" data-snooze="${l.id}" style="cursor:pointer;">Snooze 1wk</button>
+            <button class="fu-contact-link" data-stop="${l.id}" style="cursor:pointer;color:var(--warn);">Stop</button>
+            <span class="fu-msg" data-queue-msg="${l.id}"></span>
+          </div>
+          <div class="fu-log-form" id="fu-log-${l.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);">
+            <div style="display:grid;grid-template-columns:160px 1fr;gap:10px;align-items:start;">
+              <select data-log-method="${l.id}">
+                <option value="phone">Phone call</option>
+                <option value="text">Text</option>
+                <option value="video_call">Video call</option>
+                <option value="email">Email</option>
+                <option value="other">Other / voicemail</option>
+              </select>
+              <textarea data-log-note="${l.id}" placeholder="What happened? (logged to the activity feed)" style="min-height:54px;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+              <span class="fu-msg">Next follow-up:</span>
+              <input type="date" data-log-date="${l.id}" />
+              <button class="fu-contact-link" data-quick="3" data-for="${l.id}" style="cursor:pointer;">+3d</button>
+              <button class="fu-contact-link" data-quick="7" data-for="${l.id}" style="cursor:pointer;">+1wk</button>
+              <button class="fu-contact-link" data-quick="14" data-for="${l.id}" style="cursor:pointer;">+2wk</button>
+              <button class="fu-contact-link" data-quick="30" data-for="${l.id}" style="cursor:pointer;">+1mo</button>
+              <span class="fu-msg">(blank = smart default)</span>
+            </div>
+            <div style="margin-top:8px;">
+              <button class="save-btn" data-log-save="${l.id}">Save touch &amp; reschedule</button>
+            </div>
+          </div>
+        </div>`;
+    };
+
+    document.getElementById('content').innerHTML = `
+      <div class="fu-section">
+        <h2>How each track sends</h2>
+        <p class="fu-sub">Draft = the daily job queues an email here for you to review and send. Auto-send = it goes out on its own. ${isOwner ? 'Flip a track to Auto once you trust the copy.' : 'Only the owner can change these.'}</p>
+        <div class="fu-modes">${modeBar}</div>
+      </div>
+
+      <div class="fu-section">
+        <h2>Email Outbox <span class="fu-due">${fuDrafts.length} waiting</span></h2>
+        <p class="fu-sub">Edit anything before it goes. Nothing sends without your click.</p>
+        ${draftCards}
+      </div>
+
+      <div class="fu-section">
+        <h2>Call / text queue — due now <span class="fu-due">${due.length}</span></h2>
+        <p class="fu-sub">Your personal follow-ups. Tap to call or text, then log what happened and set the next touch.</p>
+        ${due.length ? due.map(queueCard).join('') : '<div class="fu-empty">Nobody is due right now. 🎉</div>'}
+      </div>
+
+      <div class="fu-section">
+        <h2>Upcoming <span class="fu-due">${upcoming.length}</span></h2>
+        ${upcoming.length ? upcoming.map(queueCard).join('') : '<div class="fu-empty">Nothing scheduled ahead.</div>'}
+      </div>
+    `;
+
+    // Populate draft fields via JS (avoids HTML-escaping the email source).
+    for (const d of fuDrafts) {
+      const subEl = document.querySelector(`[data-draft-subject="${d.id}"]`);
+      const bodyEl = document.querySelector(`[data-draft-body="${d.id}"]`);
+      const prevEl = document.getElementById(`fu-preview-${d.id}`);
+      if (subEl) subEl.value = d.subject || '';
+      if (bodyEl) bodyEl.value = d.body_html || '';
+      if (prevEl) prevEl.innerHTML = d.body_html || '';
+    }
+
+    wireFollowupEvents();
+  }
+
+  function wireFollowupEvents() {
+    // Send-mode toggles
+    document.querySelectorAll('.fu-mode-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const type = sel.dataset.type;
+        const { error } = await supabase.from('followup_settings')
+          .update({ send_mode: sel.value, updated_by: session.user.id, updated_at: new Date().toISOString() })
+          .eq('followup_type', type);
+        if (error) alert('Could not update: ' + error.message);
+      });
+    });
+
+    // Outbox: send / skip
+    document.querySelectorAll('[data-send-draft]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.sendDraft;
+        const msg = document.querySelector(`[data-draft-msg="${id}"]`);
+        const subject = document.querySelector(`[data-draft-subject="${id}"]`).value;
+        const body_html = document.querySelector(`[data-draft-body="${id}"]`).value;
+        btn.disabled = true; msg.textContent = 'Sending…';
+        const res = await fuApi('/api/send-followup', { draft_id: id, action: 'send', subject, body_html });
+        if (res.ok) { msg.textContent = 'Sent ✓'; setTimeout(renderFollowups, 600); }
+        else { btn.disabled = false; msg.textContent = 'Failed: ' + ((await res.json().catch(() => ({}))).error || res.status); }
+      });
+    });
+    document.querySelectorAll('[data-skip-draft]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.skipDraft;
+        const msg = document.querySelector(`[data-draft-msg="${id}"]`);
+        btn.disabled = true; msg.textContent = 'Skipping…';
+        const res = await fuApi('/api/send-followup', { draft_id: id, action: 'skip' });
+        if (res.ok) { setTimeout(renderFollowups, 400); }
+        else { btn.disabled = false; msg.textContent = 'Failed'; }
+      });
+    });
+
+    // Queue: toggle log form
+    document.querySelectorAll('[data-log-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const f = document.getElementById('fu-log-' + btn.dataset.logToggle);
+        if (f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+    // Quick date chips
+    document.querySelectorAll('[data-quick]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = new Date(); d.setDate(d.getDate() + parseInt(btn.dataset.quick, 10));
+        const inp = document.querySelector(`[data-log-date="${btn.dataset.for}"]`);
+        if (inp) inp.value = d.toISOString().slice(0, 10);
+      });
+    });
+    // Snooze 1 week
+    document.querySelectorAll('[data-snooze]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.snooze;
+        const lead = fuLeadById(id);
+        const d = new Date(); d.setDate(d.getDate() + 7);
+        const res = await fuApi('/api/set-followup', { lead_id: id, track: lead.followup_track, next_followup_at: d.toISOString() });
+        if (res.ok) setTimeout(renderFollowups, 400);
+      });
+    });
+    // Stop follow-up
+    document.querySelectorAll('[data-stop]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Stop following up with this person? (Removes them from the queue.)')) return;
+        const res = await fuApi('/api/set-followup', { lead_id: btn.dataset.stop, track: 'none' });
+        if (res.ok) setTimeout(renderFollowups, 400);
+      });
+    });
+    // Log touch & reschedule
+    document.querySelectorAll('[data-log-save]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.logSave;
+        const lead = fuLeadById(id);
+        const msg = document.querySelector(`[data-queue-msg="${id}"]`);
+        const method = document.querySelector(`[data-log-method="${id}"]`).value;
+        const note = document.querySelector(`[data-log-note="${id}"]`).value;
+        const dateVal = document.querySelector(`[data-log-date="${id}"]`).value;
+        btn.disabled = true; msg.textContent = 'Saving…';
+        // 1) log the touch
+        await fuApi('/api/log-interaction', {
+          first_name: lead.first_name, last_name: lead.last_name,
+          email: lead.email, phone: lead.phone,
+          direction: 'outbound', method, notes: note, source: 'manual'
+        });
+        // 2) reschedule (blank date → server computes smart default)
+        const body = { lead_id: id, track: lead.followup_track };
+        if (dateVal) body.next_followup_at = new Date(dateVal + 'T12:00:00').toISOString();
+        const res = await fuApi('/api/set-followup', body);
+        if (res.ok) { msg.textContent = 'Saved ✓'; setTimeout(renderFollowups, 600); }
+        else { btn.disabled = false; msg.textContent = 'Failed'; }
+      });
+    });
+  }
+
+  function fuLeadById(id) {
+    // Cache rebuilt each render (renderFollowups). Fallback keeps actions safe
+    // if a row is somehow missing.
+    return fuLeadCache.get(id) || { followup_track: 'interested_no_app' };
+  }
 
   async function renderInteractions() {
     document.getElementById('content').innerHTML = `
