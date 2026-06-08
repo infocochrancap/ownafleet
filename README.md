@@ -40,6 +40,7 @@ web/
 │   │   └── abuse-check.js          Honeypot + per-IP rate limit (shared)
 │   ├── submit-lead.js              POST — main lead form (→ Supabase + emails)
 │   ├── apply-partner.js            POST — partner application
+│   ├── partner-add-referral.js     POST — logged-in partner adds a referral (auto-attributed)
 │   ├── request-deck.js             POST — public deck request (legacy/fallback path)
 │   ├── calendly-webhook.js         POST — invitee.created webhook (HMAC-verified)
 │   ├── log-interaction.js          POST — Cloudflare Email Worker → log@ownafleet.com

@@ -136,6 +136,48 @@
     <button class="copy-btn" id="copyBtn">Copy link</button>
   </div>
 
+  <!-- ============ ADD A REFERRAL ============ -->
+  <style>
+    .ar-wrap { margin-bottom: 32px; }
+    .ar-form { background: white; border-top: 3px solid var(--accent); padding: 24px 28px; margin-top: 14px; max-width: 720px; }
+    .ar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .ar-grid label { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .ar-grid .full { grid-column: 1 / -1; }
+    .ar-grid input, .ar-grid select, .ar-grid textarea { width: 100%; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--line); font-family: inherit; font-size: 16px; color: var(--ink); background: var(--paper); }
+    .ar-grid textarea { min-height: 64px; resize: vertical; }
+  </style>
+  <div class="ar-wrap">
+    <button class="copy-btn" id="addRefToggle" style="background: var(--accent);">+ Add a referral</button>
+    <div class="ar-form" id="addRefForm" style="display:none;">
+      <div style="font-family:'Fraunces',serif;font-size:18px;margin-bottom:6px;">Add a referral</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.55;">
+        Already talked to someone? Add them here and they're automatically credited to you. Nothing is emailed to them — Josh takes it from here.
+      </p>
+      <div class="ar-grid">
+        <label>First name *<input id="arFirst" type="text" autocomplete="off"></label>
+        <label>Last name<input id="arLast" type="text" autocomplete="off"></label>
+        <label>Email<input id="arEmail" type="email" autocomplete="off"></label>
+        <label>Phone<input id="arPhone" type="tel" autocomplete="off"></label>
+        <label class="full">Equipment size (optional)
+          <select id="arEquip">
+            <option value="">—</option>
+            <option>$250K – $500K</option>
+            <option>$500K – $1M</option>
+            <option>$1M – $2M</option>
+            <option>$2M – $5M</option>
+            <option>Over $5M — consultation</option>
+            <option>Not sure yet</option>
+          </select>
+        </label>
+        <label class="full">Note (optional)<textarea id="arNote" placeholder="Anything Josh should know — how you know them, what they're interested in…"></textarea></label>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:16px;">
+        <button class="copy-btn" id="arSubmit">Add referral</button>
+        <span id="arMsg" style="font-size:13px;color:var(--muted);"></span>
+      </div>
+    </div>
+  </div>
+
   <div class="stats-row">
     <div class="stat"><div class="stat-label">Total referrals</div><div class="stat-value" id="statTotal">—</div></div>
     <div class="stat"><div class="stat-label">In pipeline</div><div class="stat-value" id="statPipe">—</div></div>
@@ -338,6 +380,45 @@
     btn.textContent = 'Copied ✓';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+  });
+
+  // ----- Add a referral -----
+  const addToggle = document.getElementById('addRefToggle');
+  const addForm = document.getElementById('addRefForm');
+  addToggle.addEventListener('click', () => {
+    const open = addForm.style.display !== 'none';
+    addForm.style.display = open ? 'none' : 'block';
+    addToggle.textContent = open ? '+ Add a referral' : '− Close';
+  });
+  const arVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  document.getElementById('arSubmit').addEventListener('click', async () => {
+    const msg = document.getElementById('arMsg');
+    const btn = document.getElementById('arSubmit');
+    const payload = {
+      first_name: arVal('arFirst'), last_name: arVal('arLast'),
+      email: arVal('arEmail'), phone: arVal('arPhone'),
+      equipment_range: arVal('arEquip'), note: arVal('arNote')
+    };
+    if (!payload.first_name) { msg.style.color = '#B85C3A'; msg.textContent = 'First name is required.'; return; }
+    if (!payload.email && !payload.phone) { msg.style.color = '#B85C3A'; msg.textContent = 'Add an email or a phone number.'; return; }
+    btn.disabled = true; msg.style.color = 'var(--muted)'; msg.textContent = 'Adding…';
+    try {
+      const resp = await fetch('/api/partner-add-referral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify(payload)
+      });
+      const json = await resp.json().catch(() => ({}));
+      if (resp.ok && json.ok) {
+        if (json.duplicate) { btn.disabled = false; msg.style.color = '#8B6F3F'; msg.textContent = json.message || 'Already in the system.'; return; }
+        msg.style.color = '#2F5D3D'; msg.textContent = 'Added ✓ Refreshing…';
+        setTimeout(() => window.location.reload(), 900);
+      } else {
+        btn.disabled = false; msg.style.color = '#B85C3A'; msg.textContent = json.error || 'Could not add — try again.';
+      }
+    } catch (e) {
+      btn.disabled = false; msg.style.color = '#B85C3A'; msg.textContent = 'Network error — try again.';
+    }
   });
 
   // Load this partner's leads (RLS enforces filtering — they only see their own)
