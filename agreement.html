@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Partner Agreement — OwnaFleet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1724; --ink-soft: #2A3647; --muted: #6B7280;
+    --line: #D9DDE3; --line-soft: #EEF0F3; --paper: #F8F7F4; --paper-warm: #F2F0EA;
+    --accent: #8B6F3F; --accent-deep: #6B5430; --success: #2F5D3D; --warn: #B85C3A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); font-family: 'Inter', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  nav { background: var(--ink); color: white; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-family: 'Fraunces', serif; font-weight: 400; font-size: 14px; letter-spacing: 0.4em; color: white; text-decoration: none; }
+  .nav-right { display: flex; align-items: center; gap: 24px; font-size: 12px; }
+  .nav-user { color: rgba(255,255,255,0.6); }
+  .signout-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); padding: 6px 14px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+  .signout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 40px; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .subhead { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+  .doc-meta { display: flex; gap: 24px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .doc-meta strong { color: var(--ink-soft); font-weight: 500; }
+
+  /* Agreement viewport — must scroll to bottom before signing unlocks */
+  .doc { background: white; border: 1px solid var(--line); border-top: 3px solid var(--accent); height: 60vh; min-height: 420px; overflow-y: auto; padding: 36px 40px; }
+  .doc h1 { font-size: 24px; margin: 0 0 16px; line-height: 1.3; }
+  .doc h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 18px; margin: 28px 0 12px; color: var(--ink); }
+  .doc p { font-size: 13.5px; line-height: 1.7; margin-bottom: 12px; color: var(--ink-soft); }
+  .doc ul { margin: 0 0 12px 22px; }
+  .doc li { font-size: 13.5px; line-height: 1.7; color: var(--ink-soft); margin-bottom: 6px; }
+  .doc strong { color: var(--ink); }
+
+  .scroll-hint { text-align: center; font-size: 12px; color: var(--muted); padding: 10px; background: var(--paper-warm); border: 1px solid var(--line); border-top: none; }
+  .scroll-hint.done { color: var(--success); }
+
+  /* Signing block */
+  .sign-card { background: white; border: 1px solid var(--line); margin-top: 28px; padding: 32px 40px; }
+  .sign-card h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 22px; margin-bottom: 18px; }
+  .sign-card.locked { opacity: 0.45; pointer-events: none; }
+  label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  input[type="text"] { width: 100%; max-width: 420px; padding: 12px 14px; border: 1px solid var(--line); font-family: 'Fraunces', serif; font-size: 18px; color: var(--ink); background: var(--paper); margin-bottom: 18px; }
+  input[type="text"]:focus { outline: none; border-color: var(--accent); }
+  .assent { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 22px; max-width: 640px; }
+  .assent input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
+  .assent span { font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+  .sign-btn { background: var(--ink); color: white; border: none; padding: 16px 36px; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+  .sign-btn:hover { background: var(--accent); }
+  .sign-btn:disabled { background: var(--muted); cursor: not-allowed; }
+  .sign-msg { font-size: 13px; margin-top: 14px; }
+
+  .signed-banner { background: rgba(47,93,61,0.08); border: 1px solid rgba(47,93,61,0.3); padding: 24px 28px; margin-top: 28px; }
+  .signed-banner h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 20px; color: var(--success); margin-bottom: 8px; }
+  .signed-banner p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .dash-btn { display: inline-block; background: var(--ink); color: white; padding: 13px 26px; text-decoration: none; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 14px; }
+  .dash-btn:hover { background: var(--accent); }
+
+  .loading { text-align: center; padding: 80px 0; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">OWNAFLEET</a>
+  <div class="nav-right">
+    <span class="nav-user" id="userEmail"></span>
+    <button class="signout-btn" id="signoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<main>
+  <div class="loading" id="loading">Loading your agreement…</div>
+  <div id="content" style="display:none;">
+    <h1>Referral Partner Agreement</h1>
+    <p class="subhead">Review the agreement below, then sign electronically. Your typed name, the date and time, and a fingerprint of this exact document are recorded, and a copy is emailed to you.</p>
+    <div class="doc-meta">
+      <span>Version <strong id="metaVersion"></strong></span>
+      <span>Your referral fee <strong id="metaFee"></strong> of eligible equipment purchase price</span>
+    </div>
+    <div class="doc" id="docBody"></div>
+    <div class="scroll-hint" id="scrollHint">Scroll to the end of the agreement to enable signing ↓</div>
+
+    <div id="signBlock">
+      <div class="sign-card locked" id="signCard">
+        <h2>Sign electronically</h2>
+        <label for="signedName">Type your full legal name</label>
+        <input type="text" id="signedName" autocomplete="name" placeholder="Full legal name">
+        <div class="assent">
+          <input type="checkbox" id="assentBox">
+          <span>I have read and agree to the OWNAFLEET Referral, Non-Solicitation, Non-Circumvention, Confidentiality and Fee Agreement above. I intend my typed name to be my legally binding electronic signature, I make the certifications in Section 17, and I consent to receive records about this agreement electronically.</span>
+        </div>
+        <button class="sign-btn" id="signBtn">Agree &amp; Sign</button>
+        <div class="sign-msg" id="signMsg"></div>
+      </div>
+    </div>
+
+    <div class="signed-banner" id="signedBanner" style="display:none;">
+      <h2>Agreement signed ✓</h2>
+      <p id="signedDetail"></p>
+      <p>A copy was emailed to you for your records. Your referral link and dashboard tools are now unlocked.</p>
+      <a class="dash-btn" href="/dashboard">Go to dashboard →</a>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { supabase } from '/shared/supabase.js';
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '/login'; throw new Error('redirect'); }
+
+  document.getElementById('signoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  });
+  document.getElementById('userEmail').textContent = session.user.email;
+
+  // Load the rendered agreement for this partner
+  let info;
+  try {
+    const resp = await fetch('/api/get-agreement', {
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    if (!resp.ok) {
+      const j = await resp.json().catch(() => ({}));
+      throw new Error(j.error || 'Could not load agreement');
+    }
+    info = await resp.json();
+  } catch (e) {
+    document.getElementById('loading').textContent = e.message + ' — email josh@ownafleet.com for help.';
+    throw e;
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+  document.getElementById('metaVersion').textContent = info.version;
+  document.getElementById('metaFee').textContent = info.fee_pct.toFixed(2) + '%';
+  document.getElementById('docBody').innerHTML = info.html;
+
+  const signCard = document.getElementById('signCard');
+  const signedBanner = document.getElementById('signedBanner');
+
+  function showSigned(name, at) {
+    document.getElementById('signBlock').style.display = 'none';
+    document.getElementById('scrollHint').style.display = 'none';
+    signedBanner.style.display = 'block';
+    const when = at ? new Date(at).toLocaleString() : '';
+    document.getElementById('signedDetail').textContent =
+      `Signed by ${name || 'you'}${when ? ' on ' + when : ''} · version ${info.version}.`;
+  }
+
+  if (info.signed) {
+    showSigned(info.signed_name, info.signed_at);
+  } else {
+    // Unlock signing once they've scrolled (near) the bottom of the doc
+    const doc = document.getElementById('docBody');
+    const hint = document.getElementById('scrollHint');
+    function checkScroll() {
+      if (doc.scrollTop + doc.clientHeight >= doc.scrollHeight - 60) {
+        signCard.classList.remove('locked');
+        hint.textContent = 'You’ve reached the end — sign below when ready ✓';
+        hint.classList.add('done');
+        doc.removeEventListener('scroll', checkScroll);
+      }
+    }
+    doc.addEventListener('scroll', checkScroll);
+    checkScroll(); // in case it fits without scrolling
+
+    document.getElementById('signBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('signMsg');
+      const btn = document.getElementById('signBtn');
+      const name = document.getElementById('signedName').value.trim();
+      const assent = document.getElementById('assentBox').checked;
+      if (name.length < 3) { msg.style.color = 'var(--warn)'; msg.textContent = 'Type your full legal name.'; return; }
+      if (!assent) { msg.style.color = 'var(--warn)'; msg.textContent = 'Check the box to confirm you agree.'; return; }
+      btn.disabled = true; msg.style.color = 'var(--muted)'; msg.textContent = 'Recording your signature…';
+      try {
+        const resp = await fetch('/api/sign-agreement', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+          body: JSON.stringify({ signed_name: name, assent: true })
+        });
+        const j = await resp.json().catch(() => ({}));
+        if (resp.ok && j.ok) {
+          showSigned(name, j.signed_at);
+        } else {
+          btn.disabled = false; msg.style.color = 'var(--warn)'; msg.textContent = j.error || 'Could not record signature — try again.';
+        }
+      } catch (e) {
+        btn.disabled = false; msg.style.color = 'var(--warn)'; msg.textContent = 'Network error — try again.';
+      }
+    });
+  }
+</script>
+</body>
+</html>

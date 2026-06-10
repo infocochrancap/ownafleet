@@ -39,11 +39,12 @@ export default async function handler(req, res) {
 
   const { data: partner } = await supabase
     .from('referral_partners')
-    .select('id, first_name, last_name, email, referral_code, status')
+    .select('id, first_name, last_name, email, referral_code, status, agreement_signed_at')
     .eq('user_id', user.id)
     .maybeSingle();
   if (!partner) return res.status(403).json({ error: 'Not a referral partner' });
   if (partner.status !== 'active') return res.status(403).json({ error: 'Partner account is not active' });
+  if (!partner.agreement_signed_at) return res.status(403).json({ error: 'Sign your partner agreement first — go to ownafleet.com/agreement' });
 
   // ----- VALIDATE -----
   const body = req.body || {};

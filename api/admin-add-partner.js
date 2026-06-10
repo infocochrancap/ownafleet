@@ -84,7 +84,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to create partner' });
   }
 
-  // Fire welcome email — same body as notify-partner-approved.js
+  // Fire welcome email — sign-first, same body as notify-partner-approved.js.
+  // The referral link is withheld until they e-sign at /agreement.
   const splitPct = parseFloat(partner.commission_split_pct ?? DEFAULT_SPLIT_PCT);
   const partnerEffectivePct = (JOSH_BASE_PCT * splitPct / 100);
   const typicalPayout = Math.round(1200000 * partnerEffectivePct / 100);
@@ -94,7 +95,7 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: FROM,
       to: [partner.email],
-      subject: 'You\'re approved — your OwnaFleet referral link',
+      subject: 'You\'re approved — one step left: sign your partner agreement',
       html: approvalEmailHtml(partner, typicalPayout)
     });
   } catch (emailErr) {
@@ -112,27 +113,17 @@ export default async function handler(req, res) {
 }
 
 function approvalEmailHtml(partner, typicalPayout) {
-  const referralUrl = `https://ownafleet.com?ref=${encodeURIComponent(partner.referral_code)}`;
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
       <p>Hi ${escape(partner.first_name)},</p>
-      <p>Welcome. You're set up in the OwnaFleet partner program — here's your unique referral link:</p>
-      <p style="margin: 24px 0; padding: 20px; background: #F8F7F4; border-left: 3px solid #8B6F3F;">
-        <code style="font-family: 'Courier New', monospace; font-size: 14px; color: #0B1724; word-break: break-all;">${escape(referralUrl)}</code>
-      </p>
-      <p>Anyone who lands on the site through this link is attributed to you — straight through to funding. You can see live status on your dashboard:</p>
+      <p>Welcome — you're set up in the OwnaFleet partner program. One step left before your referral link goes live: review and sign the referral partner agreement. It takes about two minutes.</p>
       <p style="margin: 20px 0;">
-        <a href="https://ownafleet.com/dashboard" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">Open dashboard →</a>
+        <a href="https://ownafleet.com/agreement" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">Review &amp; sign the agreement →</a>
       </p>
-      <p>Sign in at <a href="https://ownafleet.com/login" style="color: #8B6F3F;">ownafleet.com/login</a> with this email — magic link, no password.</p>
+      <p>Sign in at <a href="https://ownafleet.com/login" style="color: #8B6F3F;">ownafleet.com/login</a> with this email — magic link, no password. You'll sign electronically (typed name) and get a copy for your records. The moment you sign, your unique referral link and dashboard unlock automatically.</p>
 
-      <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">The qualified-lead profile</h3>
-      <p>Individuals with a meaningful windfall — capital gain, business sale, strong income year, or other liquidity event.</p>
-      <p><strong>Lender thresholds:</strong> net worth ≥ $1M, liquid assets ≥ $200K. Anything below those usually can't be financed, so pre-filtering saves everyone time.</p>
-
-      <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">Your referral fee</h3>
-      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> per closed deal at the program's average size ($1.2M of equipment), paid on funding.</p>
-      <p style="font-size: 13px; color: #6B7280;">Larger or smaller deals scale proportionally. Your dashboard shows estimated payout per lead from day one.</p>
+      <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">What's waiting on the other side</h3>
+      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> per closed deal at the program's average size ($1.2M of equipment), paid on funding — plus a dashboard that tracks every referral from intro through funding.</p>
 
       <p>Any questions, reply here.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>

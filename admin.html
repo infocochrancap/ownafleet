@@ -1250,7 +1250,7 @@
     ).length;
 
     const rows = sorted.length === 0
-      ? `<tr><td colspan="8" style="text-align:center;padding:60px;color:var(--muted);">No referral partners yet. Click "Quick add partner" above to onboard your first one.</td></tr>`
+      ? `<tr><td colspan="9" style="text-align:center;padding:60px;color:var(--muted);">No referral partners yet. Click "Quick add partner" above to onboard your first one.</td></tr>`
       : sorted.map(p => {
           const s = statsByPartner.get(p.id) || { total: 0, active: 0, funded: 0, pipeline_value: 0, earned_commission: 0, latest_lead_at: null };
           const lastActivity = s.latest_lead_at || p.created_at;
@@ -1276,6 +1276,9 @@
                   <option value="rejected" ${p.status === 'rejected' ? 'selected' : ''}>Rejected</option>
                 </select>
               </td>
+              <td style="font-size:12px;">${p.agreement_signed_at
+                ? `<span style="color:var(--success);">Signed ✓</span><div style="font-size:11px;color:var(--muted);">${formatDate(p.agreement_signed_at)} · ${escapeHtml(p.agreement_version || '')}</div>`
+                : (p.status === 'active' ? '<span style="color:var(--warn);">Awaiting signature</span>' : '<span style="color:var(--muted);">—</span>')}</td>
               <td style="text-align:right;">${s.total}</td>
               <td style="text-align:right;">${s.active}</td>
               <td style="text-align:right;color:${s.funded > 0 ? 'var(--success)' : 'var(--ink-soft)'};">${s.funded}</td>
@@ -1297,13 +1300,14 @@
 
       <div style="margin-bottom: 24px;">
         <button class="save-btn" id="quickAddPartnerBtn">+ Quick add partner</button>
-        <span style="margin-left:12px;font-size:12px;color:var(--muted);">Skips the application flow — auto-approves and sends the welcome email immediately.</span>
+        <span style="margin-left:12px;font-size:12px;color:var(--muted);">Skips the application flow — auto-approves and emails them a link to review &amp; sign the partner agreement.</span>
       </div>
 
       <table>
         <thead><tr>
           <th>Partner</th>
           <th>Status</th>
+          <th>Agreement</th>
           <th style="text-align:right;">Leads</th>
           <th style="text-align:right;">Active</th>
           <th style="text-align:right;">Funded</th>
@@ -1339,7 +1343,7 @@
         sel.dataset.previousStatus = sel.value;
 
         if (sel.value === 'active' && prev !== 'active') {
-          if (!confirm('Send approval email with referral link to this partner?')) return;
+          if (!confirm('Send approval email asking this partner to review & sign the agreement?')) return;
           try {
             const res = await fetch('/api/notify-partner-approved', {
               method: 'POST',
@@ -1366,7 +1370,7 @@
   function openQuickAddPartnerModal() {
     document.getElementById('modalBody').innerHTML = `
       <h2>Quick add partner</h2>
-      <p class="modal-sub">Skips the application form. Creates an active partner record and sends the welcome email immediately. Use this for friends/known referrers — not strangers.</p>
+      <p class="modal-sub">Skips the application form. Creates an active partner record and emails them a link to review &amp; sign the partner agreement (referral link unlocks after they sign). Use this for friends/known referrers — not strangers.</p>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
         <label>
           <span style="display:block;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;font-weight:500;">First name *</span>

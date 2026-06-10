@@ -368,6 +368,13 @@
     throw new Error('inactive');
   }
 
+  // Agreement gate: approved partners must sign the current referral-partner
+  // agreement before the dashboard (referral link, add-referral) unlocks.
+  if (!partner.agreement_signed_at) {
+    window.location.href = '/agreement';
+    throw new Error('agreement required');
+  }
+
   document.getElementById('userEmail').textContent = partner.email;
   document.getElementById('pageTitle').textContent = `Welcome back, ${partner.first_name}.`;
 
