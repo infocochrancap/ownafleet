@@ -1,15 +1,21 @@
 // Single source of truth for the OWNAFLEET referral-partner agreement.
 //
-// The text below is Josh's "Ownafleet Referral Agreement Clean Integrated
-// Draft" (2026-06-10), adapted only as needed for click-wrap e-signing:
-//  - the Referrer party line, effective date, and fee % render dynamically
-//  - Section 17 wet-signature blocks are replaced by an Electronic Acceptance
-//    section (ESIGN/UETA click-wrap: typed name + assent + retained record)
-//  - Exhibit C's certification is incorporated into the assent checkbox
-// Any substantive change to the text MUST bump AGREEMENT_VERSION — partners
-// who signed an older version will be asked to re-sign.
+// v2026-06-10.4 changes from .1 (all Josh-approved 2026-06-10; Codex-review
+// fixes applied in .3 and .4):
+//  1. Non-circumvention → objective fee-survival rule (§6.1): if referred
+//     purchaser closes within Tail Period and Josh gets paid → partner gets
+//     paid, no intent test required.
+//  2. Partner confidentiality tightened (§9.3): partners may not hand
+//     provider names or identities to referred purchasers.
+//  3. Tail Period unified to 36 months everywhere (§2.15 def + §4.6 + §6.2).
+//  4. Fee rate moved to Schedule 1; body references Schedule 1 dynamically.
+//  5. Mutual limitation of liability added (§11.4): both sides capped at
+//     12-month fees paid, mutual no-consequential-damages waiver.
+//  6. Fee survival expressly survives termination (§12.4).
+//  7. Minor adds: §5.12 CAN-SPAM/TCPA, §10.3 privacy rep, §16.2 assignee
+//     fee-assumption language.
 //
-// PENDING: /legal review memo + Brett Siglin sign-off on text + method.
+// PENDING: Brett Siglin review and sign-off.
 //
 // NOTE: this file is partner-facing only behind login (internal surface per
 // the anti-bypass rules) — naming Armada / Bevel / EquipmentShare here is OK
@@ -18,7 +24,7 @@
 
 import crypto from 'crypto';
 
-export const AGREEMENT_VERSION = '2026-06-10.1';
+export const AGREEMENT_VERSION = '2026-06-10.4';
 
 // Josh's affiliate share of equipment purchase price; partner's effective fee
 // = JOSH_BASE_PCT * commission_split_pct / 100 (e.g. 2.1% * 40% = 0.84%).
@@ -85,13 +91,17 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>2.9 &ldquo;<strong>Equipment</strong>&rdquo; means commercial equipment, heavy equipment, fleet assets, vehicles, machinery, attachments, or related assets acquired, financed, owned, leased, managed, or enrolled through or in connection with the OWNAFLEET Program.</p>
 
-<p>2.10 &ldquo;<strong>Program Provider</strong>&rdquo; means Armada Fleet Management, LLC, Bevel Financial, Inc., EquipmentShare.com Inc, and any other lender, lessor, vendor, equipment provider, fleet manager, rental manager, asset manager, service provider, program administrator, financing source, or similar counterparty introduced to Referrer by Company, identified to Referrer through the OWNAFLEET Program, or otherwise involved in the OWNAFLEET Program.</p>
+<p>2.10 &ldquo;<strong>Pre-Existing Relationship</strong>&rdquo; means a person or entity that, with respect to the same or a substantially similar OWNAFLEET-type commercial equipment opportunity and before the Documentation Date, was already known to Company, had already contacted Company, had already been contacted by Company, was already in Company&rsquo;s database or CRM, had already been introduced to Company by another source, or was already in Active Discussion with Company, a Company Affiliate, or a Program Provider, in each case as documented in Company&rsquo;s written records as of or before the Documentation Date. Company bears the burden of establishing Pre-Existing Relationship status as provided in Sections 3.6 and 6.1.</p>
 
-<p>2.11 &ldquo;<strong>Referral</strong>&rdquo; means a portal-submitted or Company-approved written introduction by Referrer to Company of a potential commercial equipment buyer, purchaser, participant, or purchaser entity that was not already known to Company or already in Active Discussion with Company or a Company Affiliate before the Documentation Date.</p>
+<p>2.11 &ldquo;<strong>Program Provider</strong>&rdquo; means Armada Fleet Management, LLC, Bevel Financial, Inc., EquipmentShare.com Inc, and any other lender, lessor, vendor, equipment provider, fleet manager, rental manager, asset manager, service provider, program administrator, financing source, or similar counterparty introduced to Referrer by Company, identified to Referrer through the OWNAFLEET Program, or otherwise involved in the OWNAFLEET Program.</p>
 
-<p>2.12 &ldquo;<strong>Referred Purchaser</strong>&rdquo; means any individual or entity that becomes the subject of a valid Referral, together with such individual&rsquo;s or entity&rsquo;s Affiliates, controlled entities, acquisition entities, special purpose entities, related entities, successors, assigns, or other entities through which the referred party acquires, finances, owns, manages, leases, or participates in an Approved Transaction.</p>
+<p>2.12 &ldquo;<strong>Referral</strong>&rdquo; means a portal-submitted or Company-approved written introduction by Referrer to Company of a potential commercial equipment buyer, purchaser, participant, or purchaser entity that was not already a Pre-Existing Relationship before the Documentation Date.</p>
 
-<p>2.13 &ldquo;<strong>Referral Fee</strong>&rdquo; means the fee payable by Company to Referrer under Section 4 of this Agreement.</p>
+<p>2.13 &ldquo;<strong>Referred Purchaser</strong>&rdquo; means any individual or entity that becomes the subject of a valid Referral, together with such individual&rsquo;s or entity&rsquo;s Affiliates, controlled entities, acquisition entities, special purpose entities, related entities, successors, assigns, or other entities through which the referred party acquires, finances, owns, manages, leases, or participates in an Approved Transaction.</p>
+
+<p>2.14 &ldquo;<strong>Referral Fee</strong>&rdquo; means the fee payable by Company to Referrer under Section 4 of this Agreement.</p>
+
+<p>2.15 &ldquo;<strong>Tail Period</strong>&rdquo; means the thirty-six (36) month period beginning on the Documentation Date. All references in this Agreement to a time period for fee rights, follow-on purchases, or Company&rsquo;s non-circumvention obligations with respect to a Referred Purchaser refer to the Tail Period.</p>
 
 <h2>3. Referral Process</h2>
 
@@ -101,21 +111,20 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>3.3 <strong>No Obligation to Accept Referral.</strong> Company has no obligation to accept, approve, pursue, close, or continue any Referral or transaction. Company may reject or discontinue any Referral or transaction in its sole discretion, including for business, legal, compliance, reputational, underwriting, financing, provider, operational, or documentation reasons.</p>
 
-<p>3.4 <strong>Direct Communications with Purchasers.</strong> Company and its representatives may communicate directly with any Referred Purchaser and its representatives as necessary or appropriate to evaluate, document, negotiate, close, administer, service, finance, manage, support, or complete any transaction or related matter involving the OWNAFLEET Program. Such communications will not constitute circumvention if they are not undertaken for the purpose of avoiding payment of a Referral Fee otherwise earned under this Agreement.</p>
+<p>3.4 <strong>Direct Communications with Purchasers.</strong> Company and its representatives may communicate directly with any Referred Purchaser and its representatives as necessary or appropriate to evaluate, document, negotiate, close, administer, service, finance, manage, support, or complete any transaction or related matter involving the OWNAFLEET Program. Such direct communications do not affect Referrer&rsquo;s right to a Referral Fee under Section 6.1 if an Approved Transaction closes within the Tail Period.</p>
 
-<p>3.5 <strong>First Documented Introduction Controls.</strong> If more than one person or entity claims a fee, commission, referral right, or similar compensation with respect to the same Referred Purchaser or transaction, the first valid Referral based on the earliest portal timestamp, CRM timestamp, approved tracking-link timestamp, or other Documentation Date will control, unless Company determines in good faith that the Referred Purchaser was already known to Company, already in Active Discussion with Company or a Company Affiliate, or otherwise not eligible as a Referral under this Agreement.</p>
+<p>3.5 <strong>First Documented Introduction Controls.</strong> If more than one person or entity claims a fee, commission, referral right, or similar compensation with respect to the same Referred Purchaser or transaction, the first valid Referral based on the earliest portal timestamp, CRM timestamp, approved tracking-link timestamp, or other Documentation Date will control, unless Company determines in good faith that the Referred Purchaser was a Pre-Existing Relationship or otherwise not eligible as a Referral under this Agreement.</p>
 
-<p>3.6 <strong>Pre-Existing Relationships and Active Discussions.</strong> No Referral Fee will be owed for any person or entity that, before the Documentation Date, was already known to Company, had already contacted Company, had already been contacted by Company, was already in Company&rsquo;s database, had already been introduced to Company by another source, or was already in Active Discussion with Company, a Company Affiliate, or an OWNAFLEET Program Provider regarding the same or substantially similar opportunity.</p>
+<p>3.6 <strong>Pre-Existing Relationships.</strong> No Referral Fee will be owed for any person or entity that was a Pre-Existing Relationship before the Documentation Date. The burden is on Company to establish, by written records pre-dating the Documentation Date, that a prospective purchaser was a Pre-Existing Relationship.</p>
 
 <h2>4. Referral Fee</h2>
 
-<p>4.1 <strong>Fee Amount.</strong> Subject to the terms of this Agreement, Company will pay Referrer a Referral Fee equal to <strong>${fee}</strong> of the Eligible Equipment Purchase Price for each Approved Transaction involving a Referred Purchaser.</p>
+<p>4.1 <strong>Fee Amount.</strong> Subject to the terms of this Agreement, Company will pay Referrer a Referral Fee equal to the rate set forth on Schedule 1 to this Agreement (as populated at the time of Referrer&rsquo;s electronic acceptance) of the Eligible Equipment Purchase Price for each Approved Transaction involving a Referred Purchaser. For this Agreement, the Referral Fee rate is <strong>${fee}</strong> of the Eligible Equipment Purchase Price.</p>
 
 <p>4.2 <strong>Condition to Earning Fee.</strong> A Referral Fee is earned only when all of the following have occurred:</p>
 <ul>
 <li>Referrer made a valid Referral under this Agreement;</li>
-<li>the Referral resulted in an Approved Transaction;</li>
-<li>the Referred Purchaser or its Affiliate closed the Equipment purchase;</li>
+<li>the Referred Purchaser or its Affiliate completed an Approved Transaction within the Tail Period (no separate causation or origination showing is required beyond the valid Referral and the Approved Transaction closing within the Tail Period);</li>
 <li>the Equipment purchase became final and was not rescinded, cancelled, unwound, rejected, or reversed at or before closing;</li>
 <li>Company or a Company Affiliate actually received its corresponding upstream fee, referral fee, aggregation fee, management fee, revenue share, or other compensation attributable to the Approved Transaction; and</li>
 <li>payment of the Referral Fee is lawful and permitted under this Agreement and Applicable Law.</li>
@@ -127,7 +136,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>4.5 <strong>Proportionate Reduction.</strong> If Company or a Company Affiliate receives less than the expected upstream fee or revenue for any Approved Transaction, the Referral Fee will be reduced proportionately. If Company or a Company Affiliate receives no fee or revenue, no Referral Fee will be owed.</p>
 
-<p>4.6 <strong>Follow-On Purchases.</strong> Subject to the terms of this Agreement, the Referral Fee will apply to additional Approved Transactions by a Referred Purchaser or its Affiliate for thirty-six (36) months after the Documentation Date, but only if Company or a Company Affiliate actually receives a corresponding upstream fee or revenue on the additional Approved Transaction.</p>
+<p>4.6 <strong>Follow-On Purchases.</strong> Subject to the terms of this Agreement, the Referral Fee will apply to additional Approved Transactions by a Referred Purchaser or its Affiliate during the Tail Period, but only if Company or a Company Affiliate actually receives a corresponding upstream fee or revenue on the additional Approved Transaction.</p>
 
 <p>4.7 <strong>No Other Compensation.</strong> Except for the Referral Fee expressly provided in this Agreement, Referrer is not entitled to any commission, fee, equity, profit participation, promote, carried interest, ownership interest, revenue share, management fee, servicing fee, renewal fee, trailing fee, consulting fee, or other compensation from Company or any Company Affiliate.</p>
 
@@ -151,7 +160,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>5.6 <strong>Materials and Messaging.</strong> Company is not requiring Referrer to use Company-approved marketing materials and does not control Referrer&rsquo;s independent communications. However, Referrer may not state or imply that any materials, projections, summaries, tax discussions, legal discussions, financial illustrations, or other communications were prepared, approved, endorsed, reviewed, or authorized by Company unless Company has expressly approved them in writing. Referrer is solely responsible for any unapproved materials or statements Referrer uses.</p>
 
-<p>5.7 <strong>Referral Fee and Conflict Disclosure.</strong> Company may disclose through the OWNAFLEET website, referral portal, program terms, FAQs, transaction acknowledgments, closing documents, or other written materials that referral fees may be paid in connection with the OWNAFLEET Program, including that Referrer may receive compensation equal to ${fee} of the applicable equipment purchase price if a Referred Purchaser completes an Approved Transaction. Referrer is not required by this Agreement to recite a Company-scripted disclosure in every communication. However, Referrer must not conceal, deny, or misrepresent the existence, nature, amount, or source of any Referral Fee. If a Referred Purchaser asks whether Referrer may be compensated, Referrer must answer truthfully. If Referrer is acting as or is associated with a financial planner, investment adviser, broker-dealer, fund manager, CPA, attorney, insurance agent, fiduciary, licensed professional, or regulated person, Referrer is solely responsible for making any client-facing compensation, conflict, fiduciary, professional, firm, or regulatory disclosures required by Applicable Law before or at the time of referral. Company may require Referred Purchasers to acknowledge referral-fee disclosures through the portal or transaction documents.</p>
+<p>5.7 <strong>Referral Fee and Conflict Disclosure.</strong> Company may disclose through the OWNAFLEET website, referral portal, program terms, FAQs, transaction acknowledgments, closing documents, or other written materials that referral fees may be paid in connection with the OWNAFLEET Program, including that Referrer may receive a Referral Fee as set forth on Schedule 1 if a Referred Purchaser completes an Approved Transaction. Referrer is not required by this Agreement to recite a Company-scripted disclosure in every communication. However, Referrer must not conceal, deny, or misrepresent the existence, nature, amount, or source of any Referral Fee. If a Referred Purchaser asks whether Referrer may be compensated, Referrer must answer truthfully. If Referrer is acting as or is associated with a financial planner, investment adviser, broker-dealer, fund manager, CPA, attorney, insurance agent, fiduciary, licensed professional, or regulated person, Referrer is solely responsible for making any client-facing compensation, conflict, fiduciary, professional, firm, or regulatory disclosures required by Applicable Law before or at the time of referral. Company may require Referred Purchasers to acknowledge referral-fee disclosures through the portal or transaction documents.</p>
 
 <p>5.8 <strong>Professional and Firm Approval.</strong> If Referrer is, or is associated with, a financial planner, investment adviser, investment adviser representative, broker-dealer, registered representative, fund manager, capital raiser, CPA, attorney, insurance agent, lender, consultant, or other licensed or regulated person, Referrer represents that Referrer has obtained all firm, employer, client, regulatory, licensing, supervisory, disclosure, and professional approvals required to enter into this Agreement, make Referrals, and receive Referral Fees.</p>
 
@@ -161,21 +170,23 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>5.11 <strong>Compliance With Law.</strong> Referrer must comply with Applicable Law in all activities relating to this Agreement, the OWNAFLEET Program, Company, Program Providers, Referred Purchasers, and Referral Fees.</p>
 
+<p>5.12 <strong>CAN-SPAM, TCPA, and Outreach Compliance.</strong> If Referrer sends email or text-message communications to prospective Referred Purchasers in connection with the OWNAFLEET Program, Referrer is solely responsible for complying with the CAN-SPAM Act, the Telephone Consumer Protection Act (TCPA), and all other applicable marketing, anti-spam, do-not-call, opt-out, and consent laws. Referrer must not send unsolicited commercial email or text messages on behalf of Company, represent that Company has approved any particular outreach campaign, or use Company&rsquo;s trademarks, brands, or domains in a manner that could be construed as Company-authorized bulk communications.</p>
+
 <h2>6. Company Conduct and Referrer Protection</h2>
 
-<p>6.1 <strong>No Intentional Fee Avoidance.</strong> Company will not intentionally bypass Referrer with respect to a valid documented Referral for the purpose of avoiding payment of a Referral Fee otherwise earned under this Agreement.</p>
+<p>6.1 <strong>Objective Fee-Survival Rule.</strong> If a Referred Purchaser or its Affiliate completes an Approved Transaction at any time within the Tail Period, and Company or a Company Affiliate actually receives its corresponding upstream fee or revenue attributable to that transaction, Company will pay Referrer the applicable Referral Fee &mdash; regardless of the channel through which the transaction closed, the path by which the Referred Purchaser reached Company, a Company Affiliate, or a Program Provider, or any internal origination designation used by Company. This obligation applies even if Company independently solicited or co-sourced the transaction, unless Company can establish by written records pre-dating the Documentation Date that the Referred Purchaser was a Pre-Existing Relationship not subject to this Agreement.</p>
 
-<p>6.2 <strong>No Targeted Circumvention of Referred Purchasers.</strong> For five (5) years after the Documentation Date, Company will not directly target a Referred Purchaser for a substantially similar OWNAFLEET-type commercial equipment opportunity outside this Agreement for the purpose of avoiding payment of a Referral Fee otherwise owed to Referrer.</p>
+<p>6.2 <strong>No Targeted Circumvention.</strong> During the Tail Period, Company will not take steps designed to structure, route, or document a transaction involving a Referred Purchaser in a manner intended to remove it from the scope of Section 6.1 or otherwise deprive Referrer of a Referral Fee earned under this Agreement.</p>
 
-<p>6.3 <strong>Permitted Company Activity.</strong> The restrictions in Section 6.2 do not prohibit Company or any Company Affiliate from:</p>
+<p>6.3 <strong>Permitted Company Activity.</strong> The provisions of Sections 6.1 and 6.2 do not prohibit Company or any Company Affiliate from:</p>
 <ul>
 <li>communicating with Referred Purchasers to evaluate, document, negotiate, close, administer, service, manage, or support any transaction;</li>
 <li>responding to inbound communications from a Referred Purchaser;</li>
-<li>sending general marketing, newsletters, webinars, educational content, public solicitations, or broadly distributed communications not specifically targeted to bypass Referrer;</li>
-<li>engaging with any person or entity already known to Company or already in Company&rsquo;s pipeline before the Documentation Date;</li>
+<li>sending general marketing, newsletters, webinars, educational content, public solicitations, or broadly distributed communications not specifically designed to bypass Referrer;</li>
+<li>engaging with any Pre-Existing Relationship;</li>
 <li>conducting business with any purchaser where no Referral Fee is owed under this Agreement;</li>
 <li>complying with Program Provider requirements, lender requirements, financing requirements, documentation requirements, legal requirements, or business requirements;</li>
-<li>communicating with a Referred Purchaser after Referrer&rsquo;s fee period has expired for follow-on purchases; or</li>
+<li>communicating with a Referred Purchaser after the Tail Period has expired; or</li>
 <li>taking any action reasonably necessary to protect Company, a Company Affiliate, a Program Provider, or a transaction.</li>
 </ul>
 
@@ -189,13 +200,14 @@ export function renderAgreementHtml(partner, feePct) {
 <ul>
 <li>contact, solicit, contract with, or transact directly with any Program Provider for the purpose of replacing, avoiding, or bypassing Company;</li>
 <li>introduce Referred Purchasers or other purchasers directly to any Program Provider in a manner intended to bypass Company;</li>
+<li>disclose the identity, contact information, or involvement of any Program Provider to any Referred Purchaser or prospective purchaser;</li>
 <li>use Confidential Information to establish a competing or bypass arrangement with any Program Provider;</li>
 <li>divert or attempt to divert Company&rsquo;s OWNAFLEET Program relationships, fees, economics, purchaser relationships, or opportunities;</li>
 <li>misrepresent Company&rsquo;s role in the OWNAFLEET Program; or</li>
 <li>assist any third party in doing any of the foregoing.</li>
 </ul>
 
-<p>7.3 <strong>Duration.</strong> The restrictions in this Section 7 apply during the term of this Agreement and thereafter for so long as necessary to protect Company&rsquo;s Confidential Information, Program Provider relationships, documented referral rights, unpaid fee rights, and legitimate business interests, to the maximum extent permitted by Applicable Law.</p>
+<p>7.3 <strong>Duration.</strong> The restrictions on contacting, soliciting, contracting with, or transacting directly with Program Providers (Sections 7.1 and 7.2) apply during the term of this Agreement and for the Tail Period after the Documentation Date applicable to any Referral involving the relevant Program Provider. Confidentiality and trade-secret duties under this Section 7 and Section 9 with respect to Confidential Information survive for so long as the relevant information remains non-public, to the maximum extent permitted by Applicable Law. All restrictions in this Section 7 apply only to the extent permitted by Applicable Law, including RCW 49.62 (Washington noncompetition covenants) where applicable.</p>
 
 <p>7.4 <strong>Permitted Existing Relationships.</strong> The restrictions in this Section 7 do not prohibit Referrer from continuing a bona fide pre-existing relationship with a Program Provider if Referrer can document that such relationship existed before Company introduced or disclosed the Program Provider to Referrer, provided that Referrer may not use Company&rsquo;s Confidential Information, OWNAFLEET Program economics, documents, purchaser information, or transaction information to expand, redirect, or convert that relationship in a manner that bypasses Company.</p>
 
@@ -203,7 +215,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>8.1 <strong>No Solicitation of Company Relationships.</strong> Referrer must not use Confidential Information to solicit, divert, or interfere with Company&rsquo;s OWNAFLEET Program relationships, Program Provider relationships, purchaser relationships, referral-source relationships, vendor relationships, lender relationships, contractor relationships, employee relationships, consultant relationships, or business opportunities.</p>
 
-<p>8.2 <strong>No Solicitation of Referrer&rsquo;s Documented Purchasers to Avoid Fee.</strong> Company must not intentionally solicit or divert a valid Referred Purchaser in a manner prohibited by Section 6.2 for the purpose of avoiding payment of a Referral Fee otherwise owed to Referrer.</p>
+<p>8.2 <strong>No Diversion of Referred Purchasers.</strong> Company must not take steps to divert a Referred Purchaser in a manner that would violate Section 6.1 or 6.2 of this Agreement.</p>
 
 <p>8.3 <strong>No Restriction on General Business.</strong> The Parties acknowledge that this Agreement is not intended to impose a broad noncompetition covenant. The restrictions are limited to protecting documented referrals, Confidential Information, fee rights, and business relationships arising from this Agreement and the OWNAFLEET Program.</p>
 
@@ -213,7 +225,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>9.2 <strong>No Disclosure.</strong> A Party receiving Confidential Information must not disclose it to any third party except to its attorneys, accountants, tax advisers, compliance advisers, employees, contractors, or representatives who have a need to know and are bound by confidentiality obligations, or as otherwise required by law.</p>
 
-<p>9.3 <strong>Program Provider Confidentiality.</strong> Referrer must not disclose, publish, copy, distribute, reverse engineer, or use any non-public OWNAFLEET Program economics, Program Provider contacts, Program Provider terms, transaction structures, fee arrangements, purchaser lists, or operational information except as necessary to make Referrals under this Agreement.</p>
+<p>9.3 <strong>Program Provider Confidentiality.</strong> Referrer must not disclose, publish, copy, distribute, reverse engineer, or use any non-public OWNAFLEET Program economics, Program Provider identities, Program Provider contacts, Program Provider terms, transaction structures, fee arrangements, purchaser lists, or operational information. Referrer must not disclose the identity, name, contact information, or involvement of any Program Provider to any Referred Purchaser or prospective purchaser, except (a) with Company&rsquo;s prior written consent, (b) through Company-approved materials that Company has expressly authorized for use with that purchaser, or (c) as required by Applicable Law.</p>
 
 <p>9.4 <strong>Return or Destruction.</strong> Upon request, each Party must return or destroy the other Party&rsquo;s Confidential Information, except that each Party may retain archival copies as required for legal, tax, compliance, or recordkeeping purposes.</p>
 
@@ -244,7 +256,9 @@ export function renderAgreementHtml(partner, feePct) {
 <li>Referrer is not subject to any disqualification, disciplinary order, suspension, bar, regulatory restriction, criminal conviction, or other event that would make Referrer&rsquo;s activities or compensation unlawful or inappropriate, unless fully disclosed in writing to Company before any Referral.</li>
 </ul>
 
-<h2>11. Indemnification</h2>
+<p>10.3 <strong>Referrer Data Privacy Representations.</strong> Referrer represents and warrants that: (a) Referrer has the legal right to share the name, email address, phone number, and other contact information of any Referred Purchaser with Company; (b) Referrer has made any disclosures to the Referred Purchaser about sharing their information with third parties as required by Applicable Law; and (c) Referrer&rsquo;s collection, use, and sharing of Referred Purchaser contact information complies with Applicable Law, including applicable privacy laws.</p>
+
+<h2>11. Indemnification and Limitation of Liability</h2>
 
 <p>11.1 <strong>Referrer Indemnity.</strong> Referrer will indemnify, defend, and hold harmless Company, Company Affiliates, Josh Cochran, and their respective members, managers, officers, employees, contractors, representatives, agents, successors, and assigns from and against all claims, damages, losses, liabilities, penalties, fines, costs, expenses, disputes, regulatory inquiries, purchaser claims, Program Provider claims, and attorneys&rsquo; fees to the extent arising out of or relating to:</p>
 <ul>
@@ -262,9 +276,17 @@ export function renderAgreementHtml(partner, feePct) {
 </ul>
 <p>Referrer will not be required to indemnify Company to the extent a claim is finally determined by a court of competent jurisdiction to have been caused by Company&rsquo;s fraud, willful misconduct, or intentional breach of this Agreement.</p>
 
-<p>11.2 <strong>Company Indemnity.</strong> Company will indemnify and hold harmless Referrer from third-party claims arising solely from Company&rsquo;s intentional breach of Section 6.1 or Company&rsquo;s failure to pay a Referral Fee actually earned and payable under this Agreement, except to the extent the claim arises from Referrer&rsquo;s breach, conduct, statements, omissions, materials, or violation of Applicable Law.</p>
+<p>11.2 <strong>Company Indemnity.</strong> Company will indemnify and hold harmless Referrer from third-party claims arising solely from Company&rsquo;s fraud, willful misconduct, or intentional breach of its payment obligations under Section 6.1 of this Agreement, except to the extent the claim arises from Referrer&rsquo;s breach, conduct, statements, omissions, materials, or violation of Applicable Law.</p>
 
 <p>11.3 <strong>Procedure.</strong> The indemnified Party must provide prompt written notice of any claim for indemnification. Failure to provide prompt notice will not relieve the indemnifying Party except to the extent the delay materially prejudices the defense. The indemnifying Party may control the defense with counsel reasonably acceptable to the indemnified Party, provided that no settlement may impose liability, admission, payment, or obligation on the indemnified Party without its written consent.</p>
+
+<p>11.4 <strong>Limitation of Liability.</strong></p>
+<ul>
+<li><strong>Cap.</strong> Each Party&rsquo;s aggregate liability to the other Party under or in connection with this Agreement will not exceed the total Referral Fees actually paid or payable by Company to Referrer in the twelve (12) months immediately preceding the event giving rise to the claim.</li>
+<li><strong>Consequential Damages Waiver.</strong> Neither Party will be liable to the other for any indirect, incidental, special, consequential, punitive, or exemplary damages arising out of or related to this Agreement, including lost profits, loss of business opportunity, or loss of goodwill, even if advised of the possibility of such damages.</li>
+<li><strong>Earned Fees Not Consequential Damages.</strong> For the avoidance of doubt, unpaid Referral Fees earned under Section 4 are direct contract obligations, not consequential or indirect damages, and are not subject to the cap or waiver in this Section 11.4.</li>
+<li><strong>Exceptions.</strong> The limitations in this Section 11.4 do not apply to: (i) fraud or willful misconduct by either Party; (ii) a Party&rsquo;s breach of its confidentiality obligations under Section 9; (iii) Referrer&rsquo;s non-circumvention obligations under Section 7; (iv) Company&rsquo;s payment obligations under Sections 4 and 6.1; (v) Company&rsquo;s anti-circumvention obligations under Sections 6.1 and 6.2; or (vi) a Party&rsquo;s indemnification obligations for third-party claims under Sections 11.1 and 11.2.</li>
+</ul>
 
 <h2>12. Term and Termination</h2>
 
@@ -274,13 +296,13 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>12.3 <strong>Termination for Cause.</strong> Company may terminate this Agreement immediately by written notice if Referrer breaches this Agreement, violates Applicable Law, makes unauthorized statements, creates regulatory or reputational risk, attempts to circumvent Company, fails to disclose compensation or conflicts, or engages in conduct that Company determines in good faith could harm Company, the OWNAFLEET Program, a Program Provider, or a Referred Purchaser.</p>
 
-<p>12.4 <strong>Effect of Termination.</strong> Termination does not affect any Referral Fee earned before termination. Termination also does not eliminate any clawback, confidentiality, non-circumvention, non-solicitation, indemnity, dispute-resolution, records, audit, or other obligation that by its nature should survive termination.</p>
+<p>12.4 <strong>Effect of Termination; Post-Termination Fee Survival.</strong> Termination does not affect any Referral Fee earned before termination. In addition, any Referral Fee that becomes earned after termination because a Referred Purchaser completes an Approved Transaction within the Tail Period (as measured from the Documentation Date) will remain payable by Company in accordance with Section 4, provided all conditions in Section 4.2 are satisfied as of the closing date of the Approved Transaction. Termination also does not eliminate any clawback, confidentiality, non-circumvention, non-solicitation, indemnity, dispute-resolution, records, audit, or other obligation that by its nature should survive termination.</p>
 
-<p>12.5 <strong>Survival.</strong> Sections 4 through 16 survive termination to the extent necessary to protect the Parties&rsquo; rights and obligations.</p>
+<p>12.5 <strong>Survival.</strong> Sections 4 through 16 survive termination to the extent necessary to protect the Parties&rsquo; rights and obligations, including Referrer&rsquo;s right to receive Referral Fees for Approved Transactions closing within the Tail Period after the termination date.</p>
 
 <h2>13. Records and Audit Rights</h2>
 
-<p>13.1 <strong>Referral Records.</strong> Company may maintain portal records, CRM records, tracking-link data, timestamps, submitter information, Referred Purchaser information, Approved Transaction records, fee calculations, payment dates, clawbacks, and related matters. Company&rsquo;s portal, CRM, and payment records will be presumptive evidence of the Documentation Date, referral status, fee calculation, and payment status, absent manifest error.</p>
+<p>13.1 <strong>Referral Records.</strong> Company may maintain portal records, CRM records, tracking-link data, timestamps, submitter information, Referred Purchaser information, Approved Transaction records, fee calculations, payment dates, clawbacks, and related matters. Company&rsquo;s portal, CRM, and payment records will be presumptive evidence of the Documentation Date, referral status, fee calculation, and payment status, absent manifest error. For clarity, this presumption does not shift Company&rsquo;s burden to establish Pre-Existing Relationship status under Sections 3.6 and 6.1.</p>
 
 <p>13.2 <strong>Referrer Records.</strong> Referrer must maintain accurate records sufficient to demonstrate compliance with this Agreement, including records of introductions, required approvals, and communications with Referred Purchasers. If Referrer is legally, professionally, contractually, or regulatorily required to make compensation, conflict, fiduciary, firm, client, or similar disclosures, Referrer must also maintain records of such disclosures.</p>
 
@@ -306,7 +328,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>16.1 <strong>Independent Contractors.</strong> The Parties are independent contractors. Nothing in this Agreement creates an employment, agency, partnership, joint venture, fiduciary, broker-dealer, investment adviser, solicitor, franchise, or representative relationship.</p>
 
-<p>16.2 <strong>Assignment.</strong> Referrer may not assign this Agreement or any rights or obligations under it without Company&rsquo;s prior written consent. Company may assign this Agreement to a Company Affiliate or successor, or in connection with any reorganization, merger, sale, transfer, or restructuring of the OWNAFLEET Program or Company&rsquo;s business.</p>
+<p>16.2 <strong>Assignment.</strong> Referrer may not assign this Agreement or any rights or obligations under it without Company&rsquo;s prior written consent. Company may assign this Agreement to a Company Affiliate or successor, or in connection with any reorganization, merger, sale, transfer, or restructuring of the OWNAFLEET Program or Company&rsquo;s business, provided that (a) the assignee must assume in writing all of Company&rsquo;s accrued, unpaid, and future Tail Period payment obligations to Referrer under this Agreement as a condition of the assignment, and (b) Company will remain liable for such obligations unless Referrer provides a written release of Company.</p>
 
 <p>16.3 <strong>No Third-Party Beneficiaries.</strong> This Agreement is for the benefit of the Parties and their permitted successors and assigns only. No Referred Purchaser, Program Provider, or other third party has rights under this Agreement.</p>
 
@@ -318,7 +340,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>16.7 <strong>Waiver.</strong> No waiver is effective unless in writing and signed by the Party granting the waiver. No waiver of one breach is a waiver of any other breach.</p>
 
-<p>16.8 <strong>Counterparts and Electronic Signatures.</strong> This Agreement may be signed in counterparts and by electronic signature, each of which is deemed an original and all of which together constitute one instrument. The Parties agree to conduct this transaction by electronic means and intend Referrer&rsquo;s electronic acceptance under Section 17 to constitute Referrer&rsquo;s legally binding electronic signature under the federal ESIGN Act and applicable state electronic-transactions laws.</p>
+<p>16.8 <strong>Counterparts and Electronic Signatures.</strong> This Agreement may be signed in counterparts and by electronic signature, each of which is deemed an original and all of which together constitute one instrument. The Parties agree to conduct this transaction by electronic means pursuant to the federal Electronic Signatures in Global and National Commerce Act (ESIGN Act, 15 U.S.C. &sect; 7001 et seq.) and applicable state electronic-transactions laws, and intend Referrer&rsquo;s electronic acceptance under Section 17 to constitute Referrer&rsquo;s legally binding electronic signature. Referrer expressly consents to receive this Agreement and all related notices and disclosures electronically.</p>
 
 <p>16.9 <strong>Notices.</strong> Notices must be in writing and delivered by email, personal delivery, nationally recognized overnight courier, or certified mail to the addresses below, or to any updated notice address provided in writing.</p>
 
@@ -340,7 +362,7 @@ export function renderAgreementHtml(partner, feePct) {
 <li>Referrer is solely responsible for its own legal, tax, regulatory, professional, and compliance obligations;</li>
 <li>Referrer will not provide tax, legal, accounting, investment, or financial advice on behalf of Company;</li>
 <li>Referrer will not guarantee any outcome; and</li>
-<li>Referrer will not circumvent Company or misuse Confidential Information.</li>
+<li>Referrer will not circumvent Company, disclose Program Provider identities to referred purchasers, or misuse Confidential Information.</li>
 </ul>
 
 <h2>Exhibit A — Referral Portal Submission Fields and Terms</h2>
@@ -349,7 +371,7 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>The referral portal may request information such as: Referrer name; Referrer entity, if any; Referrer email and phone number; prospective purchaser name; prospective purchaser entity, if known; prospective purchaser email and phone number; prospective purchaser state or market; known affiliated or controlled purchaser entities; source of relationship; summary of introduction; whether Referrer is acting in any licensed, professional, fiduciary, advisory, or regulated capacity with respect to the prospective purchaser; whether Referrer has any firm, employer, client, professional, or regulatory disclosure obligations; portal acknowledgment of this Agreement; and any other information Company reasonably requests.</p>
 
-<p>The portal timestamp, CRM timestamp, approved tracking-link timestamp, or other Company-approved electronic record will establish the Documentation Date unless Company determines in good faith that the Referral was incomplete, inaccurate, duplicative, previously known, previously submitted, or otherwise ineligible under this Agreement.</p>
+<p>The portal timestamp, CRM timestamp, approved tracking-link timestamp, or other Company-approved electronic record will establish the Documentation Date unless Company determines in good faith that the Referral was incomplete, inaccurate, duplicative, a Pre-Existing Relationship, or otherwise ineligible under this Agreement.</p>
 
 <p>Company may require a Referrer to update or confirm portal information before any Referral Fee becomes payable.</p>
 
@@ -357,9 +379,17 @@ export function renderAgreementHtml(partner, feePct) {
 
 <p>Company may provide referral-fee disclosure through the OWNAFLEET website, referral portal, program terms, FAQs, transaction acknowledgments, closing documents, or other written materials. The disclosure may state substantially:</p>
 
-<p>&ldquo;OWNAFLEET, Cochran Management, LLC, or their program partners may pay referral fees to referral partners who introduce equipment purchasers to the OWNAFLEET Program. A referral partner may receive compensation equal to ${fee} of the applicable equipment purchase price if a referred purchaser completes an equipment purchase through the OWNAFLEET Program. This compensation creates a financial incentive for referral partners to make introductions.&rdquo;</p>
+<p>&ldquo;OWNAFLEET, Cochran Management, LLC, or their program partners may pay referral fees to referral partners who introduce equipment purchasers to the OWNAFLEET Program. A referral partner may receive a Referral Fee as set forth in their partner agreement if a referred purchaser completes an equipment purchase through the OWNAFLEET Program. This compensation creates a financial incentive for referral partners to make introductions.&rdquo;</p>
 
 <p>Referrer is not required by this Agreement to use a Company-scripted disclosure in every communication. Referrer remains solely responsible for any disclosure obligations that apply to Referrer because of Referrer&rsquo;s own professional, fiduciary, client, firm, licensing, employment, regulatory, or legal obligations. Referrer must not conceal, deny, or misrepresent the existence, nature, amount, or source of any Referral Fee.</p>
+
+<h2>Schedule 1 — Referral Fee Rate</h2>
+
+<p>Pursuant to Section 4.1, the Referral Fee rate applicable to this Agreement is:</p>
+
+<p><strong>${fee}</strong> of the Eligible Equipment Purchase Price for each Approved Transaction.</p>
+
+<p>This rate is set at the time of Referrer&rsquo;s electronic acceptance and is incorporated into the cryptographic hash of this Agreement stored in Company&rsquo;s records. Any change to Referrer&rsquo;s Referral Fee rate requires a new version of this Agreement, which Referrer will be asked to review and re-sign.</p>
 `.trim();
 }
 
