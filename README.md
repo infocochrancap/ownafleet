@@ -43,6 +43,7 @@ web/
 │   ├── partner-add-referral.js     POST — logged-in partner adds a referral (auto-attributed)
 │   ├── request-deck.js             POST — public deck request (legacy/fallback path)
 │   ├── calendly-webhook.js         POST — invitee.created webhook (HMAC-verified)
+│   ├── jotform-webhook.js          POST — /apply Jotform submission → auto-flip to Application Submitted
 │   ├── log-interaction.js          POST — Cloudflare Email Worker → log@ownafleet.com
 │   ├── send-application.js         POST — admin sends Armada credit-app link (manual modal button)
 │   ├── send-nudge.js               POST — admin sends manual one-off nudge (modal button)
@@ -95,6 +96,7 @@ See `.env.example` for the canonical list with descriptions. The short table:
 | `CRON_SECRET` | `cron-followups` | Bearer token for Vercel cron auth |
 | `INTERACTION_LOG_API_KEY` | `log-interaction` | Bearer token paired with Cloudflare Worker |
 | `ARMADA_APPLICATION_URL` | `send-application` | The current credit-app link from operations |
+| `JOTFORM_WEBHOOK_KEY` | `jotform-webhook` | Shared secret (`?key=`) for the /apply Jotform submission webhook |
 
 `LEAD_NOTIFY_EMAILS` is **deprecated** — `/api/submit-lead` hardcodes Josh as the sole notification recipient. Brian + Alondra get engaged later in the funnel.
 
