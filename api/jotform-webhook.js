@@ -110,6 +110,7 @@ export default async function handler(req, res) {
     if (data) { lead = data; break; }
   }
 
+  const matchedExisting = !!lead;
   let promoted = false;
   if (lead && PRE_APP_STATUSES.has(lead.status)) {
     const { error } = await supabase
@@ -120,17 +121,47 @@ export default async function handler(req, res) {
     if (error) console.error('jotform-webhook status flip failed:', error);
   }
 
+  // Best-effort phone from the submission (leads.phone is nullable).
+  const phone = extractPhone(rawRequest) || extractPhone(pretty);
+
+  // ----- AUTO-CREATE a lead when the applicant skipped our funnel -----
+  // Application-first prospects (got the link from a friend or partner and
+  // never hit the homepage, like a partner testing it) match no lead. Create
+  // one at 'application_submitted' so they land in tracking instead of only
+  // showing as an interaction. Needs at least an email to be useful.
+  // NOTE: partner attribution can't be inferred from Jotform (the form doesn't
+  // carry our ?ref= code), so referral_partner_id stays null — set it in /admin
+  // if the lead actually came through a referral.
+  let createdLead = false;
+  if (!lead && emails[0]) {
+    const { first, last } = splitName(displayName, emails[0]);
+    const { data: nl, error: createErr } = await supabase
+      .from('leads')
+      .insert({
+        first_name: first, last_name: last,
+        email: emails[0], phone: phone || null,
+        status: 'application_submitted',
+        import_source: 'jotform_application'
+      })
+      .select('id, first_name, last_name, email, status')
+      .single();
+    if (!createErr && nl) { lead = nl; createdLead = true; }
+    else if (createErr) console.error('jotform-webhook lead auto-create failed:', createErr);
+  }
+
   // ----- LOG the interaction (this row is also the idempotency marker) -----
   try {
     await supabase.from('prospect_interactions').insert({
       first_name: lead?.first_name || displayName,
       email: lead?.email || emails[0] || null,
-      phone: null,
+      phone: phone || null,
       direction: 'inbound',
       method: 'other',
       subject: 'Credit application submitted (Jotform)',
       notes: `Jotform submission ${submissionId}${formId ? ` on form ${formId}` : ''}.` +
-             (lead ? (promoted ? ' Lead auto-promoted to Application Submitted.' : ` Lead matched (status ${lead.status} — not changed).`) : ' No matching lead found.'),
+             (createdLead ? ' New lead auto-created at Application Submitted (application-first; skipped the homepage).'
+               : matchedExisting ? (promoted ? ' Lead auto-promoted to Application Submitted.' : ` Lead matched (status ${lead.status} — not changed).`)
+               : ' No email on submission — no lead created.'),
       external_id: externalId,
       external_url: formId ? `https://www.jotform.com/inbox/${formId}` : null,
       source: 'other'
@@ -156,9 +187,11 @@ export default async function handler(req, res) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const who = lead ? `${lead.first_name || ''} ${lead.last_name || ''}`.trim() : displayName;
-    const subject = lead
-      ? `Application submitted — ${who}`
-      : `Application submitted — ${who} (no matching lead)`;
+    const subject = createdLead
+      ? `Application submitted — ${who} (new lead created)`
+      : matchedExisting
+        ? `Application submitted — ${who}`
+        : `Application submitted — ${who} (no lead — needs manual add)`;
     await resend.emails.send({
       from: FROM, to: [NOTIFY], subject,
       html: `
@@ -167,11 +200,15 @@ export default async function handler(req, res) {
           <ul style="line-height:1.8;">
             <li><strong>Who:</strong> ${esc(who)}</li>
             ${emails.length ? `<li><strong>Email(s) on the application:</strong> ${esc(emails.join(', '))}</li>` : ''}
-            <li><strong>Tracking:</strong> ${lead
-              ? (promoted
-                  ? 'Lead auto-promoted to <strong>Application Submitted</strong> ✓'
-                  : `Lead matched — already at <strong>${esc(lead.status)}</strong>, left as-is`)
-              : '<strong>No matching lead</strong> — add them via /admin (Interactions tab) so the pipeline stays complete'}</li>
+            <li><strong>Tracking:</strong> ${
+              createdLead
+                ? 'New lead <strong>created at Application Submitted</strong> (came in via the application, skipped the homepage) ✓'
+                : matchedExisting
+                  ? (promoted
+                      ? 'Lead auto-promoted to <strong>Application Submitted</strong> ✓'
+                      : `Lead matched — already at <strong>${esc(lead.status)}</strong>, left as-is`)
+                  : '<strong>No email on the submission</strong> — could not auto-create; add them via /admin'}</li>
+            ${createdLead ? '<li style="color:#6B7280;font-size:13px;">If this person came through a partner referral, set the referral source on the lead in /admin.</li>' : ''}
             <li><strong>Jotform submission:</strong> ${esc(submissionId)}</li>
           </ul>
         </div>`
@@ -180,7 +217,7 @@ export default async function handler(req, res) {
     console.warn('jotform-webhook notify failed:', e.message);
   }
 
-  return res.status(200).json({ ok: true, matched: !!lead, promoted });
+  return res.status(200).json({ ok: true, matched: matchedExisting, created: createdLead, promoted });
 }
 
 // ---- helpers ----
@@ -222,10 +259,29 @@ function extractName(rawRequest) {
       if (v && typeof v === 'object' && (v.first || v.last)) {
         return `${v.first || ''} ${v.last || ''}`.trim() || null;
       }
-      if (typeof v === 'string' && v.trim() && !EMAIL_RE.test(v)) return v.trim().slice(0, 80);
+      if (typeof v === 'string' && v.trim() && !/\S+@\S+/.test(v)) return v.trim().slice(0, 80);
     }
   } catch { /* rawRequest not JSON — fine */ }
   return null;
+}
+
+// Split a display name into {first, last}. Falls back to the email local-part
+// when no usable name is present (leads.first_name is NOT NULL).
+function splitName(displayName, fallbackEmail) {
+  const n = (displayName || '').trim();
+  if (n && !/\S+@\S+/.test(n)) {
+    const parts = n.split(/\s+/);
+    return { first: parts[0].slice(0, 80), last: parts.slice(1).join(' ').slice(0, 80) };
+  }
+  const local = ((fallbackEmail || '').split('@')[0] || 'Applicant').slice(0, 80);
+  return { first: local, last: '' };
+}
+
+// Best-effort US phone extraction from free text. Returns null if none found.
+function extractPhone(text) {
+  if (!text) return null;
+  const m = String(text).match(/(?:\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/);
+  return m ? m[0].trim().slice(0, 40) : null;
 }
 
 function esc(s) {
