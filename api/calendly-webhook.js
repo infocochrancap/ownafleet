@@ -157,24 +157,41 @@ export default async function handler(req, res) {
     console.warn('prospect_interactions threw:', e);
   }
 
-  // 4c. If a lead exists for this email and they're still on the
-  //     first step ('submitted_homepage'), auto-bump them to 'booked_call'.
-  //     We only advance from the earliest stage — never roll back a lead
-  //     that's already further down the pipeline.
+  // 4c. Lead handling.
+  //     - If a lead exists and is still on the first step ('submitted_homepage'),
+  //       advance it to 'booked_call' (forward-only — never roll a lead back).
+  //     - If NO lead exists, the person booked cold (a deck link, the FAQ page,
+  //       a partner referral) and would otherwise never enter the main lead
+  //       pipeline — only prospect_interactions/deck_requests. Create a lead at
+  //       'booked_call' so the booking is tracked end to end.
   try {
     const { data: existingLead } = await supabase
       .from('leads')
       .select('id, status')
       .ilike('email', inviteeEmail)
       .maybeSingle();
-    if (existingLead && existingLead.status === 'submitted_homepage') {
-      await supabase
-        .from('leads')
-        .update({ status: 'booked_call' })
-        .eq('id', existingLead.id);
+    if (existingLead) {
+      if (existingLead.status === 'submitted_homepage') {
+        await supabase
+          .from('leads')
+          .update({ status: 'booked_call' })
+          .eq('id', existingLead.id);
+      }
+    } else {
+      const leadFirst = inviteeName.split(/\s+/)[0] || inviteeEmail.split('@')[0] || 'Unknown';
+      const leadLast = inviteeName.split(/\s+/).slice(1).join(' ');
+      const { error: leadErr } = await supabase.from('leads').insert({
+        first_name: leadFirst,
+        last_name: leadLast || '',
+        email: inviteeEmail,
+        phone: extractCalendlyPhone(payload),
+        status: 'booked_call',
+        import_source: 'calendly_booking'
+      });
+      if (leadErr) console.warn('calendly lead auto-create failed (non-fatal):', leadErr.message);
     }
   } catch (e) {
-    console.warn('lead status auto-bump failed:', e);
+    console.warn('lead create/bump failed:', e);
   }
 
   if (existing) {
@@ -231,6 +248,20 @@ function prepEmailHtml(first_name) {
       </p>
     </div>
   `;
+}
+
+// Best-effort phone from a Calendly payload: the SMS-reminder number, a custom
+// "phone" question, or any answer that looks like a phone number. Returns null.
+function extractCalendlyPhone(payload) {
+  if (payload?.text_reminder_number) return String(payload.text_reminder_number).trim().slice(0, 40);
+  const phoneRe = /(?:\+?1[\s.\-]?)?\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/;
+  for (const item of (payload?.questions_and_answers || [])) {
+    const q = (item.question || '').toLowerCase();
+    const a = (item.answer || '').trim();
+    if (!a) continue;
+    if (/phone|cell|mobile|number/.test(q) || phoneRe.test(a)) return a.slice(0, 40);
+  }
+  return null;
 }
 
 function escape(s) {
