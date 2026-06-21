@@ -591,7 +591,79 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
     <p class="math-footnote" style="margin-top: 8px;">Informational only · Personal guarantee required · Confirm tax treatment with your CPA</p>
 
     <div style="margin-top: 40px; text-align: center;">
-      <a href="#form" class="btn btn-primary">See if this fits →</a>
+      <a href="#topform" class="btn btn-primary">See if this fits →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2b. HIGH-INTENT LEAD CAPTURE (right after the calculator) ============ -->
+<section class="form-section" id="topform">
+  <div class="container">
+    <div class="eyebrow">Start here</div>
+    <h2>See if this <em>fits your year.</em></h2>
+    <p class="lede" style="margin-bottom: 4px;">Submit your details and you'll get a booking link plus the full 21-slide overview.</p>
+    <p class="form-fit-line">Best fits: <strong>$1M+ windfall</strong> or <strong>$500K+ annual income</strong></p>
+    <div style="max-width: 640px; margin: 28px auto 0;">
+      <form class="form-card" id="topLeadForm" novalidate>
+        <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+          <label>Website (leave blank)
+            <input type="text" name="website" id="t_website" tabindex="-1" autocomplete="off">
+          </label>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="t_first">First name<span class="req">*</span></label>
+            <input type="text" id="t_first" required>
+          </div>
+          <div class="form-field">
+            <label for="t_last">Last name<span class="req">*</span></label>
+            <input type="text" id="t_last" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="t_email">Email<span class="req">*</span></label>
+            <input type="email" id="t_email" required>
+          </div>
+          <div class="form-field">
+            <label for="t_phone">Phone<span class="req">*</span></label>
+            <input type="tel" id="t_phone" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="t_income">Income to offset this year<span class="req">*</span></label>
+            <select id="t_income" required>
+              <option value="">Select range</option>
+              <option>$250K – $500K</option>
+              <option>$500K – $1M</option>
+              <option>$1M – $2M</option>
+              <option>$2M – $5M</option>
+              <option>Over $5M — consultation</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="t_nw">Net worth<span class="req">*</span></label>
+            <select id="t_nw" required>
+              <option value="">Select range</option>
+              <option>Under $1M</option>
+              <option>$1M – $3M</option>
+              <option>$3M – $10M</option>
+              <option>$10M – $30M</option>
+              <option>$30M+</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-field">
+            <label for="t_notes">What are you trying to accomplish? (optional)</label>
+            <textarea id="t_notes" placeholder="Strong income year, business sale, exit, capital event, planning for next year — whatever's relevant."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn" id="topFormSubmit">Submit & see your next step →</button>
+        <p class="form-fineprint" id="topFormStatus">By submitting, you consent to be contacted by Cochran Management and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
+      </form>
     </div>
   </div>
 </section>
@@ -693,20 +765,16 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
 <!-- ============ 6. ABOUT (OwnaFleet + Cochran Capital, dark frame) ============ -->
 <section class="about" id="about">
   <div class="container">
-    <div class="eyebrow">About</div>
-    <div class="about-grid">
-      <div class="about-photo" style="background-image: url('/assets/josh-about.jpg'); background-size: cover; background-position: center;"></div>
-      <div class="about-block">
-        <h3>OwnaFleet</h3>
-        <p>OwnaFleet is the program brand under <strong>Cochran Capital</strong> for managed heavy-equipment ownership. We connect qualified participants to the operator's national rental fleet, run the front-end relationship through closing, and stay involved across the lifecycle of the deal.</p>
+    <div class="eyebrow">Why Cochran Capital</div>
+    <div class="about-block" style="max-width: 820px;">
+      <h3>An experienced firm behind every deal.</h3>
+      <p>OwnaFleet is the managed heavy-equipment ownership program from <strong>Cochran Capital</strong>, an investment firm focused on real assets, infrastructure, and asset-backed yield. We connect qualified participants to a major publicly-traded operator's national rental fleet, run the front-end relationship through closing, and stay involved across the full lifecycle of the deal.</p>
 
-        <div class="about-sep"></div>
+      <div class="about-sep"></div>
 
-        <h3>Cochran Capital</h3>
-        <p>Cochran Capital is the investment firm behind OwnaFleet — focused on real assets, infrastructure, and asset-backed yield. Founded by Josh Cochran. Based in Dover, DE.</p>
-        <p>Working with us means a single point of contact through closing, flexibility on minimums based on long-term partner relationships, and an advocate for your interests through the entire deal.</p>
-        <p style="font-size:12px;color:rgba(255,255,255,0.55);font-style:italic;line-height:1.55;margin-top:24px;">Disclosure: Josh is not a financial, tax, or legal advisor. He participates in the program himself and works directly with the operations team, helping refine the participant experience. He is compensated on completed deals — at no additional cost to you.</p>
-      </div>
+      <p>What that means for you: a single, accountable point of contact through closing; flexibility on minimums earned through long-term partner relationships; an independent CPA agreed-upon-procedures review of the program on file; and an advocate for your interests at every step. <strong>Same program, same economics, better access.</strong></p>
+      <p style="margin-top:16px;">Led by <strong>Josh Cochran</strong>, founder of Cochran Capital · Dover, DE.</p>
+      <p class="about-disclosure" style="font-size:12px;color:rgba(255,255,255,0.55);font-style:italic;line-height:1.55;margin-top:24px;">Disclosure: Cochran Management LLC is not a financial, tax, or legal advisor and does not provide such advice. The firm participates in the program itself and works directly with the operations team to help refine the participant experience. Cochran Management is compensated by the program's operating partners on completed deals — at no additional cost to you.</p>
     </div>
   </div>
 </section>
@@ -728,7 +796,7 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
   <div class="container">
     <div class="eyebrow">Tell us about your tax year</div>
     <h2>Drop your <em>details below.</em></h2>
-    <p class="lede" style="margin-bottom: 4px;">Once you submit, you'll get a booking link with Josh and the full 21-slide overview.</p>
+    <p class="lede" style="margin-bottom: 4px;">Once you submit, you'll get a booking link and the full 21-slide overview.</p>
     <p class="form-fit-line">Best fits: <strong>$1M+ windfall</strong> or <strong>$500K+ annual income</strong></p>
 
     <div class="form-layout">
@@ -791,7 +859,7 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
           </div>
         </div>
         <button type="submit" class="submit-btn" id="leadFormSubmit">Submit & see your next step →</button>
-        <p class="form-fineprint" id="leadFormStatus">By submitting, you consent to be contacted by Josh and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
+        <p class="form-fineprint" id="leadFormStatus">By submitting, you consent to be contacted by Cochran Management and our program partners. Your information is shared only with the program's vetted partners for the purpose of evaluating your participation. We do not sell or share your data.</p>
       </form>
 
       <aside class="form-sidebar">
@@ -801,7 +869,7 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
         </div>
         <div class="form-step-row">
           <div class="form-step-label">Step 2</div>
-          <div class="form-step-text">Right after you submit, book your call with Josh and review the 21-slide overview deck — both embedded on the next page. No emails to dig through.</div>
+          <div class="form-step-text">Right after you submit, book your intro call and review the 21-slide overview deck — both embedded on the next page. No emails to dig through.</div>
         </div>
         <div class="form-step-row">
           <div class="form-step-label">Step 3</div>
@@ -868,33 +936,31 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
     } catch (e) { /* sessionStorage may throw in private mode — non-fatal */ }
   })();
 
-  // ============== Lead form submission ==============
-  // POSTs to /api/submit-lead (Supabase insert + internal/lead emails),
-  // then redirects to /welcome?name=&email=&phone=&lead_id= so the
-  // Calendly widget on the next page can prefill the booker's info.
-  (function() {
-    const form = document.getElementById('leadForm');
+  // ============== Lead form submission (shared by both forms) ==============
+  // Both the top (post-calculator) form and the footer form POST to
+  // /api/submit-lead, then redirect to /welcome?name=&email=&phone=&lead_id=
+  // so the Calendly widget on the next page can prefill. ONE function wires
+  // both so they can never drift; cfg.ids maps this form's element IDs to the
+  // API fields, and cfg.pixelName tags which form converted in Meta.
+  function wireLeadForm(cfg) {
+    const form = document.getElementById(cfg.formId);
     if (!form) return;
-    const submitBtn = document.getElementById('leadFormSubmit');
-    const statusEl = document.getElementById('leadFormStatus');
-    const defaultStatusText = statusEl ? statusEl.textContent : '';
+    const ids = cfg.ids;
+    const submitBtn = document.getElementById(cfg.submitId);
+    const statusEl = document.getElementById(cfg.statusId);
+    const val = (id) => (document.getElementById(id)?.value || '').trim();
 
     function setStatus(msg, isError) {
       if (!statusEl) return;
       statusEl.textContent = msg;
       statusEl.style.color = isError ? '#B85C3A' : '';
     }
-    function resetStatus() {
-      if (!statusEl) return;
-      statusEl.textContent = defaultStatusText;
-      statusEl.style.color = '';
-    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       // Lightweight client-side validation
-      const required = ['first', 'last', 'email', 'phone', 'income', 'nw'];
+      const required = [ids.first, ids.last, ids.email, ids.phone, ids.income, ids.nw];
       for (const id of required) {
         const el = document.getElementById(id);
         if (!el || !el.value || !String(el.value).trim()) {
@@ -904,49 +970,33 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
         }
       }
 
-      // Build payload — map hero-form field IDs to API field names.
       const payload = {
-        first_name:      document.getElementById('first').value.trim(),
-        last_name:       document.getElementById('last').value.trim(),
-        email:           document.getElementById('email').value.trim(),
-        phone:           document.getElementById('phone').value.trim(),
-        equipment_range: document.getElementById('income').value,
-        net_worth:       document.getElementById('nw').value,
-        notes:           (document.getElementById('notes')?.value || '').trim(),
+        first_name:      val(ids.first),
+        last_name:       val(ids.last),
+        email:           val(ids.email),
+        phone:           val(ids.phone),
+        equipment_range: document.getElementById(ids.income).value,
+        net_worth:       document.getElementById(ids.nw).value,
+        notes:           val(ids.notes),
         // Honeypot — humans never fill this, bots do. Server rejects non-empty.
-        website:         (document.getElementById('lf_website')?.value || '')
+        website:         (document.getElementById(ids.website)?.value || '')
       };
 
-      // Attach captured attribution. Partner referrals use the existing
-      // `referral_code` flow on the API (looks up referral_partners table).
-      // Other UTM channels get stamped on `import_source` so admin can
-      // see "where did this lead come from" at a glance.
+      // Attribution: partner ?ref= → referral_code; UTM/referrer → import_source.
       try {
         const get = (k) => sessionStorage.getItem('of_attr_' + k) || '';
         const ref = get('ref');
         if (ref) payload.referral_code = ref;
-        const utm = {
-          source: get('utm_source'),
-          medium: get('utm_medium'),
-          campaign: get('utm_campaign'),
-          content: get('utm_content'),
-          term: get('utm_term')
-        };
-        // Build a single attribution string for import_source.
-        // Format: "utm:source/medium/campaign[/content][/term]" or "referrer:<host>"
-        const utmParts = [utm.source, utm.medium, utm.campaign, utm.content, utm.term]
-          .filter(Boolean);
+        const utmParts = [get('utm_source'), get('utm_medium'), get('utm_campaign'), get('utm_content'), get('utm_term')].filter(Boolean);
         if (utmParts.length) {
           payload.import_source = 'utm:' + utmParts.join('/');
         } else {
           const referrer = sessionStorage.getItem('of_attr_referrer');
           if (referrer) {
-            try {
-              payload.import_source = 'referrer:' + new URL(referrer).hostname;
-            } catch (e) { /* malformed referrer, skip */ }
+            try { payload.import_source = 'referrer:' + new URL(referrer).hostname; } catch (e) {}
           }
         }
-      } catch (e) { /* attribution is best-effort, never block submit */ }
+      } catch (e) { /* best-effort */ }
 
       submitBtn.disabled = true;
       const originalLabel = submitBtn.textContent;
@@ -968,19 +1018,11 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
           return;
         }
 
-        // Fire Meta Pixel `Lead` event for FB ad attribution. No-op if the
-        // pixel hasn't been configured yet (PIXEL_ID still placeholder).
+        // Meta Pixel Lead event — content_name distinguishes which form converted.
         if (window.fbq && window._OF_PIXEL_READY) {
-          try {
-            window.fbq('track', 'Lead', {
-              content_name: 'OwnaFleet homepage form',
-              value: 0,
-              currency: 'USD'
-            });
-          } catch (e) { /* swallow */ }
+          try { window.fbq('track', 'Lead', { content_name: cfg.pixelName, value: 0, currency: 'USD' }); } catch (e) {}
         }
 
-        // Hand off to /welcome with prefill params for the Calendly widget.
         const params = new URLSearchParams({
           name:    `${payload.first_name} ${payload.last_name}`.trim(),
           email:   payload.email,
@@ -995,7 +1037,20 @@ src="https://www.facebook.com/tr?id=1542043940964149&ev=PageView&noscript=1"/></
         submitBtn.textContent = originalLabel;
       }
     });
-  })();
+  }
+
+  // Footer form (full qualifier)
+  wireLeadForm({
+    formId: 'leadForm', submitId: 'leadFormSubmit', statusId: 'leadFormStatus',
+    pixelName: 'OwnaFleet homepage form (footer)',
+    ids: { first:'first', last:'last', email:'email', phone:'phone', income:'income', nw:'nw', notes:'notes', website:'lf_website' }
+  });
+  // Top form (high-intent, right after the calculator)
+  wireLeadForm({
+    formId: 'topLeadForm', submitId: 'topFormSubmit', statusId: 'topFormStatus',
+    pixelName: 'OwnaFleet homepage form (top)',
+    ids: { first:'t_first', last:'t_last', email:'t_email', phone:'t_phone', income:'t_income', nw:'t_nw', notes:'t_notes', website:'t_website' }
+  });
 </script>
 
 </body>
