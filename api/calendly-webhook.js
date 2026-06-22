@@ -136,6 +136,10 @@ export default async function handler(req, res) {
   ].filter(Boolean).join('\n');
 
   // Fire-and-forget — interaction logging shouldn't fail the webhook.
+  // ixIsNew gates one-time side effects (e.g., the partner call-invite) so a
+  // Calendly retry of the same invitee doesn't fire them twice. A 23505 means
+  // we've already processed this invitee URI.
+  let ixIsNew = false;
   try {
     const { error: ixErr } = await supabase
       .from('prospect_interactions')
@@ -150,9 +154,8 @@ export default async function handler(req, res) {
         external_url: eventUri,
         source: 'calendly'
       });
-    if (ixErr && ixErr.code !== '23505') {
-      console.warn('prospect_interactions insert error:', ixErr);
-    }
+    if (!ixErr) ixIsNew = true;
+    else if (ixErr.code !== '23505') console.warn('prospect_interactions insert error:', ixErr);
   } catch (e) {
     console.warn('prospect_interactions threw:', e);
   }
@@ -164,12 +167,14 @@ export default async function handler(req, res) {
   //       a partner referral) and would otherwise never enter the main lead
   //       pipeline — only prospect_interactions/deck_requests. Create a lead at
   //       'booked_call' so the booking is tracked end to end.
+  let leadRow = null;  // captured for the partner call-invite below
   try {
     const { data: existingLead } = await supabase
       .from('leads')
-      .select('id, status')
+      .select('id, status, referral_partner_id')
       .ilike('email', inviteeEmail)
       .maybeSingle();
+    leadRow = existingLead || null;
     if (existingLead) {
       if (existingLead.status === 'submitted_homepage') {
         await supabase
@@ -180,18 +185,49 @@ export default async function handler(req, res) {
     } else {
       const leadFirst = inviteeName.split(/\s+/)[0] || inviteeEmail.split('@')[0] || 'Unknown';
       const leadLast = inviteeName.split(/\s+/).slice(1).join(' ');
-      const { error: leadErr } = await supabase.from('leads').insert({
+      const { data: newLead, error: leadErr } = await supabase.from('leads').insert({
         first_name: leadFirst,
         last_name: leadLast || '',
         email: inviteeEmail,
         phone: extractCalendlyPhone(payload),
         status: 'booked_call',
         import_source: 'calendly_booking'
-      });
+      }).select('id, referral_partner_id').single();
       if (leadErr) console.warn('calendly lead auto-create failed (non-fatal):', leadErr.message);
+      else leadRow = newLead;
     }
   } catch (e) {
     console.warn('lead create/bump failed:', e);
+  }
+
+  // 4d. If this booking is attributed to a referral partner, invite that
+  //     partner to the call so they can join if they'd like. Calendly's API
+  //     can't add a guest to an already-booked event, so we email the partner
+  //     the meeting time + Google Meet join link (the supported path). Gated on
+  //     ixIsNew (no double-invite on Calendly retries) and ACTIVE partner only.
+  if (ixIsNew && leadRow?.referral_partner_id) {
+    try {
+      const { data: rp } = await supabase
+        .from('referral_partners')
+        .select('first_name, email, status')
+        .eq('id', leadRow.referral_partner_id)
+        .maybeSingle();
+      if (rp && rp.status === 'active' && rp.email) {
+        const joinUrl = extractMeetingLink(payload);
+        const whenPT = startTime
+          ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', dateStyle: 'full', timeStyle: 'short' }) + ' PT'
+          : null;
+        const prospectName = inviteeName.trim() || firstName;
+        await new Resend(process.env.RESEND_API_KEY).emails.send({
+          from: FROM,
+          to: [rp.email],
+          subject: `Your referral ${prospectName} booked a call — you're welcome to join`,
+          html: partnerInviteHtml(rp.first_name, prospectName, whenPT, joinUrl)
+        });
+      }
+    } catch (e) {
+      console.warn('partner call-invite failed (non-fatal):', e.message);
+    }
   }
 
   if (existing) {
@@ -262,6 +298,38 @@ function extractCalendlyPhone(payload) {
     if (/phone|cell|mobile|number/.test(q) || phoneRe.test(a)) return a.slice(0, 40);
   }
   return null;
+}
+
+// Best-effort meeting join URL from the Calendly payload (Google Meet / Zoom /
+// custom link). Returns null if the location isn't a URL (e.g., a phone number).
+function extractMeetingLink(payload) {
+  const loc = payload?.scheduled_event?.location;
+  if (!loc) return null;
+  const candidates = [loc.join_url, loc.location, loc?.data?.join_url];
+  for (const c of candidates) {
+    if (typeof c === 'string' && /^https?:\/\//.test(c)) return c;
+  }
+  return null;
+}
+
+// Email inviting the referral partner to the prospect's booked call.
+function partnerInviteHtml(partnerFirst, prospectName, whenPT, joinUrl) {
+  return `
+    <div style="font-family: -apple-system, sans-serif; max-width: 600px; line-height: 1.6; color: #0B1724;">
+      <p>Hi ${escape(partnerFirst || 'there')},</p>
+      <p>Good news — your referral <strong>${escape(prospectName)}</strong> just booked an intro call with Josh${whenPT ? ` on <strong>${escape(whenPT)}</strong>` : ''}.</p>
+      <p>You're welcome to join if you'd like${joinUrl ? '' : ' — Josh will share the join details'}. No pressure at all; many partners prefer to let Josh run the first call. Either way, you'll see the deal progress on your dashboard.</p>
+      ${joinUrl ? `<p style="margin: 24px 0;">
+        <a href="${escape(joinUrl)}" style="display: inline-block; background: #0B1724; color: white; padding: 14px 28px; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500;">Join the call →</a>
+      </p>
+      <p style="font-size: 13px; color: #6B7280;">Tip: add it to your calendar so you don't miss it.</p>` : ''}
+      <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>
+      <hr style="border: none; border-top: 1px solid #D9DDE3; margin: 32px 0 16px;">
+      <p style="font-size: 11px; color: #6B7280; font-style: italic; line-height: 1.5;">
+        This communication is informational only and does not constitute financial, tax, legal, investment, or accounting advice.
+      </p>
+    </div>
+  `;
 }
 
 function escape(s) {
