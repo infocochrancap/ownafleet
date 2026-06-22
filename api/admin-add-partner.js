@@ -88,7 +88,7 @@ export default async function handler(req, res) {
   // The referral link is withheld until they e-sign at /agreement.
   const splitPct = parseFloat(partner.commission_split_pct ?? DEFAULT_SPLIT_PCT);
   const partnerEffectivePct = (JOSH_BASE_PCT * splitPct / 100);
-  const typicalPayout = Math.round(1200000 * partnerEffectivePct / 100);
+  const typicalPayout = Math.round(1000000 * partnerEffectivePct / 100); // $1M example deal (fee scales with size)
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -123,7 +123,7 @@ function approvalEmailHtml(partner, typicalPayout) {
       <p>Sign in at <a href="https://ownafleet.com/login" style="color: #8B6F3F;">ownafleet.com/login</a> with this email — magic link, no password. You'll sign electronically (typed name) and get a copy for your records. The moment you sign, your unique referral link and dashboard unlock automatically.</p>
 
       <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">What's waiting on the other side</h3>
-      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> per closed deal at the program's average size ($1.2M of equipment), paid on funding — plus a dashboard that tracks every referral from intro through funding.</p>
+      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> on a $1M deal, paid on funding (your fee scales with the deal size) — plus a dashboard that tracks every referral from intro through funding.</p>
 
       <p>Any questions, reply here.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>

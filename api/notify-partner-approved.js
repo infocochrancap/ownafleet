@@ -57,8 +57,8 @@ export default async function handler(req, res) {
   // e.g., 40 -> 0.84% of equipment purchase. Default for new partners is 40.
   const splitPct = parseFloat(partner.commission_split_pct ?? 40);
   const partnerEffectivePct = (JOSH_BASE_PCT * splitPct / 100); // for internal use only
-  // Typical deal in the program = $1.2M of equipment.
-  const typicalPayout = Math.round(1200000 * partnerEffectivePct / 100);
+  // Use a $1M example deal for consistency with the rest of the site (fee scales with size).
+  const typicalPayout = Math.round(1000000 * partnerEffectivePct / 100);
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -87,7 +87,7 @@ function signFirstEmailHtml(partner, typicalPayout) {
       <p>Sign in at <a href="https://ownafleet.com/login" style="color: #8B6F3F;">ownafleet.com/login</a> with this email — magic link, no password. You'll sign electronically (typed name) and get a copy for your records. The moment you sign, your unique referral link and dashboard unlock automatically.</p>
 
       <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">What's waiting on the other side</h3>
-      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> per closed deal at the program's average size ($1.2M of equipment), paid on funding — plus a dashboard that tracks every referral from intro through funding.</p>
+      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> on a $1M deal, paid on funding (your fee scales with the deal size) — plus a dashboard that tracks every referral from intro through funding.</p>
 
       <p>Any questions, reply here.</p>
       <p style="margin-top: 32px;">— Josh Cochran<br><span style="color: #6B7280; font-size: 13px;">OwnaFleet · Cochran Management LLC</span></p>

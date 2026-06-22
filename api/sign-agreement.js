@@ -97,7 +97,7 @@ export default async function handler(req, res) {
 
   // ----- Emails (signature stands even if email fails) -----
   const splitPct = parseFloat(partner.commission_split_pct ?? 40);
-  const typicalPayout = Math.round(1200000 * (JOSH_BASE_PCT * splitPct / 100) / 100);
+  const typicalPayout = Math.round(1000000 * (JOSH_BASE_PCT * splitPct / 100) / 100);
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   let email_sent = true;
@@ -186,7 +186,7 @@ function welcomeEmailHtml(partner, typicalPayout) {
       <p><strong>Lender thresholds:</strong> net worth ≥ $1M, liquid assets ≥ $200K. Anything below those usually can't be financed, so pre-filtering saves everyone time.</p>
 
       <h3 style="font-family: 'Times New Roman', serif; font-weight: 400; font-size: 18px; margin: 32px 0 8px; color: #0B1724;">Your referral fee</h3>
-      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> per closed deal at the program's average size ($1.2M of equipment), paid on funding.</p>
+      <p><strong>Approximately $${typicalPayout.toLocaleString()}</strong> on a $1M deal, paid on funding. Your fee scales with the deal size.</p>
       <p style="font-size: 13px; color: #6B7280;">Larger or smaller deals scale proportionally. Your dashboard shows estimated payout per lead from day one.</p>
 
       <p>Any questions, reply here.</p>
